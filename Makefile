@@ -40,5 +40,10 @@ ifeq ($(findstring --network sepolia,$(ARGS)),--network sepolia)
 	NETWORK_ARGS:= --rpc-url $(SEPOLIA_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(ETHERSCAN_API_KEY) -vvvv
 endif
 
-deploy:
-	@forge script script/DexYourMeme.s.sol:DexYourMeme $(NETWORK_ARGS)
+deployDYM:
+	@forge script script/DeployDYM.s.sol:DeployDYM $(NETWORK_ARGS)
+
+deployDFM:
+	@forge script script/DeployDFM.s.sol:DeployDFM $(NETWORK_ARGS)
+
+deployMCM:
