@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
 import {DexYourMeme} from "../src/DexYourMeme.sol";
-import {DeployDYM} from "../script/DeployDYM.sol";
+import {DeployDYM} from "../script/DeployDYM.s.sol";
 
 contract CounterTest is Test {
     DeployDYM dymDeployer;
