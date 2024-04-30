@@ -11,6 +11,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     error DFM__ZeroAmount();
     error DFM__InvalidMeme();
     error DFM__MemeDead();
+    error DFM__TransferFailed();
+    error DFM__NothingToRefund();
 
     /// @dev Constants
     uint256 private constant SUPPLY = 1000000;
@@ -43,6 +45,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     /// @dev Events
     event MemeCreated(address indexed creator, string name, string symbol);
     event MemeFunded(uint256 id, uint256 value);
+    event RefundPerformed(address funder, uint256 amount);
 
     /// @dev Constructor
     constructor() Ownable(msg.sender) {}
@@ -75,9 +78,27 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
 
         meme.idToTotalFunds += msg.value;
         meme.idToFunderToFunds[msg.sender] += msg.value;
+        // funderToFunds[msg.sender] += msg.value; -> this to be moved into killMeme()
 
         emit MemeFunded(id, msg.value);
     }
 
-    function refund() external {}
+    function refund() external nonReentrant {
+        uint256 amount = funderToFunds[msg.sender];
+
+        if (amount > 0) {
+            funderToFunds[msg.sender] = 0;
+        } else {
+            revert DFM__NothingToRefund();
+        }
+
+        (bool success, ) = msg.sender.call{value: amount}("");
+
+        if (!success) {
+            funderToFunds[msg.sender] = amount;
+            revert DFM__TransferFailed();
+        }
+
+        emit RefundPerformed(msg.sender, amount);
+    }
 }
