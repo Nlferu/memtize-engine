@@ -7,6 +7,11 @@ import {ReentrancyGuard} from "@solmate/src/utils/ReentrancyGuard.sol";
 // This -> Minter -> Dex
 
 contract DYMFundsManager is Ownable, ReentrancyGuard {
+    /// @dev Errors
+    error DFM__ZeroAmount();
+    error DFM__InvalidMeme();
+    error DFM__MemeDead();
+
     /// @dev Constants
     uint256 private constant SUPPLY = 1000000;
     uint256 private constant HYPER = 1 ether;
@@ -37,6 +42,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
 
     /// @dev Events
     event MemeCreated(address indexed creator, string name, string symbol);
+    event MemeFunded(uint256 id, uint256 value);
 
     /// @dev Constructor
     constructor() Ownable(msg.sender) {}
@@ -61,7 +67,17 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     // If 1 month will pass this will kill funding of meme
     function killMeme() internal {}
 
-    function fundMeme() external {}
+    function fundMeme(uint256 id) external payable {
+        if (msg.value <= 0) revert DFM__ZeroAmount();
+        if (id >= s_totalMemes) revert DFM__InvalidMeme();
+        Meme storage meme = s_memes[id];
+        if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
+
+        meme.idToTotalFunds += msg.value;
+        meme.idToFunderToFunds[msg.sender] += msg.value;
+
+        emit MemeFunded(id, msg.value);
+    }
 
     function refund() external {}
 }
