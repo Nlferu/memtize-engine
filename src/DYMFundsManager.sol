@@ -13,6 +13,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     error DFM__MemeDead();
     error DFM__TransferFailed();
     error DFM__NothingToRefund();
+    error DFM__MinterCallFailed();
 
     /// @dev Constants
     uint256 private constant SUPPLY = 1000000;
@@ -75,6 +76,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         Meme storage meme = s_memes[id];
 
         (bool success, bytes memory data) = memeCoinMinter.call(abi.encodeWithSignature("mintToken()"));
+        if (!success) revert DFM__MinterCallFailed();
     }
 
     /** @notice If meme fails to achieve fund goal on time this function will assign funds back to funders wallets and change state of meme to dead */
