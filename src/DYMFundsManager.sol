@@ -71,8 +71,10 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
 
     /** @notice Sends request to MCM for creation of meme */
     /** @param id Meme id that we want to work with */
-    function hypeMeme(uint256 id) external {
+    function hypeMeme(uint256 id, address memeCoinMinter) external {
         Meme storage meme = s_memes[id];
+
+        (bool success, bytes memory data) = memeCoinMinter.call(abi.encodeWithSignature("mintToken()"));
     }
 
     /** @notice If meme fails to achieve fund goal on time this function will assign funds back to funders wallets and change state of meme to dead */
