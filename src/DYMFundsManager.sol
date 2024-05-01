@@ -68,7 +68,12 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     function hypeMeme() internal {}
 
     // If 1 month will pass this will kill funding of meme
-    function killMeme() internal {}
+    function killMeme(uint256 id) internal {
+        Meme storage meme = s_memes[id];
+        if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
+
+        meme.idToMemeStatus = MemeStatus.DEAD;
+    }
 
     function fundMeme(uint256 id) external payable {
         if (msg.value <= 0) revert DFM__ZeroAmount();
