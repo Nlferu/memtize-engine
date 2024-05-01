@@ -68,7 +68,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         emit MemeCreated(msg.sender, name, symbol);
     }
 
-    // This will send request to Minter for creation of meme
+    // Sends request to MCM for creation of meme
     function hypeMeme() external {}
 
     /** @notice If meme fails to achieve fund goal on time this function will assign funds back to funders wallets and change state of meme to dead */
