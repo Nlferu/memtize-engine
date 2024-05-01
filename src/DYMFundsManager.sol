@@ -51,6 +51,9 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     /// @dev Constructor
     constructor() Ownable(msg.sender) {}
 
+    /** @notice It is creating new meme with basic ERC20 data and starts timer, which is telling if meme is alive or dead */
+    /** @param name Meme id that we want to work with */
+    /** @param symbol Meme id that we want to work with */
     function createMeme(string calldata name, string calldata symbol) external {
         Meme storage meme = s_memes[s_totalMemes];
 
