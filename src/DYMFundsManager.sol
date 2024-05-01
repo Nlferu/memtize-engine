@@ -126,8 +126,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     }
 
     /** @notice Temporary function for testing purposes -> it should be replaced with GraphQl */
-    /** @notice Returns */
-    /** @param funder Meme id that we want to work with */
+    /** @notice Returns total funds available for refund for given funder */
+    /** @param funder wallet address of funder */
     function getFunderToFunds(address funder) external view returns (uint256) {
         return s_funderToFunds[funder];
     }
