@@ -47,6 +47,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     event MemeCreated(address indexed creator, string name, string symbol);
     event MemeFunded(uint256 id, uint256 value);
     event RefundPerformed(address funder, uint256 amount);
+    event MemeKilled(uint256 id);
 
     /// @dev Constructor
     constructor() Ownable(msg.sender) {}
@@ -88,6 +89,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         }
 
         meme.idToMemeStatus = MemeStatus.DEAD;
+
+        emit MemeKilled(id);
     }
 
     /** @notice Allows to send funds for given meme */
