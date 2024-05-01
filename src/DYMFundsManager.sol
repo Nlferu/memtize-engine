@@ -86,6 +86,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         meme.idToMemeStatus = MemeStatus.DEAD;
     }
 
+    /** @notice Allows to send funds for given meme */
+    /** @param id Meme id that we want to work with */
     function fundMeme(uint256 id) external payable {
         if (msg.value <= 0) revert DFM__ZeroAmount();
         if (id >= s_totalMemes) revert DFM__InvalidMeme();
