@@ -66,15 +66,15 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     }
 
     // This will send request to Minter for creation of meme
-    function hypeMeme() internal {}
+    function hypeMeme() external {}
 
     // If 1 month will pass this will kill funding of meme
-    function killMeme(uint256 id) internal {
+    function killMeme(uint256 id) external {
         Meme storage meme = s_memes[id];
         if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
 
         // Iterating over the funders mapping of the meme and transferring funds
-        address[] memory funders = new address[](meme.idToFunders.length);
+        address[] memory funders = meme.idToFunders;
 
         for (uint256 i = 0; i < funders.length; i++) {
             address funder = funders[i];
@@ -84,6 +84,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
             // Optionally reset the individual funder balance in the meme to zero
             meme.idToFunderToFunds[funder] = 0;
         }
+        meme.idToFunders = new address[](0);
 
         meme.idToMemeStatus = MemeStatus.DEAD;
     }
@@ -119,6 +120,10 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         }
 
         emit RefundPerformed(msg.sender, amount);
+    }
+
+    function getFunderToFunds(address funder) external view returns (uint256) {
+        return funderToFunds[funder];
     }
 
     function getMemeData(
