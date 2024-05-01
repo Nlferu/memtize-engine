@@ -129,6 +129,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         return s_funderToFunds[funder];
     }
 
+    /** @notice Temporary function for testing purposes -> it should be replaced with GraphQl */
     /** @notice Gets all data associated with given meme */
     /** @param id Meme id that we want to work with */
     function getMemeData(
