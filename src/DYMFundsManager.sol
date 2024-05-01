@@ -70,7 +70,9 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     }
 
     // Sends request to MCM for creation of meme
-    function hypeMeme() external {}
+    function hypeMeme(uint256 id) external {
+        Meme storage meme = s_memes[id];
+    }
 
     /** @notice If meme fails to achieve fund goal on time this function will assign funds back to funders wallets and change state of meme to dead */
     /** @param id Meme id that we want to work with */
