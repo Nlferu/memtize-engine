@@ -105,6 +105,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         emit MemeFunded(id, msg.value);
     }
 
+    /** @notice Allows user to withdraw funds from dead memes if user has any */
     function refund() external nonReentrant {
         uint256 amount = s_funderToFunds[msg.sender];
 
