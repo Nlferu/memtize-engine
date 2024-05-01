@@ -41,7 +41,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
 
     /// @dev Mappings
     mapping(uint256 => Meme) private s_memes;
-    mapping(address => uint256) private funderToFunds;
+    mapping(address => uint256) private s_funderToFunds;
 
     /// @dev Events
     event MemeCreated(address indexed creator, string name, string symbol);
@@ -79,7 +79,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         for (uint256 i = 0; i < funders.length; i++) {
             address funder = funders[i];
             uint256 funds = meme.idToFunderToFunds[funder];
-            funderToFunds[funder] += funds;
+            s_funderToFunds[funder] += funds;
 
             // Optionally reset the individual funder balance in the meme to zero
             meme.idToFunderToFunds[funder] = 0;
@@ -104,10 +104,10 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     }
 
     function refund() external nonReentrant {
-        uint256 amount = funderToFunds[msg.sender];
+        uint256 amount = s_funderToFunds[msg.sender];
 
         if (amount > 0) {
-            funderToFunds[msg.sender] = 0;
+            s_funderToFunds[msg.sender] = 0;
         } else {
             revert DFM__NothingToRefund();
         }
@@ -115,7 +115,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         (bool success, ) = msg.sender.call{value: amount}("");
 
         if (!success) {
-            funderToFunds[msg.sender] = amount;
+            s_funderToFunds[msg.sender] = amount;
             revert DFM__TransferFailed();
         }
 
@@ -123,7 +123,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     }
 
     function getFunderToFunds(address funder) external view returns (uint256) {
-        return funderToFunds[funder];
+        return s_funderToFunds[funder];
     }
 
     function getMemeData(
