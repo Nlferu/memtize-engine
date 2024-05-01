@@ -129,6 +129,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         return s_funderToFunds[funder];
     }
 
+    /** @notice Gets all data associated with given meme */
+    /** @param id Meme id that we want to work with */
     function getMemeData(
         uint256 id
     ) external view returns (address, string memory, string memory, uint256, uint256, address[] memory, uint256[] memory funds, MemeStatus) {
