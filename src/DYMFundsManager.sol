@@ -73,18 +73,13 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         Meme storage meme = s_memes[id];
         if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
 
-        // Iterating over the funders mapping of the meme and transferring funds
         address[] memory funders = meme.idToFunders;
 
         for (uint256 i = 0; i < funders.length; i++) {
             address funder = funders[i];
             uint256 funds = meme.idToFunderToFunds[funder];
             s_funderToFunds[funder] += funds;
-
-            // Optionally reset the individual funder balance in the meme to zero
-            meme.idToFunderToFunds[funder] = 0;
         }
-        meme.idToFunders = new address[](0);
 
         meme.idToMemeStatus = MemeStatus.DEAD;
     }
