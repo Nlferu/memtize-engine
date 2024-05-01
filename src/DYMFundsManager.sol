@@ -78,7 +78,9 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         for (uint256 i = 0; i < funders.length; i++) {
             address funder = funders[i];
             uint256 funds = meme.idToFunderToFunds[funder];
+
             s_funderToFunds[funder] += funds;
+            meme.idToFunderToFunds[funder] = 0;
         }
 
         meme.idToMemeStatus = MemeStatus.DEAD;
@@ -93,7 +95,6 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         meme.idToTotalFunds += msg.value;
         meme.idToFunders.push(msg.sender);
         meme.idToFunderToFunds[msg.sender] += msg.value;
-        // funderToFunds[msg.sender] += msg.value; -> this to be moved into killMeme()
 
         emit MemeFunded(id, msg.value);
     }
