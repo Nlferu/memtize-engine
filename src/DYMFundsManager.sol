@@ -69,7 +69,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         emit MemeCreated(msg.sender, name, symbol);
     }
 
-    // Sends request to MCM for creation of meme
+    /** @notice Sends request to MCM for creation of meme */
+    /** @param id Meme id that we want to work with */
     function hypeMeme(uint256 id) external {
         Meme storage meme = s_memes[id];
     }
