@@ -34,6 +34,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         string idToSymbol;
         uint256 idToTimeLeft;
         uint256 idToTotalFunds;
+        address[] idToFunders;
         mapping(address => uint256) idToFunderToFunds;
         MemeStatus idToMemeStatus;
     }
@@ -72,6 +73,18 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         Meme storage meme = s_memes[id];
         if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
 
+        // Iterating over the funders mapping of the meme and transferring funds
+        address[] memory funders = new address[](meme.idToFunders.length);
+
+        for (uint256 i = 0; i < funders.length; i++) {
+            address funder = funders[i];
+            uint256 funds = meme.idToFunderToFunds[funder];
+            funderToFunds[funder] += funds;
+
+            // Optionally reset the individual funder balance in the meme to zero
+            meme.idToFunderToFunds[funder] = 0;
+        }
+
         meme.idToMemeStatus = MemeStatus.DEAD;
     }
 
@@ -82,6 +95,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
 
         meme.idToTotalFunds += msg.value;
+        meme.idToFunders.push(msg.sender);
         meme.idToFunderToFunds[msg.sender] += msg.value;
         // funderToFunds[msg.sender] += msg.value; -> this to be moved into killMeme()
 
@@ -105,5 +119,19 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         }
 
         emit RefundPerformed(msg.sender, amount);
+    }
+
+    function getMemeData(
+        uint256 id
+    ) external view returns (address, string memory, string memory, uint256, uint256, address[] memory, uint256[] memory funds, MemeStatus) {
+        Meme storage meme = s_memes[id];
+
+        funds = new uint256[](meme.idToFunders.length);
+
+        for (uint i; i < meme.idToFunders.length; i++) {
+            funds[i] = meme.idToFunderToFunds[meme.idToFunders[i]];
+        }
+
+        return (meme.idToCreator, meme.idToName, meme.idToSymbol, meme.idToTimeLeft, meme.idToTotalFunds, meme.idToFunders, funds, meme.idToMemeStatus);
     }
 }
