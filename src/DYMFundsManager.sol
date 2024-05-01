@@ -68,7 +68,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     // This will send request to Minter for creation of meme
     function hypeMeme() external {}
 
-    // If 1 month will pass this will kill funding of meme
+    /** @notice If meme fails to achieve fund goal on time this function will assign funds back to funders wallets and change state of meme to dead */
+    /** @param id Meme id that we want to work with */
     function killMeme(uint256 id) external {
         Meme storage meme = s_memes[id];
         if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
