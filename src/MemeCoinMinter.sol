@@ -17,7 +17,7 @@ interface IERC20 {
 contract MemeCoinMinter {
     event TokenCreated(address tokenAddress, string tokenName, string tokenSymbol);
 
-    address[] tokens;
+    address[] public tokens;
 
     function mintToken(string memory name, string memory symbol, address[] memory recipients, uint256[] memory amounts) external payable {
         CoinTemplate newToken = new CoinTemplate(name, symbol, recipients, amounts);
