@@ -79,7 +79,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         address[] memory recipients = meme.idToFunders;
         uint[] memory amounts = new uint[](recipients.length);
 
-        for (uint i = 0; i < recipients.length; i++) {
+        for (uint i; i < recipients.length; i++) {
             amounts[i] = meme.idToFunderToFunds[recipients[i]];
         }
 
@@ -102,7 +102,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
 
         address[] memory funders = meme.idToFunders;
 
-        for (uint i = 0; i < funders.length; i++) {
+        for (uint i; i < funders.length; i++) {
             address funder = funders[i];
             uint funds = meme.idToFunderToFunds[funder];
 
