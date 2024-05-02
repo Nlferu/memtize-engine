@@ -74,8 +74,16 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     /** @param id Meme id that we want to work with */
     function hypeMeme(uint256 id, address memeCoinMinter) external {
         Meme storage meme = s_memes[id];
+        address[] memory recipients = meme.idToFunders;
+        uint256[] memory amounts = new uint256[](recipients.length);
 
-        (bool success, ) = memeCoinMinter.call{value: meme.idToTotalFunds}(abi.encodeWithSignature("mintToken(string, string, address[], uint256[])"));
+        for (uint i = 0; i < recipients.length; i++) {
+            amounts[i] = meme.idToFunderToFunds[recipients[i]];
+        }
+
+        (bool success, ) = memeCoinMinter.call{value: meme.idToTotalFunds}(
+            abi.encodeWithSignature("mintToken(string,string,address[],uint256[])", meme.idToName, meme.idToSymbol, recipients, amounts)
+        );
         if (!success) revert DFM__MinterCallFailed();
     }
 
