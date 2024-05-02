@@ -36,7 +36,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         uint256 idToTimeLeft;
         uint256 idToTotalFunds;
         address[] idToFunders;
-        uint256[] idToFunds;
+        mapping(address => uint256) idToFunderToFunds;
         MemeStatus idToMemeStatus;
     }
 
@@ -76,12 +76,15 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
 
         address[] memory recipients = meme.idToFunders;
-        uint256[] memory amounts = meme.idToFunds;
+        uint256[] memory amounts = new uint256[](recipients.length);
+
+        for (uint i = 0; i < recipients.length; i++) {
+            amounts[i] = meme.idToFunderToFunds[recipients[i]];
+        }
 
         (bool success, ) = memeCoinMinter.call{value: meme.idToTotalFunds}(
             abi.encodeWithSignature("mintToken(string,string,address[],uint256[])", meme.idToName, meme.idToSymbol, recipients, amounts)
         );
-
         if (!success) revert DFM__MinterCallFailed();
     }
 
@@ -92,13 +95,13 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
 
         address[] memory funders = meme.idToFunders;
-        uint256[] memory funds = meme.idToFunds;
 
         for (uint256 i = 0; i < funders.length; i++) {
             address funder = funders[i];
-            uint256 fund = funds[i];
+            uint256 funds = meme.idToFunderToFunds[funder];
 
-            s_funderToFunds[funder] += fund;
+            s_funderToFunds[funder] += funds;
+            meme.idToFunderToFunds[funder] = 0;
         }
 
         meme.idToMemeStatus = MemeStatus.DEAD;
@@ -116,8 +119,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
 
         meme.idToTotalFunds += msg.value;
         meme.idToFunders.push(msg.sender);
-        meme.idToFunds.push(msg.value);
-        // meme.idToFunderToFunds[msg.sender] += msg.value;
+        meme.idToFunderToFunds[msg.sender] += msg.value;
 
         emit MemeFunded(id, msg.value);
     }
@@ -154,18 +156,15 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     /** @param id Meme id that we want to work with */
     function getMemeData(
         uint256 id
-    ) external view returns (address, string memory, string memory, uint256, uint256, address[] memory, uint256[] memory, MemeStatus) {
+    ) external view returns (address, string memory, string memory, uint256, uint256, address[] memory, uint256[] memory funds, MemeStatus) {
         Meme storage meme = s_memes[id];
 
-        return (
-            meme.idToCreator,
-            meme.idToName,
-            meme.idToSymbol,
-            meme.idToTimeLeft,
-            meme.idToTotalFunds,
-            meme.idToFunders,
-            meme.idToFunds,
-            meme.idToMemeStatus
-        );
+        funds = new uint256[](meme.idToFunders.length);
+
+        for (uint i; i < meme.idToFunders.length; i++) {
+            funds[i] = meme.idToFunderToFunds[meme.idToFunders[i]];
+        }
+
+        return (meme.idToCreator, meme.idToName, meme.idToSymbol, meme.idToTimeLeft, meme.idToTotalFunds, meme.idToFunders, funds, meme.idToMemeStatus);
     }
 }
