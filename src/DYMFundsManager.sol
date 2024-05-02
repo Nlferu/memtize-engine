@@ -84,7 +84,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         }
 
         (bool success, ) = memeCoinMinter.call{value: meme.idToTotalFunds}(
-            abi.encodeWithSignature("mintToken(string,string,address[],uint[])", meme.idToName, meme.idToSymbol, recipients, amounts)
+            abi.encodeWithSignature("mintToken(string,string,address[],uint256[])", meme.idToName, meme.idToSymbol, recipients, amounts)
         );
 
         if (!success) revert DFM__MinterCallFailed();
@@ -124,7 +124,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
 
         meme.idToTotalFunds += msg.value;
-        meme.idToFunders.push(msg.sender);
+        if (meme.idToFunderToFunds[msg.sender] == 0) meme.idToFunders.push(msg.sender);
         meme.idToFunderToFunds[msg.sender] += msg.value;
 
         emit MemeFunded(id, msg.value);
