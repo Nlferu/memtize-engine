@@ -49,6 +49,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     event MemeFunded(uint256 id, uint256 value);
     event RefundPerformed(address funder, uint256 amount);
     event MemeKilled(uint256 id);
+    event MemeHyped(uint id);
 
     /// @dev Constructor
     constructor() Ownable(msg.sender) {}
@@ -87,6 +88,10 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         );
 
         if (!success) revert DFM__MinterCallFailed();
+
+        meme.idToMemeStatus = MemeStatus.DEAD;
+
+        emit MemeHyped(id);
     }
 
     /** @notice If meme fails to achieve fund goal on time this function will assign funds back to funders wallets and change state of meme to dead */
