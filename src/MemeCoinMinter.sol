@@ -26,9 +26,10 @@ contract MemeCoinMinter {
         address team,
         address[] memory recipients,
         uint[] memory amounts,
-        uint totalFunds
+        uint totalFunds,
+        address dym
     ) external {
-        CoinTemplate newToken = new CoinTemplate(name, symbol, creator, team, recipients, amounts, totalFunds);
+        CoinTemplate newToken = new CoinTemplate(name, symbol, creator, team, recipients, amounts, totalFunds, dym);
 
         // This should be removed, changed or moved to other contract
         tokens.push(address(newToken));
