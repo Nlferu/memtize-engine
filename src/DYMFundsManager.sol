@@ -16,7 +16,6 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     error DFM__MinterCallFailed();
 
     /// @dev Constants
-    uint private constant SUPPLY = 1000000;
     uint private constant HYPER = 1 ether;
 
     /// @dev Variables
