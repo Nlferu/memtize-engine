@@ -14,10 +14,12 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     error DFM__MinterCallFailed();
 
     /// @dev Constants
-    address private constant TEAM_ADDRESS = 0xdD870fA1b7C4700F2BD7f44238821C26f7392148;
-    address private constant MCM_ADDRESS = 0x9B7218626AEC5DD45a80Af761004AcfE99E4b341;
-    address private constant DYM__ADDRESS = 0x5fc7Dc95b4Bb48dbC9894fCaE417482cb8A6A45a;
     uint private constant HYPER = 1 ether;
+
+    /// @dev Immutable
+    address private immutable i_team;
+    address private immutable i_MCM;
+    address private immutable i_DYM;
 
     /// @dev Variables
     uint private s_totalMemes;
@@ -53,7 +55,11 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     event TransferSuccessfull(uint amount);
 
     /// @dev Constructor
-    constructor() Ownable(msg.sender) {}
+    constructor(address team, address mcm, address dym) Ownable(msg.sender) {
+        i_team = team;
+        i_MCM = mcm;
+        i_DYM = dym;
+    }
 
     /** @notice It is creating new meme with basic ERC20 data and starts timer, which is telling if meme is alive or dead */
     /** @param name Meme id that we want to work with */
@@ -85,16 +91,17 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         }
 
         /// @dev Calling mint token fn from MCM contract
-        (bool success, ) = MCM_ADDRESS.call(
+        (bool success, ) = i_MCM.call(
             abi.encodeWithSignature(
-                "mintToken(string,string,address,address,address[],uint256[],uint256)",
+                "mintToken(string,string,address,address,address[],uint256[],uint256,address)",
                 meme.idToName,
                 meme.idToSymbol,
                 meme.idToCreator,
-                TEAM_ADDRESS,
+                i_team,
                 recipients,
                 amounts,
-                meme.idToTotalFunds
+                meme.idToTotalFunds,
+                i_DYM
             )
         );
 
@@ -102,7 +109,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         if (!success) {
             revert DFM__MinterCallFailed();
         } else {
-            (bool transfer, ) = DYM__ADDRESS.call{value: meme.idToTotalFunds}("");
+            (bool transfer, ) = i_DYM.call{value: meme.idToTotalFunds}("");
             if (!transfer) revert DFM__TransferFailed();
 
             emit TransferSuccessfull(meme.idToTotalFunds);
