@@ -25,9 +25,10 @@ contract MemeCoinMinter {
         address creator,
         address team,
         address[] memory recipients,
-        uint[] memory amounts
+        uint[] memory amounts,
+        uint totalFunds
     ) external payable {
-        CoinTemplate newToken = new CoinTemplate(name, symbol, creator, team, recipients, amounts);
+        CoinTemplate newToken = new CoinTemplate(name, symbol, creator, team, recipients, amounts, totalFunds);
 
         // This should be removed, changed or moved to other contract
         tokens.push(address(newToken));
