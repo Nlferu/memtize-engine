@@ -30,6 +30,7 @@ contract CoinTemplate is ERC20 {
 
         /// @dev Minting tokens for funders proportionally to their contributions
         uint256 fundersTokens = (TOTAL_SUPPLY * FUNDERS_PERCENT) / 100;
+
         for (uint256 i = 0; i < funders.length; i++) {
             uint256 funderTokens = (fundersTokens * amounts[i]) / address(this).balance;
             _mint(funders[i], funderTokens);
