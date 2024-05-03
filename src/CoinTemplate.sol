@@ -20,7 +20,8 @@ contract CoinTemplate is ERC20 {
         address creatorAddress,
         address teamAddress,
         address[] memory funders,
-        uint256[] memory amounts
+        uint256[] memory amounts,
+        uint totalFunds
     ) ERC20(name, symbol) {
         if (funders.length != amounts.length) revert CT__ArraysNotParrarell();
 
@@ -33,7 +34,7 @@ contract CoinTemplate is ERC20 {
         uint256 fundersTokens = (TOTAL_SUPPLY * FUNDERS_PERCENT) / 100;
 
         for (uint256 i = 0; i < funders.length; i++) {
-            uint256 funderTokens = (fundersTokens * amounts[i]) / address(this).balance;
+            uint256 funderTokens = (fundersTokens * amounts[i]) / totalFunds;
             _mint(funders[i], funderTokens);
         }
 
