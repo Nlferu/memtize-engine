@@ -12,12 +12,13 @@ contract CoinTemplate is ERC20 {
     uint256 private constant FUNDERS_PERCENT = 35;
     uint256 private constant LIQUIDITY_POOL_PERCENT = 45;
 
+    address private constant DEX_YOUR_MEME = 0x6aFA23C9f4AADD2C085990DA033785708110Fd94;
+
     constructor(
         string memory name,
         string memory symbol,
         address creatorAddress,
         address teamAddress,
-        address liquidityPoolAddress,
         address[] memory funders,
         uint256[] memory amounts
     ) ERC20(name, symbol) {
@@ -26,7 +27,7 @@ contract CoinTemplate is ERC20 {
         /// @dev Minting tokens for the creator, team, and liquidity pool
         _mint(creatorAddress, (TOTAL_SUPPLY * CREATOR_PERCENT) / 100);
         _mint(teamAddress, (TOTAL_SUPPLY * TEAM_PERCENT) / 100);
-        _mint(liquidityPoolAddress, (TOTAL_SUPPLY * LIQUIDITY_POOL_PERCENT) / 100);
+        _mint(DEX_YOUR_MEME, (TOTAL_SUPPLY * LIQUIDITY_POOL_PERCENT) / 100);
 
         /// @dev Minting tokens for funders proportionally to their contributions
         uint256 fundersTokens = (TOTAL_SUPPLY * FUNDERS_PERCENT) / 100;
