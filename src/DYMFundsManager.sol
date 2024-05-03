@@ -16,7 +16,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     error DFM__MinterCallFailed();
 
     /// @dev Constants
-    address private constant TEAM_ADDRESS = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
+    address private constant TEAM_ADDRESS = 0xdD870fA1b7C4700F2BD7f44238821C26f7392148;
     uint private constant HYPER = 1 ether;
 
     /// @dev Variables
