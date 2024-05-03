@@ -17,6 +17,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
 
     /// @dev Constants
     address private constant TEAM_ADDRESS = 0xdD870fA1b7C4700F2BD7f44238821C26f7392148;
+    address private constant MCM_ADDRESS = 0x9B7218626AEC5DD45a80Af761004AcfE99E4b341;
+    address private constant DYM__ADDRESS = 0x5fc7Dc95b4Bb48dbC9894fCaE417482cb8A6A45a;
     uint private constant HYPER = 1 ether;
 
     /// @dev Variables
