@@ -105,7 +105,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
             )
         );
 
-        /// @dev If success, sending funds to DYM contract
+        /// @dev If success, sending funds directly to DYM contract
         if (!success) {
             revert DFM__MinterCallFailed();
         } else {
