@@ -12,24 +12,16 @@ contract CoinTemplate is ERC20 {
     uint256 private constant FUNDERS_PERCENT = 35;
     uint256 private constant LIQUIDITY_POOL_PERCENT = 45;
 
-    address private creatorAddress;
-    address private teamAddress;
-    address private liquidityPoolAddress;
-
     constructor(
         string memory name,
         string memory symbol,
-        address _creatorAddress,
-        address _teamAddress,
-        address _liquidityPoolAddress,
+        address creatorAddress,
+        address teamAddress,
+        address liquidityPoolAddress,
         address[] memory funders,
         uint256[] memory amounts
     ) ERC20(name, symbol) {
         if (funders.length != amounts.length) revert CT__ArraysNotParrarell();
-
-        creatorAddress = _creatorAddress;
-        teamAddress = _teamAddress;
-        liquidityPoolAddress = _liquidityPoolAddress;
 
         uint256 totalContributions = 0;
         for (uint256 i = 0; i < amounts.length; i++) {
