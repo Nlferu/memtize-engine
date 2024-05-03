@@ -84,7 +84,15 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         }
 
         (bool success, ) = memeCoinMinter.call{value: meme.idToTotalFunds}(
-            abi.encodeWithSignature("mintToken(string,string,address[],uint256[])", meme.idToName, meme.idToSymbol, recipients, amounts)
+            abi.encodeWithSignature(
+                "mintToken(string,string,address,address,address[],uint256[])",
+                meme.idToName,
+                meme.idToSymbol,
+                meme.idToCreator,
+                TEAM_ADDRESS,
+                recipients,
+                amounts
+            )
         );
 
         if (!success) revert DFM__MinterCallFailed();
