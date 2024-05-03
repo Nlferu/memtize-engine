@@ -84,7 +84,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
             amounts[i] = meme.idToFunderToFunds[recipients[i]];
         }
 
-        /// @dev Calling mint token fn from MCM constract
+        /// @dev Calling mint token fn from MCM contract
         (bool success, ) = MCM_ADDRESS.call(
             abi.encodeWithSignature(
                 "mintToken(string,string,address,address,address[],uint256[],uint256)",
@@ -99,15 +99,14 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         );
 
         /// @dev If success, sending funds to DYM contract
-        if (success) {
+        if (!success) {
+            revert DFM__MinterCallFailed();
+        } else {
             (bool transfer, ) = DYM__ADDRESS.call{value: meme.idToTotalFunds}("");
-
             if (!transfer) revert DFM__TransferFailed();
 
             emit TransferSuccessfull(meme.idToTotalFunds);
         }
-
-        if (!success) revert DFM__MinterCallFailed();
 
         meme.idToMemeStatus = MemeStatus.DEAD;
 
