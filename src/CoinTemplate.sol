@@ -37,8 +37,5 @@ contract CoinTemplate is ERC20 {
             uint256 funderTokens = (fundersTokens * amounts[i]) / totalFunds;
             _mint(funders[i], funderTokens);
         }
-
-        /// @dev Sending ETH to DexYourMeme for LP creation
-        /// Todo
     }
 }
