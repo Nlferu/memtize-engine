@@ -5,13 +5,13 @@ import {CoinTemplate} from "./CoinTemplate.sol";
 
 interface IERC20 {
     /** @notice Allows to transfer tokens from any address to any recipient */
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function transferFrom(address from, address to, uint amount) external returns (bool);
 
     /** @notice Allows to transfer tokens from this address to recipient */
-    function transfer(address to, uint256 amount) external returns (bool);
+    function transfer(address to, uint amount) external returns (bool);
 
     /** @notice Allows to check token balance for certain address */
-    function balanceOf(address account) external view returns (uint256);
+    function balanceOf(address account) external view returns (uint);
 }
 
 contract MemeCoinMinter {
@@ -19,7 +19,7 @@ contract MemeCoinMinter {
 
     address[] public tokens;
 
-    function mintToken(string memory name, string memory symbol, address[] memory recipients, uint256[] memory amounts) external payable {
+    function mintToken(string memory name, string memory symbol, address[] memory recipients, uint[] memory amounts) external payable {
         CoinTemplate newToken = new CoinTemplate(name, symbol, recipients, amounts);
 
         // This should be removed, changed or moved to other contract
@@ -28,7 +28,7 @@ contract MemeCoinMinter {
         emit TokenCreated(address(newToken), name, symbol);
     }
 
-    function getUserTokenBalance(address user, address token) external view returns (uint256) {
+    function getUserTokenBalance(address user, address token) external view returns (uint) {
         return IERC20(token).balanceOf(user);
     }
 }
