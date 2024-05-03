@@ -50,6 +50,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     event RefundPerformed(address funder, uint amount);
     event MemeKilled(uint id);
     event MemeHyped(uint id);
+    event TransferSuccessfull(uint amount);
 
     /// @dev Constructor
     constructor() Ownable(msg.sender) {}
@@ -72,7 +73,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
 
     /** @notice Sends request to MCM for creation of meme */
     /** @param id Meme id that we want to work with */
-    function hypeMeme(uint id, address memeCoinMinter) external {
+    function hypeMeme(uint id, address memeCoinMinter, address dexYourMeme) external {
         Meme storage meme = s_memes[id];
         if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
 
@@ -83,7 +84,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
             amounts[i] = meme.idToFunderToFunds[recipients[i]];
         }
 
-        (bool success, ) = memeCoinMinter.call{value: meme.idToTotalFunds}(
+        /// @dev Calling mint token fn from MCM constract
+        (bool success, ) = memeCoinMinter.call(
             abi.encodeWithSignature(
                 "mintToken(string,string,address,address,address[],uint256[],uint256)",
                 meme.idToName,
@@ -95,6 +97,15 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
                 meme.idToTotalFunds
             )
         );
+
+        /// @dev If success, sending funds to DYM contract
+        if (success) {
+            (bool transfer, ) = dexYourMeme.call{value: meme.idToTotalFunds}("");
+
+            if (!transfer) revert DFM__TransferFailed();
+
+            emit TransferSuccessfull(meme.idToTotalFunds);
+        }
 
         if (!success) revert DFM__MinterCallFailed();
 
