@@ -19,8 +19,15 @@ contract MemeCoinMinter {
 
     address[] public tokens;
 
-    function mintToken(string memory name, string memory symbol, address[] memory recipients, uint[] memory amounts) external payable {
-        CoinTemplate newToken = new CoinTemplate(name, symbol, recipients, amounts);
+    function mintToken(
+        string memory name,
+        string memory symbol,
+        address creator,
+        address team,
+        address[] memory recipients,
+        uint[] memory amounts
+    ) external payable {
+        CoinTemplate newToken = new CoinTemplate(name, symbol, creator, team, recipients, amounts);
 
         // This should be removed, changed or moved to other contract
         tokens.push(address(newToken));
