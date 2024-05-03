@@ -23,23 +23,16 @@ contract CoinTemplate is ERC20 {
     ) ERC20(name, symbol) {
         if (funders.length != amounts.length) revert CT__ArraysNotParrarell();
 
-        uint256 totalContributions = 0;
-        for (uint256 i = 0; i < amounts.length; i++) {
-            totalContributions += amounts[i];
-        }
-
         /// @dev Minting tokens for the creator, team, and liquidity pool
         _mint(creatorAddress, (TOTAL_SUPPLY * CREATOR_PERCENT) / 100);
         _mint(teamAddress, (TOTAL_SUPPLY * TEAM_PERCENT) / 100);
         _mint(liquidityPoolAddress, (TOTAL_SUPPLY * LIQUIDITY_POOL_PERCENT) / 100);
 
         /// @dev Minting tokens for funders proportionally to their contributions
-        if (totalContributions > 0) {
-            uint256 fundersTokens = (TOTAL_SUPPLY * FUNDERS_PERCENT) / 100;
-            for (uint256 i = 0; i < funders.length; i++) {
-                uint256 funderTokens = (fundersTokens * amounts[i]) / totalContributions;
-                _mint(funders[i], funderTokens);
-            }
+        uint256 fundersTokens = (TOTAL_SUPPLY * FUNDERS_PERCENT) / 100;
+        for (uint256 i = 0; i < funders.length; i++) {
+            uint256 funderTokens = (fundersTokens * amounts[i]) / address(this).balance;
+            _mint(funders[i], funderTokens);
         }
     }
 }
