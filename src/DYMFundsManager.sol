@@ -75,7 +75,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
 
     /** @notice Sends request to MCM for creation of meme */
     /** @param id Meme id that we want to work with */
-    function hypeMeme(uint id, address memeCoinMinter, address dexYourMeme) external {
+    function hypeMeme(uint id) external {
         Meme storage meme = s_memes[id];
         if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
 
@@ -87,7 +87,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         }
 
         /// @dev Calling mint token fn from MCM constract
-        (bool success, ) = memeCoinMinter.call(
+        (bool success, ) = MCM_ADDRESS.call(
             abi.encodeWithSignature(
                 "mintToken(string,string,address,address,address[],uint256[],uint256)",
                 meme.idToName,
@@ -102,7 +102,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
 
         /// @dev If success, sending funds to DYM contract
         if (success) {
-            (bool transfer, ) = dexYourMeme.call{value: meme.idToTotalFunds}("");
+            (bool transfer, ) = DYM__ADDRESS.call{value: meme.idToTotalFunds}("");
 
             if (!transfer) revert DFM__TransferFailed();
 
