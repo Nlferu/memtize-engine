@@ -14,14 +14,9 @@ interface IERC20 {
 
 contract DexYourMeme {
     event FundsReceived(uint indexed amount);
-    event FundsReceivedFall(uint indexed amount); // -> this to be removed
 
     receive() external payable {
         emit FundsReceived(msg.value);
-    }
-
-    fallback() external payable {
-        emit FundsReceivedFall(msg.value);
     }
 
     function getUserTokenBalance(address user, address token) external view returns (uint) {
