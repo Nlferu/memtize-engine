@@ -13,27 +13,33 @@ interface IERC20 {
 }
 
 contract DexYourMeme {
+    error DYM_SwapETHFailed();
     error DYM__DexMemeFailed();
 
     event FundsReceived(uint indexed amount);
     event SwappedWETH(uint indexed amount);
-    event MemeDexedSuccessfully(address indexed token);
+    event MemeDexedSuccessfully(address indexed token, address indexed pool);
 
     address private constant UNISWAP_FACTORY = 0x0227628f3F023bb0B980b67D528571c95c6DaC1c;
     address private constant WETH_ADDRESS = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
     uint24 private constant FEE = 3000;
 
     function dexMeme(address token, address memeToken) external {
-        (bool success, ) = UNISWAP_FACTORY.call(abi.encodeWithSignature("createPool"));
+        swapETH();
+
+        (bool success, bytes memory data) = UNISWAP_FACTORY.call(abi.encodeWithSignature("createPool(address,address,uint24)", token, memeToken, FEE));
 
         if (!success) revert DYM__DexMemeFailed();
+        address poolAddress = abi.decode(data, (address));
 
-        emit MemeDexedSuccessfully(memeToken);
+        emit MemeDexedSuccessfully(memeToken, poolAddress);
     }
 
     /** @notice Swaps ETH for WETH to be able to proceed with 'dexMeme()' function */
     function swapETH() internal {
-        (bool success, ) = WETH_ADDRESS.call(abi.encodeWithSignature("deposit()"));
+        (bool success, ) = WETH_ADDRESS.call{value: address(this).balance}(abi.encodeWithSignature("deposit()"));
+
+        if (!success) revert DYM_SwapETHFailed();
 
         emit SwappedWETH(IERC20(WETH_ADDRESS).balanceOf(address(this)));
     }
