@@ -48,11 +48,11 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
 
     /// @dev Events
     event MemeCreated(address indexed creator, string name, string symbol);
-    event MemeFunded(uint id, uint value);
-    event RefundPerformed(address funder, uint amount);
-    event MemeKilled(uint id);
-    event MemeHyped(uint id);
-    event TransferSuccessfull(uint amount);
+    event MemeFunded(uint indexed id, uint indexed value);
+    event RefundPerformed(address indexed funder, uint indexed amount);
+    event MemeKilled(uint indexed id);
+    event MemeHyped(uint indexed id);
+    event TransferSuccessfull(uint indexed amount);
 
     /// @dev Constructor
     constructor(address team, address mcm, address dym) Ownable(msg.sender) {
