@@ -15,6 +15,8 @@ interface IERC20 {
 contract DexYourMeme {
     event FundsReceived(uint indexed amount);
 
+    address private constant UNISWAP_FACTORY = 0x0227628f3F023bb0B980b67D528571c95c6DaC1c;
+
     receive() external payable {
         emit FundsReceived(msg.value);
     }
