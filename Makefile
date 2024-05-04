@@ -46,4 +46,10 @@ deployDYM:
 deployDFM:
 	@forge script script/DeployDFM.s.sol:DeployDFM $(NETWORK_ARGS)
 
-deployMCM:
+#deployMCM:
+
+swapETH:
+	@forge script script/Interactions.s.sol:swapETH $(NETWORK_ARGS)
+
+createPool:
+	@forge script script/Interactions.s.sol:createPool $(NETWORK_ARGS)
