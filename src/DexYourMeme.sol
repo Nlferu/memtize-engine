@@ -30,6 +30,7 @@ contract DexYourMeme {
     address private constant WETH_ADDRESS = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
     uint24 private constant FEE = 3000;
 
+    // Holding current pool address
     address pool;
 
     function dexMeme(address memeToken) external {
@@ -62,6 +63,9 @@ contract DexYourMeme {
         bytes memory data = ""; // If additional data is not needed
 
         // Consider delaying this to get Pool created for sure
+
+        // We can also get pool address by calling
+        // pool.getPool(address,address,fee)
 
         (uint256 amount0, uint256 amount1) = IUniswapV3Pool(pool).mint(
             msg.sender, // or another recipient
