@@ -6,11 +6,11 @@ import {Script, console} from "forge-std/Script.sol";
 
 contract DeployDYM is Script {
     function run() external {
-        uint256 deployerKey = vm.envUint("LOCAL_PRIVATE_KEY");
+        uint256 deployerKey = vm.envUint("PRIVATE_KEY");
 
         vm.startBroadcast(deployerKey);
         DexYourMeme dym = new DexYourMeme();
-        console.log("Deployed Dex Youe Meme:", address(dym));
+        console.log("Deployed Dex Your Meme:", address(dym));
         vm.stopBroadcast();
     }
 }
