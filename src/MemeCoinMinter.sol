@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import {CoinTemplate} from "./CoinTemplate.sol";
 
 contract MemeCoinMinter {
-    event TokenCreated(address tokenAddress, string tokenName, string tokenSymbol);
+    event TokenCreated(address indexed tokenAddress, string tokenName, string tokenSymbol);
 
     address[] private tokens;
 
