@@ -6,6 +6,11 @@ import {Script, console} from "forge-std/Script.sol";
 
 error Interaction_Failed();
 
+interface IERC20 {
+    /** @notice Allows to check token balance for certain address */
+    function balanceOf(address account) external view returns (uint);
+}
+
 contract SwapETH is Script {
     address private constant DYM_ADDRESS = 0x5f101cdB70bB7081D8AEa072c4E43c6f046A76fE;
 
@@ -42,5 +47,21 @@ contract CreatePool is Script {
 
     function run() external {
         pool();
+    }
+}
+
+contract CheckTokenBalance is Script {
+    address private constant WETH_ADDRESS = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
+
+    function checkBalance(address token) internal view returns (uint) {
+        return IERC20(token).balanceOf(address(this));
+    }
+
+    function run() external view returns (uint) {
+        uint256 balance = checkBalance(WETH_ADDRESS);
+
+        console.log("Balance Of WETH: ", balance);
+
+        return balance;
     }
 }
