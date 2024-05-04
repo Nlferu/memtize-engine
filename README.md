@@ -18,8 +18,8 @@ https://book.getfoundry.sh/
 Deploy Order:
 
 1. DYM
-2. MCM (It is using DYM)
-3. DFM (It is using MCM and DYM)
+2. MCM
+3. DFM
 
 ### Build
 
