@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
+// import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 interface IERC20 {
     /** @notice Allows to transfer tokens from any address to any recipient */
     function transferFrom(address from, address to, uint amount) external returns (bool);
