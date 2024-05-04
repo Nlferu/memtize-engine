@@ -53,3 +53,6 @@ swapETH:
 
 createPool:
 	@forge script script/Interactions.s.sol:CreatePool $(NETWORK_ARGS)
+
+balance:
+	@forge script script/Interactions.s.sol:CheckTokenBalance $(NETWORK_ARGS)
