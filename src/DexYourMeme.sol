@@ -27,7 +27,7 @@ contract DexYourMeme {
     uint24 private constant FEE = 3000;
 
     function dexMeme(address token, address memeToken) external {
-        swapETH();
+        // swapETH(); -> commented for testing purposes
 
         (bool success, bytes memory data) = UNISWAP_FACTORY.call(abi.encodeWithSignature("createPool(address,address,uint24)", token, memeToken, FEE));
 
@@ -38,7 +38,8 @@ contract DexYourMeme {
     }
 
     /** @notice Swaps ETH for WETH to be able to proceed with 'dexMeme()' function */
-    function swapETH() internal {
+    // This has to be changed to internal after testing
+    function swapETH() external {
         (bool success, ) = WETH_ADDRESS.call{value: address(this).balance}(abi.encodeWithSignature("deposit()"));
 
         if (!success) revert DYM_SwapETHFailed();
