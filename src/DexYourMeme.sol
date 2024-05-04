@@ -16,10 +16,11 @@ contract DexYourMeme {
     error DYM__DexMemeFailed();
 
     event FundsReceived(uint indexed amount);
+    event SwappedWETH(uint indexed amount);
     event MemeDexedSuccessfully(address indexed token);
 
-    // 0xfff9976782d46cc05630d1f6ebab18b2324d6b14 -> WETH Sepolia
     address private constant UNISWAP_FACTORY = 0x0227628f3F023bb0B980b67D528571c95c6DaC1c;
+    address private constant WETH_ADDRESS = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
     uint24 private constant FEE = 3000;
 
     function dexMeme(address token, address memeToken) external {
@@ -27,7 +28,14 @@ contract DexYourMeme {
 
         if (!success) revert DYM__DexMemeFailed();
 
-        emit MemeDexedSuccessfully();
+        emit MemeDexedSuccessfully(memeToken);
+    }
+
+    /** @notice Swaps ETH for WETH to be able to proceed with 'dexMeme()' function */
+    function swapETH() internal {
+        (bool success, ) = WETH_ADDRESS.call(abi.encodeWithSignature("deposit()"));
+
+        emit SwappedWETH(IERC20(WETH_ADDRESS).balanceOf(address(this)));
     }
 
     /** @notice Adds possibility to receive funds by this contract, which is required by MFM contract */
