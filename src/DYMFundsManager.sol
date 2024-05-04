@@ -104,20 +104,16 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
                 i_DYM
             )
         );
-
         /// @dev If success, sending funds directly to DYM contract
-        if (!success) {
-            revert DFM__MinterCallFailed();
-        } else {
-            (bool transfer, ) = i_DYM.call{value: meme.idToTotalFunds}("");
-            if (!transfer) revert DFM__TransferFailed();
+        if (!success) revert DFM__MinterCallFailed();
 
-            emit TransferSuccessfull(meme.idToTotalFunds);
-        }
+        (bool transfer, ) = i_DYM.call{value: meme.idToTotalFunds}("");
+        if (!transfer) revert DFM__TransferFailed();
 
         meme.idToMemeStatus = MemeStatus.DEAD;
 
         emit MemeHyped(id);
+        emit TransferSuccessfull(meme.idToTotalFunds);
     }
 
     /** @notice If meme fails to achieve fund goal on time this function will assign funds back to funders wallets and change state of meme to dead */
