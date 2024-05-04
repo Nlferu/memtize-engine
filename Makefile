@@ -49,7 +49,7 @@ deployDFM:
 #deployMCM:
 
 swapETH:
-	@forge script script/Interactions.s.sol:swapETH $(NETWORK_ARGS)
+	@forge script script/Interactions.s.sol:SwapETH $(NETWORK_ARGS)
 
 createPool:
-	@forge script script/Interactions.s.sol:createPool $(NETWORK_ARGS)
+	@forge script script/Interactions.s.sol:CreatePool $(NETWORK_ARGS)
