@@ -26,10 +26,10 @@ contract DexYourMeme {
     address private constant WETH_ADDRESS = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
     uint24 private constant FEE = 3000;
 
-    function dexMeme(address token, address memeToken) external {
+    function dexMeme(address memeToken) external {
         // swapETH(); -> commented for testing purposes
 
-        (bool success, bytes memory data) = UNISWAP_FACTORY.call(abi.encodeWithSignature("createPool(address,address,uint24)", token, memeToken, FEE));
+        (bool success, bytes memory data) = UNISWAP_FACTORY.call(abi.encodeWithSignature("createPool(address,address,uint24)", WETH_ADDRESS, memeToken, FEE));
 
         if (!success) revert DYM__DexMemeFailed();
         address poolAddress = abi.decode(data, (address));
