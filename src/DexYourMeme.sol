@@ -18,10 +18,12 @@ contract DexYourMeme {
     event FundsReceived(uint indexed amount);
     event MemeDexedSuccessfully(address indexed token);
 
+    // 0xfff9976782d46cc05630d1f6ebab18b2324d6b14 -> WETH Sepolia
     address private constant UNISWAP_FACTORY = 0x0227628f3F023bb0B980b67D528571c95c6DaC1c;
+    uint24 private constant FEE = 3000;
 
-    function dexMeme() external {
-        (bool success, ) = UNISWAP_FACTORY.call(abi.encodeWithSignature(""));
+    function dexMeme(address token, address memeToken) external {
+        (bool success, ) = UNISWAP_FACTORY.call(abi.encodeWithSignature("createPool"));
 
         if (!success) revert DYM__DexMemeFailed();
 
