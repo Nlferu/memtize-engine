@@ -44,6 +44,9 @@ contract AmbaTmp is IERC721Receiver {
         // Create new pool
         //address pool = factory.createPool(tokenA, tokenB, fee);
 
+        // Calculate sqrtPriceX96 using the TickMath library
+        // uint160 sqrtPriceX96 = TickMath.getSqrtRatioAtTick((tickLower + tickUpper) / 2);
+
         // Initialize the pool price
         uint160 initialPrice = calculateSqrtPriceX96(amountA, amountB);
         // uint160 initialPrice = uint160(0.001 * (2 ** 96));
@@ -84,6 +87,18 @@ contract AmbaTmp is IERC721Receiver {
         uint256 priceX96 = (amountA * (2 ** 96)) / amountB;
         return uint160(sqrt(priceX96) << 48);
     }
+
+    /// @dev Use below instead of 'calculateSqrtPriceX96()'
+    // Calculate the price ratio (amount1 / amount0)
+    // uint256 priceRatio = (amount1 * (2 ** 96)) / amount0;
+
+    // // Take the square root of the price ratio
+    // uint256 sqrtRatio = sqrt(priceRatio);
+
+    // // Return in uint160 type as Q64.96 fixed-point
+    // sqrtPriceX96 = uint160(sqrtRatio);
+
+    // -------------------------------------------------------------------------------------------------------
 
     /// @notice Computes the square root of a number in fixed-point Q64.96 format
 
