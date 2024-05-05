@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "./Interfaces/INonfungiblePositionManager.sol";
 import "./Interfaces/IUniswapV3Factory.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 /// @notice TODO:
 // Block 'DecreaseLiquidity' fn from manager
@@ -13,7 +14,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // We need to make this contract an ERC721 receiver
 // Create mapping that will track time passed after pool creation
-contract UniswapV3LiquidityManager {
+contract AmbaTmp {
     //address public constant FACTORY = 0x0227628f3F023bb0B980b67D528571c95c6DaC1c; // Uniswap v3 Factory
     address public constant NFT_POSITION_MANAGER = 0x1238536071E1c677A632429e3655c799b22cDA52; // NFT Position Manager
 
