@@ -79,7 +79,7 @@ contract AmbaTmp is IERC721Receiver {
     /// @param amountB The amount of token B
     /// @return sqrtPriceX96 The initial price for the pool
 
-    /// @dev To be removed after testing
+    /// @dev THIS NEEDS TO BE TESTED
     function calculateSqrtPriceX96(uint256 amountA, uint256 amountB) internal pure returns (uint160) {
         uint256 priceX96 = (amountA * (2 ** 96)) / amountB;
         return uint160(sqrt(priceX96) << 48);
@@ -87,7 +87,7 @@ contract AmbaTmp is IERC721Receiver {
 
     /// @notice Computes the square root of a number in fixed-point Q64.96 format
 
-    /// @dev To be removed after testing
+    /// @dev THIS NEEDS TO BE TESTED
     function sqrt(uint256 x) internal pure returns (uint256) {
         uint256 z = (x + 1) / 2;
         uint256 y = x;
