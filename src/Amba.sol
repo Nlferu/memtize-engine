@@ -14,7 +14,12 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 // We need to make this contract an ERC721 receiver
 // Create mapping that will track time passed after pool creation
-contract AmbaTmp {
+contract AmbaTmp is IERC721Receiver {
+    // Implementation of the ERC721Receiver function -> TODO!
+    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) external pure override returns (bytes4) {
+        return IERC721Receiver.onERC721Received.selector;
+    }
+
     //address public constant FACTORY = 0x0227628f3F023bb0B980b67D528571c95c6DaC1c; // Uniswap v3 Factory
     address public constant NFT_POSITION_MANAGER = 0x1238536071E1c677A632429e3655c799b22cDA52; // NFT Position Manager
 
