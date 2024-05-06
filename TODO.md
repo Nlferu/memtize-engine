@@ -1,10 +1,11 @@
 1. Implement Calling Uniswap Dex to create liquidity Pool
 2. Implement Chainlink Automation
 
-DYM -> 0x4402ae3aC2e643201AbA1FA3555Fb7369936b92F
+DYM -> 0x8D30DFb3a3530545872992fEf3b8573676333deA
 Pool -> 0xDe1c99195586AbCCE40Ee846D7fDC040DE288ce6
 WETH -> 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14
 Uniswap Factory -> https://sepolia.etherscan.io/address/0x0227628f3F023bb0B980b67D528571c95c6DaC1c
+Manager -> 0x1238536071E1c677A632429e3655c799b22cDA52
 
 Add Liquidity = pool.mint
 
@@ -16,4 +17,7 @@ data: Any additional data that may be needed. This is typically used for callbac
 
 Uniswap GitHub: https://github.com/Uniswap/v3-core/blob/v1.0.0/contracts/UniswapV3Pool.sol
 
-AST token: 0x105506b0Ce49FCf2E422C7dE395E284Ba11fC409
+AST token: 0x1AF2a4208E9a59C7DC8e7379210Aa6C72f6C1332
+Deadline: https://blockchain-academy.hs-mittweida.de/timestamp-converter/
+Pool: 0x33e8872d2500c028CBe615E8aFE6e6eA7B6Bb18C
+NFT: 15462
