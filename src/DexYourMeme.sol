@@ -24,8 +24,8 @@ contract DexYourMeme is IERC721Receiver {
 
     address private constant NFT_POSITION_MANAGER = 0x1238536071E1c677A632429e3655c799b22cDA52; // NFT Position Manager
     // ((sqrtPriceX96**2)/(2**192))*(10**(token0 decimals - token1 decimals)) - This  gives us the price of token0 in token1, where token0 -> WETH, token1 -> ERC20
-    //                                      79228162514264337593543950336000
-    uint160 private constant initialPrice = 79228162514264337593543000;
+    //                                      79228162514264337593543950336000 | 79228162514264337593543000
+    uint160 private constant initialPrice = 792281625142643375935439503360000; // 0.1 WETH for 10 000 000 AST
     address private constant WETH_ADDRESS = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
     uint24 private constant FEE = 3000;
     uint256 private constant WETH_AMOUNT = 1;
@@ -37,10 +37,10 @@ contract DexYourMeme is IERC721Receiver {
     }
 
     function dexMeme(address memeToken) external {
-        // swapETH(); -> commented for testing purposes
+        swapETH();
 
         /// @dev Creating And Initializing Pool
-        INonfungiblePositionManager(NFT_POSITION_MANAGER).createAndInitializePoolIfNecessary(WETH_ADDRESS, memeToken, FEE, initialPrice);
+        INonfungiblePositionManager(NFT_POSITION_MANAGER).createAndInitializePoolIfNecessary(memeToken, WETH_ADDRESS, FEE, initialPrice);
 
         // Approve tokens for the position manager
         IERC20(WETH_ADDRESS).approve(NFT_POSITION_MANAGER, WETH_AMOUNT);
@@ -48,16 +48,16 @@ contract DexYourMeme is IERC721Receiver {
 
         // Add liquidity to the new pool using mint
         INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager.MintParams({
-            token0: WETH_ADDRESS,
-            token1: memeToken,
+            token0: memeToken,
+            token1: WETH_ADDRESS,
             fee: FEE,
-            tickLower: -887272, // Near 0 price
-            tickUpper: 887272, // Extremely high price
-            amount0Desired: WETH_AMOUNT,
-            amount1Desired: MEME_AMOUNT,
+            tickLower: -887220, // Near 0 price
+            tickUpper: 887220, // Extremely high price
+            amount0Desired: MEME_AMOUNT, // 76,709.999999999999999615 -> input: 76710000000000000000000
+            amount1Desired: WETH_AMOUNT, // 0.49999999999999999999999 -> input: 500000000000000000
             amount0Min: 0,
             amount1Min: 0,
-            recipient: msg.sender, // This address will receive NFT representing liquidity pool
+            recipient: address(this), // This address will receive NFT representing liquidity pool
             deadline: block.timestamp + 1200 // 20 minutes deadline
         });
 
@@ -66,7 +66,7 @@ contract DexYourMeme is IERC721Receiver {
 
     /** @notice Swaps ETH for WETH to be able to proceed with 'dexMeme()' function */
     // This has to be changed to internal after testing
-    function swapETH() external {
+    function swapETH() internal {
         (bool success, ) = WETH_ADDRESS.call{value: address(this).balance}(abi.encodeWithSignature("deposit()"));
 
         if (!success) revert DYM_SwapETHFailed();
