@@ -17,43 +17,18 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 contract AmbaTmp is IERC721Receiver {
     uint256[] private receivedTokens;
 
-    // Implementation of the ERC721Receiver function -> TODO!
-    function onERC721Received(address /* operator */, address /* from */, uint256 tokenId, bytes memory /* data */) external override returns (bytes4) {
-        receivedTokens.push(tokenId);
+    address private constant NFT_POSITION_MANAGER = 0x1238536071E1c677A632429e3655c799b22cDA52; // NFT Position Manager
+    uint160 private constant initialPrice = 79228162514264337593543000;
 
-        // In case we would like to hold that NFT elsewhere
-        // IERC721(NFT_ADDRESS).transferFrom(address(this), HACKER, tokenId);
-
-        return this.onERC721Received.selector;
-    }
-
-    //address public constant FACTORY = 0x0227628f3F023bb0B980b67D528571c95c6DaC1c; // Uniswap v3 Factory
-    address public constant NFT_POSITION_MANAGER = 0x1238536071E1c677A632429e3655c799b22cDA52; // NFT Position Manager
-
-    INonfungiblePositionManager positionManager = INonfungiblePositionManager(NFT_POSITION_MANAGER);
-
-    //IUniswapV3Factory factory = IUniswapV3Factory(FACTORY);
-
-    /// @notice Creates a new Uniswap v3 pool and adds liquidity
+    /// @notice Creates a new Uniswap v3 pool, initializes it and adds liquidity
     /// @param tokenA First token in the pool
     /// @param tokenB Second token in the pool
     /// @param fee The fee tier for the pool (e.g., 3000 for 0.3%)
     /// @param amountA Amount of token A to provide as liquidity
     /// @param amountB Amount of token B to provide as liquidity
     function createPoolAndAddLiquidity(address tokenA, address tokenB, uint24 fee, uint256 amountA, uint256 amountB) external {
-        // Create new pool
-        //address pool = factory.createPool(tokenA, tokenB, fee);
-
-        // Calculate sqrtPriceX96 using the TickMath library
-        // uint160 sqrtPriceX96 = TickMath.getSqrtRatioAtTick((tickLower + tickUpper) / 2);
-
-        // Initialize the pool price
-        uint160 initialPrice = calculateSqrtPriceX96(amountA, amountB);
-        // uint160 initialPrice = uint160(0.001 * (2 ** 96));
-        //IUniswapV3Pool(pool).initialize(initialPrice);
-
         /// @dev Creating And Initializing Pool
-        positionManager.createAndInitializePoolIfNecessary(tokenA, tokenB, fee, initialPrice);
+        INonfungiblePositionManager(NFT_POSITION_MANAGER).createAndInitializePoolIfNecessary(tokenA, tokenB, fee, initialPrice);
 
         // Approve tokens for the position manager
         IERC20(tokenA).approve(NFT_POSITION_MANAGER, amountA);
@@ -74,42 +49,20 @@ contract AmbaTmp is IERC721Receiver {
             deadline: block.timestamp + 1200 // 20-minute deadline
         });
 
-        positionManager.mint(params);
+        INonfungiblePositionManager(NFT_POSITION_MANAGER).mint(params);
     }
 
-    /// @notice Calculates the initial price in Q64.96 format
-    /// @param amountA The amount of token A
-    /// @param amountB The amount of token B
-    /// @return sqrtPriceX96 The initial price for the pool
+    /// @notice This is needed as NonfungiblePositionManager is releasing NFT once we add liquidity to pool
+    function onERC721Received(address /* operator */, address /* from */, uint256 tokenId, bytes memory /* data */) external override returns (bytes4) {
+        receivedTokens.push(tokenId);
 
-    /// @dev THIS NEEDS TO BE TESTED
-    function calculateSqrtPriceX96(uint256 amountA, uint256 amountB) internal pure returns (uint160) {
-        uint256 priceX96 = (amountA * (2 ** 96)) / amountB;
-        return uint160(sqrt(priceX96) << 48);
+        // In case we would like to hold that NFT elsewhere
+        // IERC721(NFT_ADDRESS).transferFrom(address(this), HACKER, tokenId);
+
+        return this.onERC721Received.selector;
     }
 
-    /// @dev Use below instead of 'calculateSqrtPriceX96()'
-    // Calculate the price ratio (amount1 / amount0)
-    // uint256 priceRatio = (amount1 * (2 ** 96)) / amount0;
-
-    // // Take the square root of the price ratio
-    // uint256 sqrtRatio = sqrt(priceRatio);
-
-    // // Return in uint160 type as Q64.96 fixed-point
-    // sqrtPriceX96 = uint160(sqrtRatio);
-
-    // -------------------------------------------------------------------------------------------------------
-
-    /// @notice Computes the square root of a number in fixed-point Q64.96 format
-
-    /// @dev THIS NEEDS TO BE TESTED
-    function sqrt(uint256 x) internal pure returns (uint256) {
-        uint256 z = (x + 1) / 2;
-        uint256 y = x;
-        while (z < y) {
-            y = z;
-            z = (x / z + z) / 2;
-        }
-        return z;
+    function getAllTokens() external view returns (uint256[] memory) {
+        return receivedTokens;
     }
 }
