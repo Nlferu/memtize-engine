@@ -8,10 +8,8 @@ contract DeployAsta is Script {
     function run() external returns (Asta, address) {
         uint256 deployerKey = vm.envUint("AST_PRIVATE_KEY");
 
-        uint256 astSupply = 7000;
-
         vm.startBroadcast(deployerKey);
-        Asta asta = new Asta(astSupply);
+        Asta asta = new Asta();
         address astOwner = vm.addr(deployerKey);
         console.log("Asta Token Deployed: ", address(asta));
         console.log("Asta Token Owner: ", astOwner);
