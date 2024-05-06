@@ -1,49 +1,67 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-// import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./Interfaces/INonfungiblePositionManager.sol";
+import "./Interfaces/IUniswapV3Factory.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-interface IERC20 {
-    /** @notice Allows to transfer tokens from any address to any recipient */
-    function transferFrom(address from, address to, uint amount) external returns (bool);
+/// @notice TODO:
+// Block 'DecreaseLiquidity' fn from manager
+// Block 'Burn' fn from manager
+// Redirect/Manage 'CollectFees' function
+// Check 'Repositioning' fn from manager -> block it eventually
 
-    /** @notice Allows to transfer tokens from this address to recipient */
-    function transfer(address to, uint amount) external returns (bool);
-
-    /** @notice Allows to check token balance for certain address */
-    function balanceOf(address account) external view returns (uint);
-}
-
-interface IUniswapV3Pool {
-    function mint(address recipient, int24 tickLower, int24 tickUpper, uint128 amount, bytes calldata data) external returns (uint256 amount0, uint256 amount1);
-}
-
-contract DexYourMeme {
+contract DexYourMeme is IERC721Receiver {
     error DYM_SwapETHFailed();
     error DYM__DexMemeFailed();
+
+    uint256[] private receivedTokens;
 
     event FundsReceived(uint indexed amount);
     event SwappedWETH(uint indexed amount);
     event MemeDexedSuccessfully(address indexed token, address indexed pool);
 
-    address private constant UNISWAP_FACTORY = 0x0227628f3F023bb0B980b67D528571c95c6DaC1c;
+    address private constant NFT_POSITION_MANAGER = 0x1238536071E1c677A632429e3655c799b22cDA52; // NFT Position Manager
+    // ((sqrtPriceX96**2)/(2**192))*(10**(token0 decimals - token1 decimals)) - This  gives us the price of token0 in token1, where token0 -> WETH, token1 -> ERC20
+    //                                      79228162514264337593543950336000
+    uint160 private constant initialPrice = 79228162514264337593543000;
     address private constant WETH_ADDRESS = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
     uint24 private constant FEE = 3000;
+    uint256 private constant WETH_AMOUNT = 1;
+    uint256 private constant MEME_AMOUNT = 1_000_000;
 
-    // Holding current pool address
-    address pool;
+    /** @notice Adds possibility to receive funds by this contract, which is required by MFM contract */
+    receive() external payable {
+        emit FundsReceived(msg.value);
+    }
 
     function dexMeme(address memeToken) external {
         // swapETH(); -> commented for testing purposes
 
-        (bool success, bytes memory data) = UNISWAP_FACTORY.call(abi.encodeWithSignature("createPool(address,address,uint24)", WETH_ADDRESS, memeToken, FEE));
+        /// @dev Creating And Initializing Pool
+        INonfungiblePositionManager(NFT_POSITION_MANAGER).createAndInitializePoolIfNecessary(WETH_ADDRESS, memeToken, FEE, initialPrice);
 
-        if (!success) revert DYM__DexMemeFailed();
-        address poolAddress = abi.decode(data, (address));
+        // Approve tokens for the position manager
+        IERC20(WETH_ADDRESS).approve(NFT_POSITION_MANAGER, WETH_AMOUNT);
+        IERC20(memeToken).approve(NFT_POSITION_MANAGER, MEME_AMOUNT);
 
-        pool = poolAddress;
+        // Add liquidity to the new pool using mint
+        INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager.MintParams({
+            token0: WETH_ADDRESS,
+            token1: memeToken,
+            fee: FEE,
+            tickLower: -887272, // Near 0 price
+            tickUpper: 887272, // Extremely high price
+            amount0Desired: WETH_AMOUNT,
+            amount1Desired: MEME_AMOUNT,
+            amount0Min: 0,
+            amount1Min: 0,
+            recipient: msg.sender, // This address will receive NFT representing liquidity pool
+            deadline: block.timestamp + 1200 // 20 minutes deadline
+        });
 
-        emit MemeDexedSuccessfully(memeToken, poolAddress);
+        INonfungiblePositionManager(NFT_POSITION_MANAGER).mint(params);
     }
 
     /** @notice Swaps ETH for WETH to be able to proceed with 'dexMeme()' function */
@@ -56,34 +74,21 @@ contract DexYourMeme {
         emit SwappedWETH(IERC20(WETH_ADDRESS).balanceOf(address(this)));
     }
 
-    function addLiquidity(address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint128 liquidityAmount) external {
-        // Token approvals @TODO
-        // Assuming tokens are approved...
+    /// @notice This is needed as NonfungiblePositionManager is releasing NFT once we add liquidity to pool
+    function onERC721Received(address /* operator */, address /* from */, uint256 tokenId, bytes memory /* data */) external override returns (bytes4) {
+        receivedTokens.push(tokenId);
 
-        bytes memory data = ""; // If additional data is not needed
+        // In case we would like to hold that NFT elsewhere
+        // IERC721(NFT_ADDRESS).transferFrom(address(this), HACKER, tokenId);
 
-        // Consider delaying this to get Pool created for sure
-
-        // We can also get pool address by calling
-        // pool.getPool(address,address,fee)
-
-        (uint256 amount0, uint256 amount1) = IUniswapV3Pool(pool).mint(
-            msg.sender, // or another recipient
-            tickLower,
-            tickUpper,
-            liquidityAmount,
-            data
-        );
-
-        // Additional logic to handle amount0 and amount1 if necessary
+        return this.onERC721Received.selector;
     }
 
-    /** @notice Adds possibility to receive funds by this contract, which is required by MFM contract */
-    receive() external payable {
-        emit FundsReceived(msg.value);
+    function getAllTokens() external view returns (uint256[] memory) {
+        return receivedTokens;
     }
 
-    /** @notice ??? */
+    /** @notice Returns given token balance for certain user */
     function getUserTokenBalance(address user, address token) external view returns (uint) {
         return IERC20(token).balanceOf(user);
     }
