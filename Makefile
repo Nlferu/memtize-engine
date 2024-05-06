@@ -46,7 +46,8 @@ deployDYM:
 deployDFM:
 	@forge script script/DeployDFM.s.sol:DeployDFM $(NETWORK_ARGS)
 
-#deployMCM:
+deployAST:
+	@forge script script/DeployAsta.s.sol:DeployAsta $(NETWORK_ARGS)
 
 swapETH:
 	@forge script script/Interactions.s.sol:SwapETH $(NETWORK_ARGS)
