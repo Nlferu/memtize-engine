@@ -6,7 +6,7 @@ import {Script, console} from "forge-std/Script.sol";
 
 contract DeployAsta is Script {
     function run() external returns (Asta, address) {
-        uint256 deployerKey = vm.envUint("AST_PRIVATE_KEY");
+        uint256 deployerKey = vm.envUint("PRIVATE_KEY");
 
         vm.startBroadcast(deployerKey);
         Asta asta = new Asta();
