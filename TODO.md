@@ -21,7 +21,7 @@ AST token: 0xFb94678b88d20B897ac145C319297E1B30223090
 Deadline: https://blockchain-academy.hs-mittweida.de/timestamp-converter/
 Pool: 0x33e8872d2500c028CBe615E8aFE6e6eA7B6Bb18C
 
-NFT: 15464
-https://app.uniswap.org/pools/15468
+NFT: 15471
+https://app.uniswap.org/pools/15471
 
 =(sqrtPriceX96/2^96)^2
