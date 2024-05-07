@@ -23,3 +23,5 @@ Pool: 0x33e8872d2500c028CBe615E8aFE6e6eA7B6Bb18C
 
 NFT: 15464
 https://app.uniswap.org/pools/15468
+
+=(sqrtPriceX96/2^96)^2
