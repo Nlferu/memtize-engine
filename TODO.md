@@ -24,4 +24,7 @@ Pool: 0x33e8872d2500c028CBe615E8aFE6e6eA7B6Bb18C
 NFT: 15471
 https://app.uniswap.org/pools/15471
 
-=(sqrtPriceX96/2^96)^2
+Formula for price calculation: price = ((sqrtPriceX96**2)/(2**192))\*(10\*\*(token0 decimals - token1 decimals))
+
+0.100_000_000_000_000_005
+100_000.000_000_000_000_000_005
