@@ -26,7 +26,7 @@ contract DexYourMeme is IERC721Receiver {
     // ((sqrtPriceX96**2)/(2**192))*(10**(token0 decimals - token1 decimals)) - This  gives us the price of token0 in token1, where token0 -> WETH, token1 -> ERC20
     //                                      79228162514264337593543950336000 | 79228162514264337593543000
     /// @dev Work on accuracy! 0.009999999999999995 WETH for 999,999.999999999999999995 AST
-    uint160 private constant initialPrice = 7922816251426433759354395; // 0.1 WETH for 1 000 000 AST | 79228162514264337593543950 -> 0.1 WETH for 100 000 AST
+    uint160 private constant initialPrice = 7922816251426433759354395; // 0.01 WETH for 1 000 000 AST | 79228162514264337593543950 -> 0.1 WETH for 100 000 AST
     address private constant WETH_ADDRESS = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
     uint24 private constant FEE = 3000;
     uint256 private constant WETH_AMOUNT = 0.1 * 10 ** 18;
