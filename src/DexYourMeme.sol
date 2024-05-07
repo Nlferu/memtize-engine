@@ -25,11 +25,11 @@ contract DexYourMeme is IERC721Receiver {
     address private constant NFT_POSITION_MANAGER = 0x1238536071E1c677A632429e3655c799b22cDA52; // NFT Position Manager
     // ((sqrtPriceX96**2)/(2**192))*(10**(token0 decimals - token1 decimals)) - This  gives us the price of token0 in token1, where token0 -> WETH, token1 -> ERC20
     //                                      79228162514264337593543950336000 | 79228162514264337593543000
-    uint160 private constant initialPrice = 792281625142643375935439503360000; // 0.1 WETH for 10 000 000 AST
+    uint160 private constant initialPrice = 79228162514264337593543950336000; // 0.1 WETH for 10 000 000 AST
     address private constant WETH_ADDRESS = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
     uint24 private constant FEE = 3000;
-    uint256 private constant WETH_AMOUNT = 1;
-    uint256 private constant MEME_AMOUNT = 1_000_000;
+    uint256 private constant WETH_AMOUNT = 0.1 * 10 ** 9;
+    uint256 private constant MEME_AMOUNT = 1_000_000 * 10 ** 18;
 
     /** @notice Adds possibility to receive funds by this contract, which is required by MFM contract */
     receive() external payable {
@@ -53,8 +53,8 @@ contract DexYourMeme is IERC721Receiver {
             fee: FEE,
             tickLower: -887220, // Near 0 price
             tickUpper: 887220, // Extremely high price
-            amount0Desired: MEME_AMOUNT, // 76,709.999999999999999615 -> input: 76710000000000000000000
-            amount1Desired: WETH_AMOUNT, // 0.49999999999999999999999 -> input: 500000000000000000
+            amount0Desired: MEME_AMOUNT, // 76,709.999999999999999615 -> input: 76710000000000000000000 | 1 000 000 000
+            amount1Desired: WETH_AMOUNT, // 0.49999999999999999999999 -> input: 500000000000000000 | 1 000 000 000
             amount0Min: 0,
             amount1Min: 0,
             recipient: address(this), // This address will receive NFT representing liquidity pool
