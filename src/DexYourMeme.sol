@@ -21,7 +21,7 @@ contract DexYourMeme is IERC721Receiver {
     address private immutable i_mcm;
 
     /// @dev Arrays
-    uint256[] private s_received_NFTs;
+    uint[] private s_received_NFTs;
     address[] private s_memeCoinsDexed;
 
     /// @dev Constants
@@ -32,9 +32,9 @@ contract DexYourMeme is IERC721Receiver {
     /// @dev InitialPrice expression: 0.01 WETH for 1 000 000 AST | 79228162514264337593543950 -> 0.1 WETH for 100 000 AST
     uint160 private constant INITIAL_PRICE = 7922816251426433759354395;
     address private constant WETH_ADDRESS = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
-    uint24 private constant FEE = 3000;
-    uint256 private constant WETH_AMOUNT = 0.1 * 10 ** 18;
-    uint256 private constant MEME_AMOUNT = 1_000_000 * 10 ** 18;
+    uint24 private constant FEE = 3000; // 0.30% fee
+    uint private constant WETH_AMOUNT = 0.1 * 10 ** 18;
+    uint private constant MEME_AMOUNT = 1_000_000 * 10 ** 18;
 
     /// @dev Events
     event FundsReceived(uint indexed amount);
@@ -73,11 +73,11 @@ contract DexYourMeme is IERC721Receiver {
             fee: FEE,
             tickLower: -887220, // Near 0 price
             tickUpper: 887220, // Extremely high price
-            amount0Desired: MEME_AMOUNT, // 76,709.999999999999999615 -> input: 76710000000000000000000 | 1 000 000 000
-            amount1Desired: WETH_AMOUNT, // 0.49999999999999999999999 -> input: 500000000000000000 | 1 000 000 000
+            amount0Desired: MEME_AMOUNT, // Meme token amount sent to manager to provide liquidity
+            amount1Desired: WETH_AMOUNT, // WETH token amount sent to manager to provide liquidity
             amount0Min: 0,
             amount1Min: 0,
-            recipient: address(this), // This address will receive NFT representing liquidity pool
+            recipient: address(this), // Address that will receive NFT representing liquidity pool
             deadline: block.timestamp + 1200 // 20 minutes deadline
         });
 
@@ -98,16 +98,13 @@ contract DexYourMeme is IERC721Receiver {
     }
 
     /// @notice This is needed as NonfungiblePositionManager is issuing NFT once we initialize liquidity pool
-    function onERC721Received(address /* operator */, address /* from */, uint256 tokenId, bytes memory /* data */) external override returns (bytes4) {
+    function onERC721Received(address /* operator */, address /* from */, uint tokenId, bytes memory /* data */) external override returns (bytes4) {
         s_received_NFTs.push(tokenId);
-
-        // In case we would like to hold that NFT elsewhere
-        // IERC721(NFT_ADDRESS).transferFrom(address(this), HACKER, tokenId);
 
         return this.onERC721Received.selector;
     }
 
-    function getAllTokens() external view returns (uint256[] memory) {
+    function getAllTokens() external view returns (uint[] memory) {
         return s_received_NFTs;
     }
 
