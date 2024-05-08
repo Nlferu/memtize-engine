@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@solmate/utils/ReentrancyGuard.sol";
+import {IMemeCoinMinter} from "./Interfaces/IMemeCoinMinter.sol";
 
 contract DYMFundsManager is Ownable, ReentrancyGuard {
     /// @dev Errors
