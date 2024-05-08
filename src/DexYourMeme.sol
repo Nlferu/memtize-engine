@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "./Interfaces/INonfungiblePositionManager.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import {INonfungiblePositionManager} from "./Interfaces/INonfungiblePositionManager.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 /// @notice TODO:
 // Block 'DecreaseLiquidity' fn from manager
@@ -39,6 +39,7 @@ contract DexYourMeme is IERC721Receiver {
     /// @dev Events
     event FundsReceived(uint indexed amount);
     event Swapped_ETH_For_WETH(uint indexed amount);
+    event MemeDexRequestReceived(address indexed token);
     event MemeDexedSuccessfully(address indexed token);
 
     /// @dev Constructor
@@ -54,6 +55,7 @@ contract DexYourMeme is IERC721Receiver {
     /// @dev This to be changed to internal and called by Chainlink keepers
     function dexMeme(address memeToken) external {
         if (msg.sender != i_mcm) revert DYM__NotMemeCoinMinterCaller();
+        emit MemeDexRequestReceived(memeToken);
 
         swapETH();
 
