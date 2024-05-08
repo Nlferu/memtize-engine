@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {CoinTemplate} from "./CoinTemplate.sol";
+import {MemeCoin} from "./MemeCoin.sol";
+import {IDexYourMeme} from "./Interfaces";
 
 /// @dev TODO: This needs to be callable only by DFM contract
 contract MemeCoinMinter {
@@ -9,7 +10,7 @@ contract MemeCoinMinter {
     address[] private tokens;
 
     /// @dev Events
-    event TokenCreated(address indexed tokenAddress, string tokenName, string tokenSymbol);
+    event MemeCoinMinted(address indexed coinAddress, string coinName, string coinSymbol);
 
     /** @notice Deploys new ERC20 Meme Token */
     /** @param name Name of new ERC20 Meme Token */
@@ -20,7 +21,7 @@ contract MemeCoinMinter {
     /** @param amounts Array parallel to 'recipients[]' contains all funds of new ERC20 Meme Token */
     /** @param totalFunds Sum of ETH gathered for new ERC20 Meme Token */
     /** @param dym DexYourMeme contract address */
-    function mintToken(
+    function mintCoinAndRequestDex(
         string memory name,
         string memory symbol,
         address creator,
@@ -30,11 +31,13 @@ contract MemeCoinMinter {
         uint totalFunds,
         address dym
     ) external {
-        CoinTemplate newToken = new CoinTemplate(name, symbol, creator, team, recipients, amounts, totalFunds, dym);
+        MemeCoin newCoin = new MemeCoin(name, symbol, creator, team, recipients, amounts, totalFunds, dym);
 
-        tokens.push(address(newToken));
+        tokens.push(address(newCoin));
 
-        emit TokenCreated(address(newToken), name, symbol);
+        emit MemeCoinMinted(address(newCoin), name, symbol);
+
+        IDexYourMeme(dym).dexMeme(address(newCoin));
     }
 
     function getTokensMinted() external view returns (address[] memory) {
