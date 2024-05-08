@@ -9,7 +9,8 @@ contract DeployDYM is Script {
         uint256 deployerKey = vm.envUint("PRIVATE_KEY");
 
         vm.startBroadcast(deployerKey);
-        DexYourMeme dym = new DexYourMeme();
+        address mcm = 0xFb94678b88d20B897ac145C319297E1B30223090; // -> tmp random value
+        DexYourMeme dym = new DexYourMeme(mcm);
         console.log("Deployed Dex Your Meme:", address(dym));
         vm.stopBroadcast();
     }
