@@ -14,7 +14,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 contract DexYourMeme is IERC721Receiver {
     /// @dev Errors
-    error DYM_SwapETHFailed();
+    error DYM__SwapETHFailed();
     error DYM__DexMemeFailed();
     error DYM__NotMemeCoinMinterCaller();
 
@@ -87,7 +87,7 @@ contract DexYourMeme is IERC721Receiver {
     function swapETH() internal {
         (bool success, ) = WETH_ADDRESS.call{value: address(this).balance}(abi.encodeWithSignature("deposit()"));
 
-        if (!success) revert DYM_SwapETHFailed();
+        if (!success) revert DYM__SwapETHFailed();
 
         emit SwappedWETH(IERC20(WETH_ADDRESS).balanceOf(address(this)));
     }
