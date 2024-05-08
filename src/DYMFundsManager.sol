@@ -12,15 +12,14 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     error DFM__MemeDead();
     error DFM__TransferFailed();
     error DFM__NothingToRefund();
-    error DFM__MinterCallFailed();
 
     /// @dev Constants
     uint private constant HYPER = 1 ether;
 
     /// @dev Immutables
     address private immutable i_team;
-    address private immutable i_MCM;
-    address private immutable i_DYM;
+    address private immutable i_mcm;
+    address private immutable i_dym;
 
     /// @dev Variables
     uint private s_totalMemes;
@@ -58,8 +57,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     /// @dev Constructor
     constructor(address team, address mcm, address dym) Ownable(msg.sender) {
         i_team = team;
-        i_MCM = mcm;
-        i_DYM = dym;
+        i_mcm = mcm;
+        i_dym = dym;
     }
 
     /// @notice It is creating new meme with basic ERC20 data and starts timer, which is telling if meme is alive or dead
@@ -92,23 +91,21 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         }
 
         /// @dev Calling mint token fn from MCM contract
-        (bool success, ) = i_MCM.call(
-            abi.encodeWithSignature(
-                "mintCoinAndRequestDex(string,string,address,address,address[],uint256[],uint256,address)",
-                meme.idToName,
-                meme.idToSymbol,
-                meme.idToCreator,
-                i_team,
-                recipients,
-                amounts,
-                meme.idToTotalFunds,
-                i_DYM
-            )
-        );
-        /// @dev If success, sending funds directly to DYM contract
-        if (!success) revert DFM__MinterCallFailed();
+        IMemeCoinMinter.MintParams memory params = IMemeCoinMinter.MintParams({
+            name: meme.idToName,
+            symbol: meme.idToSymbol,
+            creator: meme.idToCreator,
+            team: i_team,
+            recipients: recipients,
+            amounts: amounts,
+            totalFunds: meme.idToTotalFunds,
+            dym: i_dym
+        });
 
-        (bool transfer, ) = i_DYM.call{value: meme.idToTotalFunds}("");
+        IMemeCoinMinter(i_mcm).mintCoinAndRequestDex(params);
+
+        /// @dev If success, sending funds directly to DYM contract
+        (bool transfer, ) = i_dym.call{value: meme.idToTotalFunds}("");
         if (!transfer) revert DFM__TransferFailed();
 
         meme.idToMemeStatus = MemeStatus.DEAD;
