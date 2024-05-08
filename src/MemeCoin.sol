@@ -20,19 +20,19 @@ contract MemeCoin is ERC20 {
     uint256 private constant FUNDERS_PERCENT = 35;
     uint256 private constant LIQUIDITY_POOL_PERCENT = 45;
 
-    /** @param name Name of new ERC20 Meme Token */
-    /** @param symbol Symbol of new ERC20 Meme Token */
-    /** @param creator Meme creator wallet address */
-    /** @param team Dex Your Meme team wallet address */
-    /** @param recipients Array parallel to 'amounts[]' contains all funders of new ERC20 Meme Token */
-    /** @param amounts Array parallel to 'recipients[]' contains all funds of new ERC20 Meme Token */
-    /** @param totalFunds Sum of ETH gathered for new ERC20 Meme Token */
-    /** @param dym DexYourMeme contract address */
+    /// @param name Name of new ERC20 Meme Token
+    /// @param symbol Symbol of new ERC20 Meme Token
+    /// @param creator Meme creator wallet address
+    /// @param team Dex Your Meme team wallet address
+    /// @param funders Array parallel to 'amounts[]' contains all funders of new ERC20 Meme Token
+    /// @param totalFunds Sum of ETH gathered for new ERC20 Meme Token */
+    /// @param amounts Array parallel to 'funders[]' contains all funds of new ERC20 Meme Token
+    /// @param dym DexYourMeme contract address
     constructor(
         string memory name,
         string memory symbol,
-        address creatorAddress,
-        address teamAddress,
+        address creator,
+        address team,
         address[] memory funders,
         uint256[] memory amounts,
         uint totalFunds,
@@ -41,8 +41,8 @@ contract MemeCoin is ERC20 {
         if (funders.length != amounts.length) revert MC__ArraysNotParrarell();
 
         /// @dev Minting tokens for the creator, team, and liquidity pool
-        _mint(creatorAddress, (TOTAL_SUPPLY * CREATOR_PERCENT) / 100);
-        _mint(teamAddress, (TOTAL_SUPPLY * TEAM_PERCENT) / 100);
+        _mint(creator, (TOTAL_SUPPLY * CREATOR_PERCENT) / 100);
+        _mint(team, (TOTAL_SUPPLY * TEAM_PERCENT) / 100);
         _mint(dym, (TOTAL_SUPPLY * LIQUIDITY_POOL_PERCENT) / 100);
 
         /// @dev Minting tokens for funders proportionally to their contributions
