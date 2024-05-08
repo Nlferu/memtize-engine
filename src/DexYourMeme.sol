@@ -2,7 +2,6 @@
 pragma solidity ^0.8.24;
 
 import "./Interfaces/INonfungiblePositionManager.sol";
-import "./Interfaces/IUniswapV3Factory.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
@@ -17,6 +16,7 @@ contract DexYourMeme is IERC721Receiver {
     error DYM__SwapETHFailed();
     error DYM__DexMemeFailed();
     error DYM__NotMemeCoinMinterCaller();
+    error DYM__NothingNewToDex();
 
     /// @dev Immutables
     address private immutable i_mcm;
@@ -53,6 +53,7 @@ contract DexYourMeme is IERC721Receiver {
         emit FundsReceived(msg.value);
     }
 
+    /// @dev This to be changed to internal and called by Chainlink keepers
     function dexMeme(address memeToken) external {
         if (msg.sender != i_mcm) revert DYM__NotMemeCoinMinterCaller();
 
