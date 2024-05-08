@@ -83,6 +83,8 @@ contract DexYourMeme is IERC721Receiver {
 
         INonfungiblePositionManager(NFT_POSITION_MANAGER).mint(params);
 
+        s_memeCoinsDexed.push(memeToken);
+
         emit MemeDexedSuccessfully(memeToken);
     }
 
@@ -107,6 +109,10 @@ contract DexYourMeme is IERC721Receiver {
 
     function getAllTokens() external view returns (uint256[] memory) {
         return s_received_NFTs;
+    }
+
+    function getDexedCoins() external view returns (address[] memory) {
+        return s_memeCoinsDexed;
     }
 
     /// @notice Returns given token balance for certain user
