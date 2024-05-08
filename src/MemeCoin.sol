@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /**
  * @dev This Token Template will be used for all Meme Coins crafting
@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract MemeCoin is ERC20 {
     /// @dev Errors
-    error MC__ArraysNotParrarell();
+    error MC__ArraysNotParallel();
 
     /// @dev Constants
     uint256 private constant TOTAL_SUPPLY = 1_000_000 * (10 ** 18);
@@ -38,7 +38,7 @@ contract MemeCoin is ERC20 {
         uint totalFunds,
         address dym
     ) ERC20(name, symbol) {
-        if (funders.length != amounts.length) revert MC__ArraysNotParrarell();
+        if (funders.length != amounts.length) revert MC__ArraysNotParallel();
 
         /// @dev Minting tokens for the creator, team, and liquidity pool
         _mint(creator, (TOTAL_SUPPLY * CREATOR_PERCENT) / 100);
