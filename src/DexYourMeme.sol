@@ -16,7 +16,6 @@ contract DexYourMeme is IERC721Receiver {
     error DYM__SwapETHFailed();
     error DYM__DexMemeFailed();
     error DYM__NotMemeCoinMinterCaller();
-    error DYM__NothingNewToDex();
 
     /// @dev Immutables
     address private immutable i_mcm;
@@ -24,7 +23,6 @@ contract DexYourMeme is IERC721Receiver {
     /// @dev Arrays
     uint256[] private s_received_NFTs;
     address[] private s_memeCoinsDexed;
-    address[] private s_memeCoinsReceived;
 
     /// @dev Constants
     address private constant NFT_POSITION_MANAGER = 0x1238536071E1c677A632429e3655c799b22cDA52;
@@ -40,15 +38,15 @@ contract DexYourMeme is IERC721Receiver {
 
     /// @dev Events
     event FundsReceived(uint indexed amount);
-    event SwappedWETH(uint indexed amount);
-    event MemeDexedSuccessfully(address indexed token, address indexed pool);
+    event Swapped_ETH_For_WETH(uint indexed amount);
+    event MemeDexedSuccessfully(address indexed token);
 
     /// @dev Constructor
     constructor(address mcm) {
         i_mcm = mcm;
     }
 
-    /** @notice Adds possibility to receive funds by this contract, which is required by MFM contract */
+    /// @notice Adds possibility to receive funds by this contract, which is required by MFM contract
     receive() external payable {
         emit FundsReceived(msg.value);
     }
@@ -82,15 +80,17 @@ contract DexYourMeme is IERC721Receiver {
         });
 
         INonfungiblePositionManager(NFT_POSITION_MANAGER).mint(params);
+
+        emit MemeDexedSuccessfully(memeToken);
     }
 
-    /** @notice Swaps ETH for WETH to be able to proceed with 'dexMeme()' function */
+    /// @notice Swaps ETH for WETH to be able to proceed with 'dexMeme()' function
     function swapETH() internal {
         (bool success, ) = WETH_ADDRESS.call{value: address(this).balance}(abi.encodeWithSignature("deposit()"));
 
         if (!success) revert DYM__SwapETHFailed();
 
-        emit SwappedWETH(IERC20(WETH_ADDRESS).balanceOf(address(this)));
+        emit Swapped_ETH_For_WETH(IERC20(WETH_ADDRESS).balanceOf(address(this)));
     }
 
     /// @notice This is needed as NonfungiblePositionManager is issuing NFT once we initialize liquidity pool
@@ -107,7 +107,7 @@ contract DexYourMeme is IERC721Receiver {
         return s_received_NFTs;
     }
 
-    /** @notice Returns given token balance for certain user */
+    /// @notice Returns given token balance for certain user
     function getUserTokenBalance(address user, address token) external view returns (uint) {
         return IERC20(token).balanceOf(user);
     }
