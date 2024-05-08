@@ -14,11 +14,11 @@ contract MemeCoin is ERC20 {
     error MC__ArraysNotParallel();
 
     /// @dev Constants
-    uint256 private constant TOTAL_SUPPLY = 1_000_000 * (10 ** 18);
-    uint256 private constant CREATOR_PERCENT = 15;
-    uint256 private constant TEAM_PERCENT = 5;
-    uint256 private constant FUNDERS_PERCENT = 35;
-    uint256 private constant LIQUIDITY_POOL_PERCENT = 45;
+    uint private constant TOTAL_SUPPLY = 1_000_000 * (10 ** 18);
+    uint private constant CREATOR_PERCENT = 15;
+    uint private constant TEAM_PERCENT = 5;
+    uint private constant FUNDERS_PERCENT = 35;
+    uint private constant LIQUIDITY_POOL_PERCENT = 45;
 
     /// @param name Name of new ERC20 Meme Token
     /// @param symbol Symbol of new ERC20 Meme Token
@@ -34,7 +34,7 @@ contract MemeCoin is ERC20 {
         address creator,
         address team,
         address[] memory funders,
-        uint256[] memory amounts,
+        uint[] memory amounts,
         uint totalFunds,
         address dym
     ) ERC20(name, symbol) {
@@ -46,10 +46,10 @@ contract MemeCoin is ERC20 {
         _mint(dym, (TOTAL_SUPPLY * LIQUIDITY_POOL_PERCENT) / 100);
 
         /// @dev Minting tokens for funders proportionally to their contributions
-        uint256 fundersTokens = (TOTAL_SUPPLY * FUNDERS_PERCENT) / 100;
+        uint fundersTokens = (TOTAL_SUPPLY * FUNDERS_PERCENT) / 100;
 
-        for (uint256 i = 0; i < funders.length; i++) {
-            uint256 funderTokens = (fundersTokens * amounts[i]) / totalFunds;
+        for (uint i = 0; i < funders.length; i++) {
+            uint funderTokens = (fundersTokens * amounts[i]) / totalFunds;
             _mint(funders[i], funderTokens);
         }
     }
