@@ -16,7 +16,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     /// @dev Constants
     uint private constant HYPER = 1 ether;
 
-    /// @dev Immutable
+    /// @dev Immutables
     address private immutable i_team;
     address private immutable i_MCM;
     address private immutable i_DYM;
