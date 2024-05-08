@@ -6,9 +6,6 @@ import {IDexYourMeme} from "./Interfaces/IDexYourMeme.sol";
 
 /// @dev TODO: This needs to be callable only by DFM contract
 contract MemeCoinMinter {
-    /// @dev Arrays
-    address[] private tokens;
-
     /// @dev Events
     event MemeCoinMinted(address indexed coinAddress, string coinName, string coinSymbol);
 
@@ -33,16 +30,10 @@ contract MemeCoinMinter {
     ) external {
         MemeCoin newCoin = new MemeCoin(name, symbol, creator, team, recipients, amounts, totalFunds, dym);
 
-        tokens.push(address(newCoin));
-
         emit MemeCoinMinted(address(newCoin), name, symbol);
 
         IDexYourMeme(dym).dexMeme(address(newCoin));
 
         emit IDexYourMeme.MemeDexRequestReceived(address(newCoin));
-    }
-
-    function getTokensMinted() external view returns (address[] memory) {
-        return tokens;
     }
 }
