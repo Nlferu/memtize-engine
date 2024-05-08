@@ -17,11 +17,11 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     uint private constant HYPER = 1 ether;
 
     /// @dev Immutables
-    address private immutable i_team;
     address private immutable i_mcm;
     address private immutable i_dym;
 
     /// @dev Variables
+    address private s_team;
     uint private s_totalMemes;
 
     /// @dev Enums
@@ -53,10 +53,11 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     event MemeKilled(uint indexed id);
     event MemeHyped(uint indexed id);
     event TransferSuccessfull(uint indexed amount);
+    event TeamAddressUpdated(address indexed team);
 
     /// @dev Constructor
     constructor(address team, address mcm, address dym) Ownable(msg.sender) {
-        i_team = team;
+        s_team = team;
         i_mcm = mcm;
         i_dym = dym;
     }
@@ -95,7 +96,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
             name: meme.idToName,
             symbol: meme.idToSymbol,
             creator: meme.idToCreator,
-            team: i_team,
+            team: s_team,
             recipients: recipients,
             amounts: amounts,
             totalFunds: meme.idToTotalFunds,
@@ -168,6 +169,13 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         }
 
         emit RefundPerformed(msg.sender, amount);
+    }
+
+    /// @notice Updates Dex Your Meme Team wallet address
+    function updateTeam(address team) external onlyOwner {
+        s_team = team;
+
+        emit TeamAddressUpdated(s_team);
     }
 
     /// @notice Temporary function for testing purposes -> it should be replaced with GraphQl
