@@ -12,15 +12,15 @@ contract MemeCoinMinter {
     /// @dev Events
     event MemeCoinMinted(address indexed coinAddress, string coinName, string coinSymbol);
 
-    /** @notice Deploys new ERC20 Meme Token */
-    /** @param name Name of new ERC20 Meme Token */
-    /** @param symbol Symbol of new ERC20 Meme Token */
-    /** @param creator Meme creator wallet address */
-    /** @param team Dex Your Meme team wallet address */
-    /** @param recipients Array parallel to 'amounts[]' contains all funders of new ERC20 Meme Token */
-    /** @param amounts Array parallel to 'recipients[]' contains all funds of new ERC20 Meme Token */
-    /** @param totalFunds Sum of ETH gathered for new ERC20 Meme Token */
-    /** @param dym DexYourMeme contract address */
+    /// @notice Deploys new ERC20 Meme Token
+    /// @param name Name of new ERC20 Meme Token
+    /// @param symbol Symbol of new ERC20 Meme Token
+    /// @param creator Meme creator wallet address
+    /// @param team Dex Your Meme team wallet address
+    /// @param recipients Array parallel to 'amounts[]' contains all funders of new ERC20 Meme Token
+    /// @param amounts Array parallel to 'recipients[]' contains all funds of new ERC20 Meme Token
+    /// @param totalFunds Sum of ETH gathered for new ERC20 Meme Token
+    /// @param dym DexYourMeme contract address
     function mintCoinAndRequestDex(
         string memory name,
         string memory symbol,
@@ -38,6 +38,8 @@ contract MemeCoinMinter {
         emit MemeCoinMinted(address(newCoin), name, symbol);
 
         IDexYourMeme(dym).dexMeme(address(newCoin));
+
+        emit MemeDexedSuccessfully(address(newCoin));
     }
 
     function getTokensMinted() external view returns (address[] memory) {
