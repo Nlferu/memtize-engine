@@ -13,24 +13,40 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 // Check 'Repositioning' fn from manager -> block it eventually
 
 contract DexYourMeme is IERC721Receiver {
+    /// @dev Errors
     error DYM_SwapETHFailed();
     error DYM__DexMemeFailed();
+    error DYM__NotMemeCoinMinterCaller();
 
-    uint256[] private receivedTokens;
+    /// @dev Immutables
+    address private immutable i_mcm;
 
-    event FundsReceived(uint indexed amount);
-    event SwappedWETH(uint indexed amount);
-    event MemeDexedSuccessfully(address indexed token, address indexed pool);
+    /// @dev Arrays
+    uint256[] private s_receivedTokens;
+    address[] private s_memeCoinsDexed;
+    address[] private s_memeCoinsReceived;
 
+    /// @dev Constants
     address private constant NFT_POSITION_MANAGER = 0x1238536071E1c677A632429e3655c799b22cDA52; // NFT Position Manager
-    // ((sqrtPriceX96**2)/(2**192))*(10**(token0 decimals - token1 decimals)) - This  gives us the price of token0 in token1, where token0 -> WETH, token1 -> ERC20
-    //                                      79228162514264337593543950336000 | 79228162514264337593543000
-    /// @dev Work on accuracy! 0.009999999999999995 WETH for 999,999.999999999999999995 AST
-    uint160 private constant initialPrice = 7922816251426433759354395; // 0.01 WETH for 1 000 000 AST | 79228162514264337593543950 -> 0.1 WETH for 100 000 AST
+    /** @dev Calculation Formula: ((sqrtPriceX96**2)/(2**192))*(10**(token0 decimals - token1 decimals))
+     * This  gives us the price of token0 in token1, where token0 -> meme token ERC20, token1 -> WETH
+     */
+    /// @dev InitialPrice expression: 0.01 WETH for 1 000 000 AST | 79228162514264337593543950 -> 0.1 WETH for 100 000 AST
+    uint160 private constant initialPrice = 7922816251426433759354395;
     address private constant WETH_ADDRESS = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
     uint24 private constant FEE = 3000;
     uint256 private constant WETH_AMOUNT = 0.1 * 10 ** 18;
     uint256 private constant MEME_AMOUNT = 1_000_000 * 10 ** 18;
+
+    /// @dev Events
+    event FundsReceived(uint indexed amount);
+    event SwappedWETH(uint indexed amount);
+    event MemeDexedSuccessfully(address indexed token, address indexed pool);
+
+    /// @dev Constructor
+    constructor() {
+        i_mcm = msg.sender;
+    }
 
     /** @notice Adds possibility to receive funds by this contract, which is required by MFM contract */
     receive() external payable {
@@ -38,6 +54,8 @@ contract DexYourMeme is IERC721Receiver {
     }
 
     function dexMeme(address memeToken) external {
+        if (msg.sender != i_mcm) revert DYM__NotMemeCoinMinterCaller();
+
         swapETH();
 
         /// @dev Creating And Initializing Pool
@@ -66,7 +84,6 @@ contract DexYourMeme is IERC721Receiver {
     }
 
     /** @notice Swaps ETH for WETH to be able to proceed with 'dexMeme()' function */
-    // This has to be changed to internal after testing
     function swapETH() internal {
         (bool success, ) = WETH_ADDRESS.call{value: address(this).balance}(abi.encodeWithSignature("deposit()"));
 
@@ -77,7 +94,7 @@ contract DexYourMeme is IERC721Receiver {
 
     /// @notice This is needed as NonfungiblePositionManager is releasing NFT once we add liquidity to pool
     function onERC721Received(address /* operator */, address /* from */, uint256 tokenId, bytes memory /* data */) external override returns (bytes4) {
-        receivedTokens.push(tokenId);
+        s_receivedTokens.push(tokenId);
 
         // In case we would like to hold that NFT elsewhere
         // IERC721(NFT_ADDRESS).transferFrom(address(this), HACKER, tokenId);
@@ -86,7 +103,7 @@ contract DexYourMeme is IERC721Receiver {
     }
 
     function getAllTokens() external view returns (uint256[] memory) {
-        return receivedTokens;
+        return s_receivedTokens;
     }
 
     /** @notice Returns given token balance for certain user */
