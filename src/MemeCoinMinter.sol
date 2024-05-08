@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {MemeCoin} from "./MemeCoin.sol";
-import {IDexYourMeme} from "./Interfaces";
+import {IDexYourMeme} from "./Interfaces/IDexYourMeme.sol";
 
 /// @dev TODO: This needs to be callable only by DFM contract
 contract MemeCoinMinter {
@@ -39,7 +39,7 @@ contract MemeCoinMinter {
 
         IDexYourMeme(dym).dexMeme(address(newCoin));
 
-        emit MemeDexedSuccessfully(address(newCoin));
+        emit IDexYourMeme.MemeDexRequestReceived(address(newCoin));
     }
 
     function getTokensMinted() external view returns (address[] memory) {
