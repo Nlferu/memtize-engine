@@ -61,9 +61,9 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         i_DYM = dym;
     }
 
-    /** @notice It is creating new meme with basic ERC20 data and starts timer, which is telling if meme is alive or dead */
-    /** @param name Meme id that we want to work with */
-    /** @param symbol Meme id that we want to work with */
+    /// @notice It is creating new meme with basic ERC20 data and starts timer, which is telling if meme is alive or dead
+    /// @param name Meme id that we want to work with
+    /// @param symbol Meme id that we want to work with
     function createMeme(string calldata name, string calldata symbol) external {
         Meme storage meme = s_memes[s_totalMemes];
 
@@ -77,8 +77,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         emit MemeCreated(msg.sender, name, symbol);
     }
 
-    /** @notice Sends request to MCM for creation of meme */
-    /** @param id Meme id that we want to work with */
+    /// @notice Sends request to MCM for creation of meme
+    /// @param id Meme id that we want to work with
     function hypeMeme(uint id) external {
         Meme storage meme = s_memes[id];
         if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
@@ -116,8 +116,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         emit TransferSuccessfull(meme.idToTotalFunds);
     }
 
-    /** @notice If meme fails to achieve fund goal on time this function will assign funds back to funders wallets and change state of meme to dead */
-    /** @param id Meme id that we want to work with */
+    /// @notice If meme fails to achieve fund goal on time this function will assign funds back to funders wallets and change state of meme to dead
+    /// @param id Meme id that we want to work with
     function killMeme(uint id) external {
         Meme storage meme = s_memes[id];
         if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
@@ -137,8 +137,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         emit MemeKilled(id);
     }
 
-    /** @notice Allows to send funds for given meme */
-    /** @param id Meme id that we want to work with */
+    /// @notice Allows to send funds for given meme
+    /// @param id Meme id that we want to work with
     function fundMeme(uint id) external payable {
         if (msg.value <= 0) revert DFM__ZeroAmount();
         if (id >= s_totalMemes) revert DFM__InvalidMeme();
@@ -152,7 +152,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         emit MemeFunded(id, msg.value);
     }
 
-    /** @notice Allows user to withdraw funds from dead memes if user has any */
+    /// @notice Allows user to withdraw funds from dead memes if user has any
     function refund() external nonReentrant {
         uint amount = s_funderToFunds[msg.sender];
 
@@ -172,16 +172,16 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         emit RefundPerformed(msg.sender, amount);
     }
 
-    /** @notice Temporary function for testing purposes -> it should be replaced with GraphQl */
-    /** @notice Returns total funds available for refund for given funder */
-    /** @param funder wallet address of funder */
+    /// @notice Temporary function for testing purposes -> it should be replaced with GraphQl
+    /// @notice Returns total funds available for refund for given funder
+    /// @param funder wallet address of funder
     function getFunderToFunds(address funder) external view returns (uint) {
         return s_funderToFunds[funder];
     }
 
-    /** @notice Temporary function for testing purposes -> it should be replaced with GraphQl */
-    /** @notice Returns all data associated with given meme */
-    /** @param id Meme id that we want to work with */
+    /// @notice Temporary function for testing purposes -> it should be replaced with GraphQl
+    /// @notice Returns all data associated with given meme
+    /// @param id Meme id that we want to work with
     function getMemeData(uint id) external view returns (address, string memory, string memory, uint, uint, address[] memory, uint[] memory funds, MemeStatus) {
         Meme storage meme = s_memes[id];
 
