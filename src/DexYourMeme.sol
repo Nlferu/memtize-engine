@@ -22,12 +22,12 @@ contract DexYourMeme is IERC721Receiver {
     address private immutable i_mcm;
 
     /// @dev Arrays
-    uint256[] private s_receivedTokens;
+    uint256[] private s_received_NFTs;
     address[] private s_memeCoinsDexed;
     address[] private s_memeCoinsReceived;
 
     /// @dev Constants
-    address private constant NFT_POSITION_MANAGER = 0x1238536071E1c677A632429e3655c799b22cDA52; // NFT Position Manager
+    address private constant NFT_POSITION_MANAGER = 0x1238536071E1c677A632429e3655c799b22cDA52;
     /** @dev Calculation Formula: ((sqrtPriceX96**2)/(2**192))*(10**(token0 decimals - token1 decimals))
      * This  gives us the price of token0 in token1, where token0 -> meme token ERC20, token1 -> WETH
      */
@@ -44,8 +44,8 @@ contract DexYourMeme is IERC721Receiver {
     event MemeDexedSuccessfully(address indexed token, address indexed pool);
 
     /// @dev Constructor
-    constructor() {
-        i_mcm = msg.sender;
+    constructor(address mcm) {
+        i_mcm = mcm;
     }
 
     /** @notice Adds possibility to receive funds by this contract, which is required by MFM contract */
@@ -92,9 +92,9 @@ contract DexYourMeme is IERC721Receiver {
         emit SwappedWETH(IERC20(WETH_ADDRESS).balanceOf(address(this)));
     }
 
-    /// @notice This is needed as NonfungiblePositionManager is releasing NFT once we add liquidity to pool
+    /// @notice This is needed as NonfungiblePositionManager is issuing NFT once we initialize liquidity pool
     function onERC721Received(address /* operator */, address /* from */, uint256 tokenId, bytes memory /* data */) external override returns (bytes4) {
-        s_receivedTokens.push(tokenId);
+        s_received_NFTs.push(tokenId);
 
         // In case we would like to hold that NFT elsewhere
         // IERC721(NFT_ADDRESS).transferFrom(address(this), HACKER, tokenId);
@@ -103,7 +103,7 @@ contract DexYourMeme is IERC721Receiver {
     }
 
     function getAllTokens() external view returns (uint256[] memory) {
-        return s_receivedTokens;
+        return s_received_NFTs;
     }
 
     /** @notice Returns given token balance for certain user */
