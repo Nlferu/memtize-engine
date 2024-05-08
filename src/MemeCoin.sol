@@ -25,8 +25,8 @@ contract MemeCoin is ERC20 {
     /// @param creator Meme creator wallet address
     /// @param team Dex Your Meme team wallet address
     /// @param funders Array parallel to 'amounts[]' contains all funders of new ERC20 Meme Token
-    /// @param totalFunds Sum of ETH gathered for new ERC20 Meme Token */
     /// @param amounts Array parallel to 'funders[]' contains all funds of new ERC20 Meme Token
+    /// @param totalFunds Sum of ETH gathered for new ERC20 Meme Token */
     /// @param dym DexYourMeme contract address
     constructor(
         string memory name,
