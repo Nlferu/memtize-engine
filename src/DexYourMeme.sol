@@ -32,7 +32,7 @@ contract DexYourMeme is IERC721Receiver {
      * This  gives us the price of token0 in token1, where token0 -> meme token ERC20, token1 -> WETH
      */
     /// @dev InitialPrice expression: 0.01 WETH for 1 000 000 AST | 79228162514264337593543950 -> 0.1 WETH for 100 000 AST
-    uint160 private constant initialPrice = 7922816251426433759354395;
+    uint160 private constant INITIAL_PRICE = 7922816251426433759354395;
     address private constant WETH_ADDRESS = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
     uint24 private constant FEE = 3000;
     uint256 private constant WETH_AMOUNT = 0.1 * 10 ** 18;
@@ -59,7 +59,7 @@ contract DexYourMeme is IERC721Receiver {
         swapETH();
 
         /// @dev Creating And Initializing Pool
-        INonfungiblePositionManager(NFT_POSITION_MANAGER).createAndInitializePoolIfNecessary(memeToken, WETH_ADDRESS, FEE, initialPrice);
+        INonfungiblePositionManager(NFT_POSITION_MANAGER).createAndInitializePoolIfNecessary(memeToken, WETH_ADDRESS, FEE, INITIAL_PRICE);
 
         // Approve tokens for the position manager
         IERC20(WETH_ADDRESS).approve(NFT_POSITION_MANAGER, WETH_AMOUNT);
