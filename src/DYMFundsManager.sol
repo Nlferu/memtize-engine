@@ -93,7 +93,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         /// @dev Calling mint token fn from MCM contract
         (bool success, ) = i_MCM.call(
             abi.encodeWithSignature(
-                "mintToken(string,string,address,address,address[],uint256[],uint256,address)",
+                "mintCoinAndRequestDex(string,string,address,address,address[],uint256[],uint256,address)",
                 meme.idToName,
                 meme.idToSymbol,
                 meme.idToCreator,
