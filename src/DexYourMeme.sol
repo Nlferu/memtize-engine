@@ -47,6 +47,8 @@ contract DexYourMeme is IERC721Receiver {
         i_mcm = mcm;
     }
 
+    //////////////////////////////////// @notice DYM External Functions ////////////////////////////////////
+
     /// @notice Adds possibility to receive funds by this contract, which is required by MFM contract
     receive() external payable {
         emit FundsReceived(msg.value);
@@ -89,6 +91,15 @@ contract DexYourMeme is IERC721Receiver {
         emit MemeDexedSuccessfully(memeToken);
     }
 
+    /// @notice This is needed as NonfungiblePositionManager is issuing NFT once we initialize liquidity pool
+    function onERC721Received(address /* operator */, address /* from */, uint tokenId, bytes memory /* data */) external override returns (bytes4) {
+        s_received_NFTs.push(tokenId);
+
+        return this.onERC721Received.selector;
+    }
+
+    //////////////////////////////////// @notice DYM Internal Functions ////////////////////////////////////
+
     /// @notice Swaps ETH for WETH to be able to proceed with 'dexMeme()' function
     function swapETH() internal {
         (bool success, ) = WETH_ADDRESS.call{value: address(this).balance}(abi.encodeWithSignature("deposit()"));
@@ -98,12 +109,7 @@ contract DexYourMeme is IERC721Receiver {
         emit Swapped_ETH_For_WETH(IERC20(WETH_ADDRESS).balanceOf(address(this)));
     }
 
-    /// @notice This is needed as NonfungiblePositionManager is issuing NFT once we initialize liquidity pool
-    function onERC721Received(address /* operator */, address /* from */, uint tokenId, bytes memory /* data */) external override returns (bytes4) {
-        s_received_NFTs.push(tokenId);
-
-        return this.onERC721Received.selector;
-    }
+    //////////////////////////////////// @notice DYM Getter Functions ////////////////////////////////////
 
     /// @notice Returns all NFT tokens received from NonfungiblePositionManager
     function getAllTokens() external view returns (uint[] memory) {
