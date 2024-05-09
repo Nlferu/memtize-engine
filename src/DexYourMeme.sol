@@ -32,7 +32,7 @@ contract DexYourMeme is IERC721Receiver {
     /// @dev InitialPrice expression: 0.01 WETH for 1 000 000 AST | 79228162514264337593543950 -> 0.1 WETH for 100 000 AST
     uint160 private constant INITIAL_PRICE = 7922816251426433759354395;
     address private constant WETH_ADDRESS = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
-    uint24 private constant FEE = 3000; // 0.30% fee
+    uint24 private constant FEE = 3000;
     uint private constant WETH_AMOUNT = 0.1 * 10 ** 18;
     uint private constant MEME_AMOUNT = 1_000_000 * 10 ** 18;
 
@@ -52,7 +52,8 @@ contract DexYourMeme is IERC721Receiver {
         emit FundsReceived(msg.value);
     }
 
-    /// @dev This to be changed to internal and called by Chainlink keepers
+    /// @notice Swaps ETH into WETH, creates, initializes and adds liquidity pool for new meme token
+    /// @param memeToken Address of ERC20 meme token minted by MCM contract
     function dexMeme(address memeToken) external {
         if (msg.sender != i_mcm) revert DYM__NotMemeCoinMinterCaller();
         emit MemeDexRequestReceived(memeToken);
@@ -70,7 +71,7 @@ contract DexYourMeme is IERC721Receiver {
         INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager.MintParams({
             token0: memeToken,
             token1: WETH_ADDRESS,
-            fee: FEE,
+            fee: FEE, // Fee tier 0.30%
             tickLower: -887220, // Near 0 price
             tickUpper: 887220, // Extremely high price
             amount0Desired: MEME_AMOUNT, // Meme token amount sent to manager to provide liquidity
@@ -104,10 +105,12 @@ contract DexYourMeme is IERC721Receiver {
         return this.onERC721Received.selector;
     }
 
+    /// @notice Returns all NFT tokens received from NonfungiblePositionManager
     function getAllTokens() external view returns (uint[] memory) {
         return s_received_NFTs;
     }
 
+    /// @notice Returns all dexed meme coins
     function getDexedCoins() external view returns (address[] memory) {
         return s_memeCoinsDexed;
     }
