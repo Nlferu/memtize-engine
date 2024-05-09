@@ -17,6 +17,7 @@ contract DexYourMeme is Ownable, IERC721Receiver {
     error DYM__SwapETHFailed();
     error DYM__DexMemeFailed();
     error DYM__NotMemeCoinMinterCaller();
+    error DYM__NotEnoughTimePassed();
 
     /// @dev Variables
     address private s_team;
@@ -39,6 +40,9 @@ contract DexYourMeme is Ownable, IERC721Receiver {
     uint24 private constant FEE = 3000;
     uint private constant WETH_AMOUNT = 0.1 * 10 ** 18;
     uint private constant MEME_AMOUNT = 1_000_000 * 10 ** 18;
+
+    /// @dev Mappings
+    mapping(uint => uint) private s_nftToTimeLeft;
 
     /// @dev Events
     event FundsReceived(uint indexed amount);
@@ -90,8 +94,10 @@ contract DexYourMeme is Ownable, IERC721Receiver {
             deadline: block.timestamp + 1200 // 20 minutes deadline
         });
 
-        INonfungiblePositionManager(NFT_POSITION_MANAGER).mint(params);
+        (uint tokenId, , , ) = INonfungiblePositionManager(NFT_POSITION_MANAGER).mint(params);
 
+        /// s_received_NFTs.push(tokenId); -> @dev CHECK IF 'onERC721Received()' adds it properly
+        s_nftToTimeLeft[tokenId] = (block.timestamp + 52 weeks);
         s_memeCoinsDexed.push(memeToken);
 
         emit MemeDexedSuccessfully(memeToken);
@@ -117,24 +123,56 @@ contract DexYourMeme is Ownable, IERC721Receiver {
 
     //////////////////////////////////// @notice DYM Team Functions ////////////////////////////////////
 
+    /// @notice Collects up to a maximum amount of fees owed to a specific position to the recipient
+    /// @param tokenId The ID of the NFT for which tokens are being collected
     function collectFees(uint tokenId) external payable onlyOwner {
         (, , , , , , , , , , uint128 tokensOwed0, uint128 tokensOwed1) = INonfungiblePositionManager(NFT_POSITION_MANAGER).positions(tokenId);
 
         INonfungiblePositionManager.CollectParams memory params = INonfungiblePositionManager.CollectParams({
-            tokenId: tokenId,
-            recipient: s_team,
-            amount0Max: tokensOwed0,
-            amount1Max: tokensOwed1
+            tokenId: tokenId, // NFT token Id that represents liquidity pool
+            recipient: s_team, // DYM Team wallet address
+            amount0Max: tokensOwed0, // ERC20 meme token
+            amount1Max: tokensOwed1 // WETH
         });
 
         INonfungiblePositionManager(NFT_POSITION_MANAGER).collect(params);
+
+        emit INonfungiblePositionManager.Collect(tokenId, s_team, tokensOwed0, tokensOwed1);
     }
 
-    function decreaseLiquidity() external payable onlyOwner {}
+    /// @dev THIS FUNCTION IS BLOCKED FOR 1 YEAR TO PREVENT RUG PULL ACTIONS ON NEWLY DEXED MEME COINS
+    /// @notice Decreases the amount of liquidity in a position and accounts it to the position
+    /// @param tokenId The ID of the token for which liquidity is being decreased
+    /// @param liquidity The amount by which liquidity will be decreased
+    /// @param memeTokenAmount The minimum amount of token0 that should be accounted for the burned liquidity
+    /// @param wethAmount The minimum amount of token1 that should be accounted for the burned liquidity
+    function decreaseLiquidity(uint tokenId, uint128 liquidity, uint memeTokenAmount, uint wethAmount) external payable onlyOwner {
+        if (s_nftToTimeLeft[tokenId] > block.timestamp) revert DYM__NotEnoughTimePassed();
 
-    function burn() external payable onlyOwner {}
+        INonfungiblePositionManager.DecreaseLiquidityParams memory params = INonfungiblePositionManager.DecreaseLiquidityParams({
+            tokenId: tokenId, // The ID of the token for which liquidity was decreased
+            liquidity: liquidity, // The amount by which liquidity for the NFT position was decreased
+            amount0Min: memeTokenAmount, // The amount of token0 that was accounted for the decrease in liquidity
+            amount1Min: wethAmount, // The amount of token1 that was accounted for the decrease in liquidity
+            deadline: block.timestamp + 1200 // 20 minutes deadline
+        });
+
+        INonfungiblePositionManager(NFT_POSITION_MANAGER).decreaseLiquidity(params);
+
+        emit INonfungiblePositionManager.DecreaseLiquidity(tokenId, liquidity, memeTokenAmount, wethAmount);
+    }
+
+    /// @dev THIS FUNCTION IS BLOCKED FOR 1 YEAR TO PREVENT RUG PULL ACTIONS ON NEWLY DEXED MEME COINS
+    /// @notice Burns a token ID, which deletes it from the NFT contract. The token must have 0 liquidity and all tokens must be collected first.
+    /// @param tokenId The ID of the token that is being burned
+    function burn(uint tokenId) external payable onlyOwner {
+        if (s_nftToTimeLeft[tokenId] > block.timestamp) revert DYM__NotEnoughTimePassed();
+
+        INonfungiblePositionManager(NFT_POSITION_MANAGER).burn(tokenId);
+    }
 
     /// @notice Updates Dex Your Meme Team wallet address
+    /// @param team DYM Team wallet address
     function updateTeam(address team) external onlyOwner {
         s_team = team;
 
