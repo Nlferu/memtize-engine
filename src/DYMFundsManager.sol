@@ -178,6 +178,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         emit MemeKilled(id);
     }
 
+    //////////////////////////////////// @notice DFM Chainlink Automation Functions ////////////////////////////////////
+
     //////////////////////////////////// @notice DYM Team Functions ////////////////////////////////////
 
     /// @notice Updates Dex Your Meme Team wallet address
@@ -186,8 +188,6 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
 
         emit TeamAddressUpdated(s_team);
     }
-
-    //////////////////////////////////// @notice DFM Chainlink Automation Functions ////////////////////////////////////
 
     //////////////////////////////////// @notice DFM Getter Functions ////////////////////////////////////
 
