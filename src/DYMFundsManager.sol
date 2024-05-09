@@ -65,6 +65,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         i_dym = dym;
     }
 
+    //////////////////////////////////// @notice DFM External Functions ////////////////////////////////////
+
     /// @notice It is creating new meme with basic ERC20 data and starts timer, which is telling if meme is alive or dead
     /// @param name Meme id that we want to work with
     /// @param symbol Meme id that we want to work with
@@ -80,6 +82,43 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
 
         emit MemeCreated(msg.sender, name, symbol);
     }
+
+    /// @notice Allows to send funds for given meme
+    /// @param id Meme id that we want to work with
+    function fundMeme(uint id) external payable {
+        if (msg.value <= 0) revert DFM__ZeroAmount();
+        if (id >= s_totalMemes) revert DFM__InvalidMeme();
+        Meme storage meme = s_memes[id];
+        if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
+
+        meme.idToTotalFunds += msg.value;
+        if (meme.idToFunderToFunds[msg.sender] == 0) meme.idToFunders.push(msg.sender);
+        meme.idToFunderToFunds[msg.sender] += msg.value;
+
+        emit MemeFunded(id, msg.value);
+    }
+
+    /// @notice Allows users to withdraw funds from dead memes
+    function refund() external nonReentrant {
+        uint amount = s_funderToFunds[msg.sender];
+
+        if (amount > 0) {
+            s_funderToFunds[msg.sender] = 0;
+        } else {
+            revert DFM__NothingToRefund();
+        }
+
+        (bool success, ) = msg.sender.call{value: amount}("");
+
+        if (!success) {
+            s_funderToFunds[msg.sender] = amount;
+            revert DFM__TransferFailed();
+        }
+
+        emit RefundPerformed(msg.sender, amount);
+    }
+
+    //////////////////////////////////// @notice DFM Internal Functions ////////////////////////////////////
 
     /// @notice Sends request to MCM for creation of meme
     /// @param id Meme id that we want to work with
@@ -139,40 +178,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         emit MemeKilled(id);
     }
 
-    /// @notice Allows to send funds for given meme
-    /// @param id Meme id that we want to work with
-    function fundMeme(uint id) external payable {
-        if (msg.value <= 0) revert DFM__ZeroAmount();
-        if (id >= s_totalMemes) revert DFM__InvalidMeme();
-        Meme storage meme = s_memes[id];
-        if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
-
-        meme.idToTotalFunds += msg.value;
-        if (meme.idToFunderToFunds[msg.sender] == 0) meme.idToFunders.push(msg.sender);
-        meme.idToFunderToFunds[msg.sender] += msg.value;
-
-        emit MemeFunded(id, msg.value);
-    }
-
-    /// @notice Allows user to withdraw funds from dead memes if user has any
-    function refund() external nonReentrant {
-        uint amount = s_funderToFunds[msg.sender];
-
-        if (amount > 0) {
-            s_funderToFunds[msg.sender] = 0;
-        } else {
-            revert DFM__NothingToRefund();
-        }
-
-        (bool success, ) = msg.sender.call{value: amount}("");
-
-        if (!success) {
-            s_funderToFunds[msg.sender] = amount;
-            revert DFM__TransferFailed();
-        }
-
-        emit RefundPerformed(msg.sender, amount);
-    }
+    //////////////////////////////////// @notice DYM Team Functions ////////////////////////////////////
 
     /// @notice Updates Dex Your Meme Team wallet address
     function updateTeam(address team) external onlyOwner {
@@ -180,6 +186,10 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
 
         emit TeamAddressUpdated(s_team);
     }
+
+    //////////////////////////////////// @notice DFM Chainlink Automation Functions ////////////////////////////////////
+
+    //////////////////////////////////// @notice DFM Getter Functions ////////////////////////////////////
 
     /// @notice Temporary function for testing purposes -> it should be replaced with GraphQl
     /// @notice Returns total funds available for refund for given funder
