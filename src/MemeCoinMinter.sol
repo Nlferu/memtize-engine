@@ -3,11 +3,16 @@ pragma solidity ^0.8.24;
 
 import {MemeCoin} from "./MemeCoin.sol";
 import {IDexYourMeme} from "./Interfaces/IDexYourMeme.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @dev TODO: This needs to be callable only by DFM contract
-contract MemeCoinMinter {
+contract MemeCoinMinter is Ownable {
     /// @dev Events
     event MemeCoinMinted(address indexed coinAddress, string coinName, string coinSymbol);
+
+    /// @dev Constructor
+    /// @notice Owner of this contract will be DFM contract just after deployment
+    constructor() Ownable(msg.sender) {}
 
     /// @notice Deploys new ERC20 Meme Token
     /// @param name Name of new ERC20 Meme Token
@@ -27,7 +32,7 @@ contract MemeCoinMinter {
         uint[] memory amounts,
         uint totalFunds,
         address dym
-    ) external {
+    ) external onlyOwner {
         MemeCoin newCoin = new MemeCoin(name, symbol, creator, team, recipients, amounts, totalFunds, dym);
 
         emit MemeCoinMinted(address(newCoin), name, symbol);
