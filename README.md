@@ -17,9 +17,10 @@ https://book.getfoundry.sh/
 
 Deploy Order:
 
-1. DYM
-2. MCM
+1. MCM
+2. DYM
 3. DFM
+4. Transfer ownership of MCM to DFM
 
 ### Build
 
