@@ -76,7 +76,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         meme.idToCreator = msg.sender;
         meme.idToName = name;
         meme.idToSymbol = symbol;
-        meme.idToTimeLeft = block.timestamp + 30 days;
+        meme.idToTimeLeft = (block.timestamp + 30 days);
 
         s_totalMemes += 1;
 
