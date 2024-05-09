@@ -5,14 +5,15 @@ import {MemeCoin} from "./MemeCoin.sol";
 import {IDexYourMeme} from "./Interfaces/IDexYourMeme.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-/// @dev TODO: This needs to be callable only by DFM contract
 contract MemeCoinMinter is Ownable {
     /// @dev Events
     event MemeCoinMinted(address indexed coinAddress, string coinName, string coinSymbol);
 
     /// @dev Constructor
-    /// @notice Owner of this contract will be DFM contract just after deployment
+    /// @notice Owner of this contract is DFM contract
     constructor() Ownable(msg.sender) {}
+
+    /////////////////////// @notice MCM External Functions (Callable only by DFM contract) ///////////////////////
 
     /// @notice Deploys new ERC20 Meme Token
     /// @param name Name of new ERC20 Meme Token
