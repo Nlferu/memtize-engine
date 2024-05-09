@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import {INonfungiblePositionManager} from "./Interfaces/INonfungiblePositionManager.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @notice TODO:
 // Block 'DecreaseLiquidity' fn from manager
@@ -11,11 +12,14 @@ import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Recei
 // Redirect/Manage 'CollectFees' function
 // Check 'Repositioning' fn from manager -> block it eventually
 
-contract DexYourMeme is IERC721Receiver {
+contract DexYourMeme is Ownable, IERC721Receiver {
     /// @dev Errors
     error DYM__SwapETHFailed();
     error DYM__DexMemeFailed();
     error DYM__NotMemeCoinMinterCaller();
+
+    /// @dev Variables
+    address private s_team;
 
     /// @dev Immutables
     address private immutable i_mcm;
@@ -41,9 +45,11 @@ contract DexYourMeme is IERC721Receiver {
     event Swapped_ETH_For_WETH(uint indexed amount);
     event MemeDexRequestReceived(address indexed token);
     event MemeDexedSuccessfully(address indexed token);
+    event TeamAddressUpdated(address team);
 
     /// @dev Constructor
-    constructor(address mcm) {
+    constructor(address team, address mcm) Ownable(msg.sender) {
+        s_team = team;
         i_mcm = mcm;
     }
 
@@ -107,6 +113,21 @@ contract DexYourMeme is IERC721Receiver {
         if (!success) revert DYM__SwapETHFailed();
 
         emit Swapped_ETH_For_WETH(IERC20(WETH_ADDRESS).balanceOf(address(this)));
+    }
+
+    //////////////////////////////////// @notice DYM Team Functions ////////////////////////////////////
+
+    function collect() external payable onlyOwner {}
+
+    // decreaseLiquidity
+
+    // burn
+
+    /// @notice Updates Dex Your Meme Team wallet address
+    function updateTeam(address team) external onlyOwner {
+        s_team = team;
+
+        emit TeamAddressUpdated(s_team);
     }
 
     //////////////////////////////////// @notice DYM Getter Functions ////////////////////////////////////
