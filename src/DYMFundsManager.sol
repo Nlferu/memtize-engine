@@ -5,6 +5,9 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@solmate/utils/ReentrancyGuard.sol";
 import {IMemeCoinMinter} from "./Interfaces/IMemeCoinMinter.sol";
 
+/// @notice TODO:
+// Add Chainlink Keepers
+
 contract DYMFundsManager is Ownable, ReentrancyGuard {
     /// @dev Errors
     error DFM__ZeroAmount();
@@ -106,8 +109,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         IMemeCoinMinter(i_mcm).mintCoinAndRequestDex(params);
 
         /// @dev If success, sending funds directly to DYM contract
-        (bool transfer, ) = i_dym.call{value: meme.idToTotalFunds}("");
-        if (!transfer) revert DFM__TransferFailed();
+        (bool success, ) = i_dym.call{value: meme.idToTotalFunds}("");
+        if (!success) revert DFM__TransferFailed();
 
         meme.idToMemeStatus = MemeStatus.DEAD;
 
