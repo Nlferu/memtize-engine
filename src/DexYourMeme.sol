@@ -6,12 +6,6 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-/// @notice TODO:
-// Block 'DecreaseLiquidity' fn from manager
-// Block 'Burn' fn from manager
-// Redirect/Manage 'CollectFees' function
-// Check 'Repositioning' fn from manager -> block it eventually
-
 contract DexYourMeme is Ownable, IERC721Receiver {
     /// @dev Errors
     error DYM__SwapETHFailed();
@@ -104,6 +98,7 @@ contract DexYourMeme is Ownable, IERC721Receiver {
     }
 
     /// @notice This is needed as NonfungiblePositionManager is issuing NFT once we initialize liquidity pool
+    /// @param tokenId The ID of the NFT
     function onERC721Received(address /* operator */, address /* from */, uint tokenId, bytes memory /* data */) external override returns (bytes4) {
         s_received_NFTs.push(tokenId);
 
