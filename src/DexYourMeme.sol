@@ -117,11 +117,22 @@ contract DexYourMeme is Ownable, IERC721Receiver {
 
     //////////////////////////////////// @notice DYM Team Functions ////////////////////////////////////
 
-    function collect() external payable onlyOwner {}
+    function collectFees(uint tokenId) external payable onlyOwner {
+        (, , , , , , , , , , uint128 tokensOwed0, uint128 tokensOwed1) = INonfungiblePositionManager(NFT_POSITION_MANAGER).positions(tokenId);
 
-    // decreaseLiquidity
+        INonfungiblePositionManager.CollectParams memory params = INonfungiblePositionManager.CollectParams({
+            tokenId: tokenId,
+            recipient: s_team,
+            amount0Max: tokensOwed0,
+            amount1Max: tokensOwed1
+        });
 
-    // burn
+        INonfungiblePositionManager(NFT_POSITION_MANAGER).collect(params);
+    }
+
+    function decreaseLiquidity() external payable onlyOwner {}
+
+    function burn() external payable onlyOwner {}
 
     /// @notice Updates Dex Your Meme Team wallet address
     function updateTeam(address team) external onlyOwner {
