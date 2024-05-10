@@ -13,9 +13,6 @@ contract DexYourMeme is Ownable, IERC721Receiver {
     error DYM__NotMemeCoinMinterCaller();
     error DYM__NotEnoughTimePassed();
 
-    /// @dev Variables
-    address private s_team;
-
     /// @dev Immutables
     address private immutable i_mcm;
 
@@ -43,11 +40,9 @@ contract DexYourMeme is Ownable, IERC721Receiver {
     event Swapped_ETH_For_WETH(uint indexed amount);
     event MemeDexRequestReceived(address indexed token);
     event MemeDexedSuccessfully(address indexed token);
-    event TeamAddressUpdated(address team);
 
     /// @dev Constructor
-    constructor(address team, address mcm) Ownable(msg.sender) {
-        s_team = team;
+    constructor(address mcm) Ownable(msg.sender) {
         i_mcm = mcm;
     }
 
@@ -125,14 +120,14 @@ contract DexYourMeme is Ownable, IERC721Receiver {
 
         INonfungiblePositionManager.CollectParams memory params = INonfungiblePositionManager.CollectParams({
             tokenId: tokenId, // NFT token Id that represents liquidity pool
-            recipient: s_team, // DYM Team wallet address
+            recipient: owner(), // DYM Team wallet address
             amount0Max: tokensOwed0, // ERC20 meme token
             amount1Max: tokensOwed1 // WETH
         });
 
         INonfungiblePositionManager(NFT_POSITION_MANAGER).collect(params);
 
-        emit INonfungiblePositionManager.Collect(tokenId, s_team, tokensOwed0, tokensOwed1);
+        emit INonfungiblePositionManager.Collect(tokenId, owner(), tokensOwed0, tokensOwed1);
     }
 
     /// @dev THIS FUNCTION IS BLOCKED FOR 1 YEAR TO PREVENT RUG PULL ACTIONS ON NEWLY DEXED MEME COINS
@@ -164,14 +159,6 @@ contract DexYourMeme is Ownable, IERC721Receiver {
         if (s_nftToTimeLeft[tokenId] > block.timestamp) revert DYM__NotEnoughTimePassed();
 
         INonfungiblePositionManager(NFT_POSITION_MANAGER).burn(tokenId);
-    }
-
-    /// @notice Updates Dex Your Meme Team wallet address
-    /// @param team DYM Team wallet address
-    function updateTeam(address team) external onlyOwner {
-        s_team = team;
-
-        emit TeamAddressUpdated(s_team);
     }
 
     //////////////////////////////////// @notice DYM Getter Functions ////////////////////////////////////
