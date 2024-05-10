@@ -129,7 +129,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface 
 
     /// @notice Sends request to MCM for creation of meme
     /// @param id Meme id that we want to work with
-    function hypeMeme(uint id) external {
+    function hypeMeme(uint id) internal {
         Meme storage meme = s_memes[id];
         if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
 
@@ -164,7 +164,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface 
 
     /// @notice If meme fails to achieve fund goal on time this function will assign funds back to funders wallets and change state of meme to dead
     /// @param id Meme id that we want to work with
-    function killMeme(uint id) external {
+    function killMeme(uint id) internal {
         Meme storage meme = s_memes[id];
         if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
 
@@ -211,9 +211,9 @@ contract DYMFundsManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface 
 
             if (meme.idToTimeLeft < block.timestamp && meme.idToMemeStatus == MemeStatus.ALIVE) {
                 if (meme.idToTotalFunds >= HYPE) {
-                    // hype
+                    hypeMeme(memeId);
                 } else {
-                    // kill
+                    killMeme(memeId);
                 }
 
                 meme.idToMemeStatus = MemeStatus.DEAD;
