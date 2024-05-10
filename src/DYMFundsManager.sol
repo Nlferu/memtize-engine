@@ -4,11 +4,12 @@ pragma solidity ^0.8.24;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@solmate/utils/ReentrancyGuard.sol";
 import {IMemeCoinMinter} from "./Interfaces/IMemeCoinMinter.sol";
+import {KeeperCompatibleInterface} from "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 
 /// @notice TODO:
 // Add Chainlink Keepers
 
-contract DYMFundsManager is Ownable, ReentrancyGuard {
+contract DYMFundsManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface {
     /// @dev Errors
     error DFM__ZeroAmount();
     error DFM__InvalidMeme();
@@ -22,10 +23,12 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     /// @dev Immutables
     address private immutable i_mcm;
     address private immutable i_dym;
+    uint private immutable i_interval;
 
     /// @dev Variables
     address private s_team;
     uint private s_totalMemes;
+    uint private s_lastTimeStamp;
 
     /// @dev Enums
     enum MemeStatus {
@@ -59,10 +62,12 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
     event TeamAddressUpdated(address indexed team);
 
     /// @dev Constructor
-    constructor(address team, address mcm, address dym) Ownable(msg.sender) {
-        s_team = team;
+    constructor(address mcm, address dym, uint interval, address team) Ownable(msg.sender) {
         i_mcm = mcm;
         i_dym = dym;
+        i_interval = interval;
+        s_team = team;
+        s_lastTimeStamp = block.timestamp;
     }
 
     //////////////////////////////////// @notice DFM External Functions ////////////////////////////////////
@@ -152,6 +157,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         if (!success) revert DFM__TransferFailed();
 
         meme.idToMemeStatus = MemeStatus.DEAD;
+        s_lastTimeStamp = block.timestamp;
 
         emit MemeHyped(id);
         emit TransferSuccessfull(meme.idToTotalFunds);
@@ -174,11 +180,42 @@ contract DYMFundsManager is Ownable, ReentrancyGuard {
         }
 
         meme.idToMemeStatus = MemeStatus.DEAD;
+        s_lastTimeStamp = block.timestamp;
 
         emit MemeKilled(id);
     }
 
     //////////////////////////////////// @notice DFM Chainlink Automation Functions ////////////////////////////////////
+
+    /// @notice Checks if the contract requires work to be done
+    /// @param 'checkData' Data passed to the contract when checking for upkeep
+    /// @return upkeepNeeded Boolean to indicate whether the keeper should call performUpkeep or not
+    /// @return 'performData' Bytes that the keeper should call performUpkeep with, if upkeep is needed
+    function checkUpkeep(bytes memory /* checkData */) external view override returns (bool upkeepNeeded, bytes memory /* performData */) {
+        bool timePassed = ((block.timestamp - s_lastTimeStamp) > i_interval);
+        bool hasMemes = s_totalMemes > 0;
+        bool hasMemesToProcess = false;
+
+        for (uint i; i < s_totalMemes; i++) {
+            Meme storage meme = s_memes[i];
+
+            if (meme.idToTimeLeft < block.timestamp && meme.idToMemeStatus == MemeStatus.ALIVE) {
+                hasMemesToProcess = true;
+                break;
+            }
+        }
+
+        // 2. Musi minac czas Mema ALIVE -> check totalFunds -> ok (hype)
+        //                                                   -> notOk (kill)
+
+        upkeepNeeded = (timePassed && hasMemes);
+
+        return (upkeepNeeded, "0x0");
+    }
+
+    /// @notice Performs work on the contract. Executed by the keepers, via the registry
+    /// @param 'performData' is the data which was passed back from the checkData simulation
+    function performUpkeep(bytes calldata /* performData */) external override {}
 
     //////////////////////////////////// @notice DYM Team Functions ////////////////////////////////////
 
