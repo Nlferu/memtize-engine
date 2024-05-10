@@ -62,6 +62,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface 
     event MemeKilled(uint indexed id);
     event MemeHyped(uint indexed id);
     event TransferSuccessfull(uint indexed amount);
+    event MemesProcessed(bool indexed performed);
 
     /// @dev Constructor
     constructor(address mcm, address dym, uint interval) Ownable(msg.sender) {
@@ -222,6 +223,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface 
 
         s_unprocessedMemes = new uint[](0);
         s_lastTimeStamp = block.timestamp;
+
+        emit MemesProcessed(true);
     }
 
     //////////////////////////////////// @notice DFM Getter Functions ////////////////////////////////////
