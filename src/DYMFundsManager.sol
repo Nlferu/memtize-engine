@@ -16,9 +16,10 @@ contract DYMFundsManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface 
     error DFM__MemeDead();
     error DFM__TransferFailed();
     error DFM__NothingToRefund();
+    error DFM__UpkeepNotNeeded();
 
     /// @dev Constants
-    uint private constant HYPER = 1 ether;
+    uint private constant HYPE = 1 ether;
 
     /// @dev Immutables
     address private immutable i_mcm;
@@ -26,9 +27,11 @@ contract DYMFundsManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface 
     uint private immutable i_interval;
 
     /// @dev Variables
-    address private s_team;
     uint private s_totalMemes;
     uint private s_lastTimeStamp;
+
+    /// @dev Arrays
+    uint[] private s_unprocessedMemes;
 
     /// @dev Enums
     enum MemeStatus {
@@ -59,14 +62,12 @@ contract DYMFundsManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface 
     event MemeKilled(uint indexed id);
     event MemeHyped(uint indexed id);
     event TransferSuccessfull(uint indexed amount);
-    event TeamAddressUpdated(address indexed team);
 
     /// @dev Constructor
-    constructor(address mcm, address dym, uint interval, address team) Ownable(msg.sender) {
+    constructor(address mcm, address dym, uint interval) Ownable(msg.sender) {
         i_mcm = mcm;
         i_dym = dym;
         i_interval = interval;
-        s_team = team;
         s_lastTimeStamp = block.timestamp;
     }
 
@@ -83,6 +84,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface 
         meme.idToSymbol = symbol;
         meme.idToTimeLeft = (block.timestamp + 30 days);
 
+        s_unprocessedMemes.push(s_totalMemes);
         s_totalMemes += 1;
 
         emit MemeCreated(msg.sender, name, symbol);
@@ -143,7 +145,7 @@ contract DYMFundsManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface 
             name: meme.idToName,
             symbol: meme.idToSymbol,
             creator: meme.idToCreator,
-            team: s_team,
+            team: owner(),
             recipients: recipients,
             amounts: amounts,
             totalFunds: meme.idToTotalFunds,
@@ -156,11 +158,8 @@ contract DYMFundsManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface 
         (bool success, ) = i_dym.call{value: meme.idToTotalFunds}("");
         if (!success) revert DFM__TransferFailed();
 
-        meme.idToMemeStatus = MemeStatus.DEAD;
-        s_lastTimeStamp = block.timestamp;
-
-        emit MemeHyped(id);
         emit TransferSuccessfull(meme.idToTotalFunds);
+        emit MemeHyped(id);
     }
 
     /// @notice If meme fails to achieve fund goal on time this function will assign funds back to funders wallets and change state of meme to dead
@@ -179,9 +178,6 @@ contract DYMFundsManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface 
             meme.idToFunderToFunds[funder] = 0;
         }
 
-        meme.idToMemeStatus = MemeStatus.DEAD;
-        s_lastTimeStamp = block.timestamp;
-
         emit MemeKilled(id);
     }
 
@@ -191,39 +187,41 @@ contract DYMFundsManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface 
     /// @param 'checkData' Data passed to the contract when checking for upkeep
     /// @return upkeepNeeded Boolean to indicate whether the keeper should call performUpkeep or not
     /// @return 'performData' Bytes that the keeper should call performUpkeep with, if upkeep is needed
-    function checkUpkeep(bytes memory /* checkData */) external view override returns (bool upkeepNeeded, bytes memory /* performData */) {
+    function checkUpkeep(bytes memory /* checkData */) public view override returns (bool upkeepNeeded, bytes memory /* performData */) {
         bool timePassed = ((block.timestamp - s_lastTimeStamp) > i_interval);
-        bool hasMemes = s_totalMemes > 0;
-        bool hasMemesToProcess = false;
+        bool hasMemesToProcess = s_unprocessedMemes.length > 0;
 
-        for (uint i; i < s_totalMemes; i++) {
-            Meme storage meme = s_memes[i];
-
-            if (meme.idToTimeLeft < block.timestamp && meme.idToMemeStatus == MemeStatus.ALIVE) {
-                hasMemesToProcess = true;
-                break;
-            }
-        }
-
-        // 2. Musi minac czas Mema ALIVE -> check totalFunds -> ok (hype)
-        //                                                   -> notOk (kill)
-
-        upkeepNeeded = (timePassed && hasMemes);
+        upkeepNeeded = (timePassed && hasMemesToProcess);
 
         return (upkeepNeeded, "0x0");
     }
 
     /// @notice Performs work on the contract. Executed by the keepers, via the registry
     /// @param 'performData' is the data which was passed back from the checkData simulation
-    function performUpkeep(bytes calldata /* performData */) external override {}
+    function performUpkeep(bytes calldata /* performData */) external override {
+        (bool upkeepNeeded, ) = checkUpkeep("");
 
-    //////////////////////////////////// @notice DYM Team Functions ////////////////////////////////////
+        if (!upkeepNeeded) revert DFM__UpkeepNotNeeded();
 
-    /// @notice Updates Dex Your Meme Team wallet address
-    function updateTeam(address team) external onlyOwner {
-        s_team = team;
+        uint[] memory unprocessedMemes = s_unprocessedMemes;
 
-        emit TeamAddressUpdated(s_team);
+        for (uint i; i < unprocessedMemes.length; i++) {
+            uint memeId = unprocessedMemes[i];
+            Meme storage meme = s_memes[memeId];
+
+            if (meme.idToTimeLeft < block.timestamp && meme.idToMemeStatus == MemeStatus.ALIVE) {
+                if (meme.idToTotalFunds >= HYPE) {
+                    // hype
+                } else {
+                    // kill
+                }
+
+                meme.idToMemeStatus = MemeStatus.DEAD;
+            }
+        }
+
+        s_unprocessedMemes = new uint[](0);
+        s_lastTimeStamp = block.timestamp;
     }
 
     //////////////////////////////////// @notice DFM Getter Functions ////////////////////////////////////
