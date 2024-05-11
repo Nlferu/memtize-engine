@@ -6,9 +6,6 @@ import {ReentrancyGuard} from "@solmate/utils/ReentrancyGuard.sol";
 import {IMemeCoinMinter} from "./Interfaces/IMemeCoinMinter.sol";
 import {KeeperCompatibleInterface} from "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 
-/// @notice TODO:
-// Add Chainlink Keepers
-
 contract DYMFundsManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface {
     /// @dev Errors
     error DFM__ZeroAmount();
