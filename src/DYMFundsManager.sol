@@ -207,13 +207,10 @@ contract DYMFundsManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface 
             uint memeId = unprocessedMemes[i];
             Meme storage meme = s_memes[memeId];
 
-            /// @dev If funds gathered then skip time
-            if (meme.idToTimeLeft < block.timestamp && meme.idToMemeStatus == MemeStatus.ALIVE) {
-                if (meme.idToTotalFunds >= HYPE) {
-                    hypeMeme(memeId);
-                } else {
-                    killMeme(memeId);
-                }
+            if (meme.idToMemeStatus == MemeStatus.ALIVE) {
+                if (meme.idToTotalFunds >= HYPE) hypeMeme(memeId);
+
+                if (meme.idToTimeLeft < block.timestamp && meme.idToTotalFunds < HYPE) killMeme(memeId);
 
                 meme.idToMemeStatus = MemeStatus.DEAD;
             }
