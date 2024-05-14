@@ -5,6 +5,10 @@ import {MemeCoin} from "./MemeCoin.sol";
 import {IDexYourMeme} from "./Interfaces/IDexYourMeme.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
+/**
+ * @dev This contract acts as a meme coin factory. Once a meme coin is successfully created, it requests listing on Uniswap
+ */
+
 contract MemeCoinMinter is Ownable {
     /// @dev Events
     event MemeCoinMinted(address indexed coinAddress, string coinName, string coinSymbol);
