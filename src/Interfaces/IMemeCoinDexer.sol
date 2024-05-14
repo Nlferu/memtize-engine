@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-interface IDexYourMeme {
+interface IMemeCoinDexer {
     /// @notice Emitted when dexMeme function has been executed for token
     /// @param token Meme coin that got dexed
     event MemeDexRequestReceived(address indexed token);
