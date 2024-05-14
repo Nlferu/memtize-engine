@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /**
- * @dev This Token Template will be used for all Meme Coins crafting
+ * @dev This is token template that will be used for all meme coins crafting
  * No additional mint/burn functionality -> in order to prevent rugged price manipulation actions
  * Transparent and clear division of fixed and final supply -> no option for hidden tokens amount, which could cause serious price drops
  */
