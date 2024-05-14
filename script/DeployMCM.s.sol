@@ -10,7 +10,7 @@ contract DeployMCM is Script {
 
         vm.startBroadcast(deployerKey);
         MemeCoinMinter mcm = new MemeCoinMinter();
-        console.log("Deployed Dex Youe Meme:", address(mcm));
+        console.log("Deployed Meme Coin Minter:", address(mcm));
         console.log("Owner: ", mcm.owner());
         vm.stopBroadcast();
     }
