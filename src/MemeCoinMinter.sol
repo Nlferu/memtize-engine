@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {MemeCoin} from "./MemeCoin.sol";
-import {IDexYourMeme} from "./Interfaces/IDexYourMeme.sol";
+import {IMemeCoinDexer} from "./Interfaces/IMemeCoinDexer.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
@@ -42,8 +42,8 @@ contract MemeCoinMinter is Ownable {
 
         emit MemeCoinMinted(address(newCoin), name, symbol);
 
-        IDexYourMeme(dym).dexMeme(address(newCoin));
+        IMemeCoinDexer(dym).dexMeme(address(newCoin));
 
-        emit IDexYourMeme.MemeDexRequestReceived(address(newCoin));
+        emit IMemeCoinDexer.MemeDexRequestReceived(address(newCoin));
     }
 }
