@@ -3,24 +3,24 @@ pragma solidity ^0.8.24;
 
 import {Test, console} from "forge-std/Test.sol";
 import {DexYourMeme} from "../src/DexYourMeme.sol";
-import {MemeManagementHub} from "../src/MemeManagementHub.sol";
+import {MemeProcessManager} from "../src/MemeProcessManager.sol";
 import {MemeCoinMinter} from "../src/MemeCoinMinter.sol";
 import {DeployDYM} from "../script/DeployDYM.s.sol";
-import {DeployMMH} from "../script/DeployMMH.s.sol";
+import {DeployMPM} from "../script/DeployMPM.s.sol";
 import {DeployMCM} from "../script/DeployMCM.s.sol";
 
 contract DexYourMemeTest is Test {
     DeployDYM dymDeployer;
-    DeployMMH mmhDeployer;
+    DeployMPM mpmDeployer;
     DeployMCM mcmDeployer;
 
     DexYourMeme dym;
-    MemeManagementHub mmh;
+    MemeProcessManager mpm;
     MemeCoinMinter mcm;
 
     function setUp() public {
         dymDeployer = new DeployDYM();
-        mmhDeployer = new DeployMMH();
+        mpmDeployer = new DeployMPM();
         mcmDeployer = new DeployMCM();
     }
 
