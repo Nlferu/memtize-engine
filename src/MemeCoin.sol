@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {IMemeCoinMinter} from "./Interfaces/IMemeCoinMinter.sol";
 
 /**
  * @dev This is token template that will be used for all meme coins crafting
@@ -20,37 +21,21 @@ contract MemeCoin is ERC20 {
     uint private constant FUNDERS_PERCENT = 35;
     uint private constant LIQUIDITY_POOL_PERCENT = 45;
 
-    /// @param name Name of new ERC20 Meme Token
-    /// @param symbol Symbol of new ERC20 Meme Token
-    /// @param creator Meme creator wallet address
-    /// @param team Dex Your Meme team wallet address
-    /// @param funders Array parallel to 'amounts[]' contains all funders of new ERC20 Meme Token
-    /// @param amounts Array parallel to 'funders[]' contains all funds of new ERC20 Meme Token
-    /// @param totalFunds Sum of ETH gathered for new ERC20 Meme Token */
-    /// @param mcd MemeCoinDexer contract address
-    constructor(
-        string memory name,
-        string memory symbol,
-        address creator,
-        address team,
-        address[] memory funders,
-        uint[] memory amounts,
-        uint totalFunds,
-        address mcd
-    ) ERC20(name, symbol) {
-        if (funders.length != amounts.length) revert MC__ArraysNotParallel();
+    /// @param params IMemeCoinMinter
+    constructor(IMemeCoinMinter.MintParams memory params) ERC20(params.name, params.symbol) {
+        if (params.recipients.length != params.amounts.length) revert MC__ArraysNotParallel();
 
         /// @dev Minting tokens for the creator, team, and liquidity pool
-        _mint(creator, (TOTAL_SUPPLY * CREATOR_PERCENT) / 100);
-        _mint(team, (TOTAL_SUPPLY * TEAM_PERCENT) / 100);
-        _mint(mcd, (TOTAL_SUPPLY * LIQUIDITY_POOL_PERCENT) / 100);
+        _mint(params.creator, (TOTAL_SUPPLY * CREATOR_PERCENT) / 100);
+        _mint(params.team, (TOTAL_SUPPLY * TEAM_PERCENT) / 100);
+        _mint(params.mcd, (TOTAL_SUPPLY * LIQUIDITY_POOL_PERCENT) / 100);
 
         /// @dev Minting tokens for funders proportionally to their contributions
         uint fundersTokens = (TOTAL_SUPPLY * FUNDERS_PERCENT) / 100;
 
-        for (uint i = 0; i < funders.length; i++) {
-            uint funderTokens = (fundersTokens * amounts[i]) / totalFunds;
-            _mint(funders[i], funderTokens);
+        for (uint i = 0; i < params.recipients.length; i++) {
+            uint funderTokens = (fundersTokens * params.amounts[i]) / params.totalFunds;
+            _mint(params.recipients[i], funderTokens);
         }
     }
 }
