@@ -29,6 +29,9 @@ test:
 testForkSepolia:
 	forge test --fork-url $(SEPOLIA_RPC_URL) -vvvv
 
+testOneFn:
+	forge test --fork-url $(SEPOLIA_RPC_URL) --mt test_CanPerformUpkeep -vvvv
+
 testForkMainnet:
 	forge test --fork-url $(MAINNET_RPC_URL) -vvvv
 
