@@ -35,6 +35,8 @@ contract MemeProcessManagerTest is Test {
 
     address private OWNER;
     address private USER = makeAddr("user");
+    address private USER_TWO = makeAddr("user_two");
+    address private USER_THREE = makeAddr("user_three");
     uint256 private constant STARTING_BALANCE = 100 ether;
 
     function setUp() public {
@@ -53,6 +55,8 @@ contract MemeProcessManagerTest is Test {
 
         deal(OWNER, STARTING_BALANCE);
         deal(USER, STARTING_BALANCE);
+        deal(USER_TWO, STARTING_BALANCE);
+        deal(USER_THREE, STARTING_BALANCE);
     }
 
     function test_CreateMeme() public {
@@ -178,6 +182,39 @@ contract MemeProcessManagerTest is Test {
 
         (upkeepNeeded, ) = memeProcessManager.checkUpkeep("");
         assertEq(upkeepNeeded, true);
+    }
+
+    function test_CantPerformUpkeep() public {
+        vm.expectRevert(MemeProcessManager.MPM__UpkeepNotNeeded.selector);
+        memeProcessManager.performUpkeep("");
+    }
+
+    function test_CanPerformUpkeep() public {
+        memeProcessManager.createMeme("Hexur The Memer", "HEX"); // insufficient funds
+        memeProcessManager.createMeme("Osteo Pedro", "PDR"); // passed
+        memeProcessManager.createMeme("Joke Joker", "JOK"); // passed
+        memeProcessManager.createMeme("Lama Lou", "LAM");
+
+        vm.prank(USER);
+        memeProcessManager.fundMeme{value: 1 ether}(1);
+
+        vm.prank(USER_TWO);
+        memeProcessManager.fundMeme{value: 2 ether}(1);
+
+        vm.prank(USER_THREE);
+        memeProcessManager.fundMeme{value: 8 ether}(1);
+
+        vm.prank(OWNER);
+        memeProcessManager.fundMeme{value: 0.99 ether}(0);
+
+        vm.prank(OWNER);
+        memeProcessManager.fundMeme{value: 5 ether}(2);
+
+        vm.warp(block.timestamp + 32);
+        vm.roll(block.number + 1);
+
+        vm.prank(USER);
+        memeProcessManager.performUpkeep("");
     }
 
     function testFuzz_SetNumber(uint256 x) public {}
