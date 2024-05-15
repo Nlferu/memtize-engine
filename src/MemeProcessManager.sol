@@ -254,4 +254,8 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
 
         return (meme.idToCreator, meme.idToName, meme.idToSymbol, meme.idToTimeLeft, meme.idToTotalFunds, meme.idToFunders, funds, meme.idToMemeStatus);
     }
+
+    function getUnprocessedMemes() external view returns (uint[] memory) {
+        return s_unprocessedMemes;
+    }
 }
