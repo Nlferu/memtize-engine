@@ -29,8 +29,9 @@ contract MemeCoinDexer is Ownable, IERC721Receiver {
     uint160 private constant INITIAL_PRICE = 7922816251426433759354395;
     address private constant WETH_ADDRESS = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
     uint24 private constant FEE = 3000;
-    uint private constant WETH_AMOUNT = 0.1 * 10 ** 18;
-    uint private constant MEME_AMOUNT = 1_000_000 * 10 ** 18;
+    /// @dev Previously 1_000_000 for 0.1 WETH
+    //uint private WETH_AMOUNT = 0.1 * 10 ** 18; /// @dev ERROR -> take this value from Minter
+    uint private constant MEME_AMOUNT = 450_000 * 10 ** 18; /// @dev ERROR -> take this value from Minter THIS CAN STAY CONSTANT
 
     /// @dev Mappings
     mapping(uint => uint) private s_nftToTimeLeft;
@@ -55,7 +56,7 @@ contract MemeCoinDexer is Ownable, IERC721Receiver {
 
     /// @notice Swaps ETH into WETH, creates, initializes and adds liquidity pool for new meme token
     /// @param memeToken Address of ERC20 meme token minted by MCM contract
-    function dexMeme(address memeToken) external {
+    function dexMeme(address memeToken, uint wethAmount) external {
         if (msg.sender != i_mcm) revert MCD__NotMemeCoinMinterCaller();
         emit MemeDexRequestReceived(memeToken);
 
@@ -65,7 +66,7 @@ contract MemeCoinDexer is Ownable, IERC721Receiver {
         INonfungiblePositionManager(NFT_POSITION_MANAGER).createAndInitializePoolIfNecessary(memeToken, WETH_ADDRESS, FEE, INITIAL_PRICE);
 
         // Approve tokens for the position manager
-        IERC20(WETH_ADDRESS).approve(NFT_POSITION_MANAGER, WETH_AMOUNT);
+        IERC20(WETH_ADDRESS).approve(NFT_POSITION_MANAGER, wethAmount);
         IERC20(memeToken).approve(NFT_POSITION_MANAGER, MEME_AMOUNT);
 
         // Add liquidity to the new pool using mint
@@ -76,7 +77,7 @@ contract MemeCoinDexer is Ownable, IERC721Receiver {
             tickLower: -887220, // Near 0 price
             tickUpper: 887220, // Extremely high price
             amount0Desired: MEME_AMOUNT, // Meme token amount sent to manager to provide liquidity
-            amount1Desired: WETH_AMOUNT, // WETH token amount sent to manager to provide liquidity
+            amount1Desired: wethAmount, // WETH token amount sent to manager to provide liquidity
             amount0Min: 0,
             amount1Min: 0,
             recipient: address(this), // Address that will receive NFT representing liquidity pool
