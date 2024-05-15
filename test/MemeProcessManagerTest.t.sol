@@ -10,7 +10,7 @@ import {DeployMCD} from "../script/DeployMCD.s.sol";
 import {DeployMPM} from "../script/DeployMPM.s.sol";
 
 contract MemeProcessManagerTest is Test {
-    event MemeCreated(address indexed creator, string name, string symbol);
+    event MemeCreated(uint indexed id, address indexed creator, string name, string symbol);
     event MemeFunded(uint indexed id, uint indexed value);
     event RefundPerformed(address indexed funder, uint indexed amount);
     event MemeKilled(uint indexed id);
@@ -56,11 +56,13 @@ contract MemeProcessManagerTest is Test {
     }
 
     function test_CanCreateMemeAndUpdateData() public {
-        vm.expectEmit(false, false, false, true, address(memeProcessManager));
-        emit MemeCreated(USER, "Hexur The Memer", "HEX");
+        vm.expectEmit(true, true, true, true, address(memeProcessManager));
+        emit MemeCreated(0, USER, "Hexur The Memer", "HEX");
         vm.prank(USER);
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
 
+        vm.expectEmit(true, true, true, true, address(memeProcessManager));
+        emit MemeCreated(1, OWNER, "Hastur User Fool", "HUF");
         vm.prank(OWNER);
         memeProcessManager.createMeme("Hastur User Fool", "HUF");
 
@@ -99,7 +101,42 @@ contract MemeProcessManagerTest is Test {
         (creator, name, symbol, timeLeft, totalFunds, funders, funds, status) = memeProcessManager.getMemeData(2);
     }
 
-    function test_CanFundMeme() public {}
+    function test_CanFundMeme() public memeCreated {
+        vm.expectRevert(MemeProcessManager.MPM__ZeroAmount.selector);
+        vm.prank(USER);
+        memeProcessManager.fundMeme{value: 0}(0);
+
+        vm.expectRevert(MemeProcessManager.MPM__InvalidMeme.selector);
+        vm.prank(USER);
+        memeProcessManager.fundMeme{value: 1 ether}(1);
+
+        vm.expectEmit(true, true, true, true, address(memeProcessManager));
+        emit MemeFunded(0, 1 ether);
+        vm.prank(USER);
+        memeProcessManager.fundMeme{value: 1 ether}(0);
+
+        vm.expectEmit(true, true, true, true, address(memeProcessManager));
+        emit MemeFunded(0, 3 ether);
+        vm.prank(OWNER);
+        memeProcessManager.fundMeme{value: 3 ether}(0);
+
+        (, , , , uint totalFunds, address[] memory funders, uint[] memory funds, ) = memeProcessManager.getMemeData(0);
+
+        assertEq(totalFunds, 4 ether);
+        assertEq(funders[0], USER);
+        assertEq(funders[1], OWNER);
+        assertEq(funds[0], 1 ether);
+        assertEq(funds[1], 3 ether);
+
+        /// @dev Test MemeDead error
+    }
 
     function testFuzz_SetNumber(uint256 x) public {}
+
+    modifier memeCreated() {
+        vm.prank(USER);
+        memeProcessManager.createMeme("Hexur The Memer", "HEX");
+
+        _;
+    }
 }
