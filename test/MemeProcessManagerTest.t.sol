@@ -10,6 +10,14 @@ import {DeployMCD} from "../script/DeployMCD.s.sol";
 import {DeployMPM} from "../script/DeployMPM.s.sol";
 
 contract MemeProcessManagerTest is Test {
+    event MemeCreated(address indexed creator, string name, string symbol);
+    event MemeFunded(uint indexed id, uint indexed value);
+    event RefundPerformed(address indexed funder, uint indexed amount);
+    event MemeKilled(uint indexed id);
+    event MemeHyped(uint indexed id);
+    event TransferSuccessfull(uint indexed amount);
+    event MemesProcessed(bool indexed performed);
+
     enum MemeStatus {
         ALIVE,
         DEAD
@@ -47,8 +55,9 @@ contract MemeProcessManagerTest is Test {
         deal(USER, STARTING_BALANCE);
     }
 
-    /// @dev Add emit
     function test_CanCreateMemeAndUpdateData() public {
+        vm.expectEmit(false, false, false, true, address(memeProcessManager));
+        emit MemeCreated(USER, "Hexur The Memer", "HEX");
         vm.prank(USER);
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
 
