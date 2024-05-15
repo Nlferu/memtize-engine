@@ -8,10 +8,10 @@ import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Recei
 
 contract MemeCoinDexer is Ownable, IERC721Receiver {
     /// @dev Errors
-    error DYM__SwapETHFailed();
-    error DYM__DexMemeFailed();
-    error DYM__NotMemeCoinMinterCaller();
-    error DYM__NotEnoughTimePassed();
+    error MCD__SwapETHFailed();
+    error MCD__DexMemeFailed();
+    error MCD__NotMemeCoinMinterCaller();
+    error MCD__NotEnoughTimePassed();
 
     /// @dev Immutables
     address private immutable i_mcm;
@@ -46,7 +46,7 @@ contract MemeCoinDexer is Ownable, IERC721Receiver {
         i_mcm = mcm;
     }
 
-    //////////////////////////////////// @notice DYM External Functions ////////////////////////////////////
+    //////////////////////////////////// @notice MCD External Functions ////////////////////////////////////
 
     /// @notice Adds possibility to receive funds by this contract, which is required by MFM contract
     receive() external payable {
@@ -56,7 +56,7 @@ contract MemeCoinDexer is Ownable, IERC721Receiver {
     /// @notice Swaps ETH into WETH, creates, initializes and adds liquidity pool for new meme token
     /// @param memeToken Address of ERC20 meme token minted by MCM contract
     function dexMeme(address memeToken) external {
-        if (msg.sender != i_mcm) revert DYM__NotMemeCoinMinterCaller();
+        if (msg.sender != i_mcm) revert MCD__NotMemeCoinMinterCaller();
         emit MemeDexRequestReceived(memeToken);
 
         swapETH();
@@ -100,13 +100,13 @@ contract MemeCoinDexer is Ownable, IERC721Receiver {
         return this.onERC721Received.selector;
     }
 
-    //////////////////////////////////// @notice DYM Internal Functions ////////////////////////////////////
+    //////////////////////////////////// @notice MCD Internal Functions ////////////////////////////////////
 
     /// @notice Swaps ETH for WETH to be able to proceed with 'dexMeme()' function
     function swapETH() internal {
         (bool success, ) = WETH_ADDRESS.call{value: address(this).balance}(abi.encodeWithSignature("deposit()"));
 
-        if (!success) revert DYM__SwapETHFailed();
+        if (!success) revert MCD__SwapETHFailed();
 
         emit Swapped_ETH_For_WETH(IERC20(WETH_ADDRESS).balanceOf(address(this)));
     }
@@ -137,7 +137,7 @@ contract MemeCoinDexer is Ownable, IERC721Receiver {
     /// @param memeTokenAmount The minimum amount of token0 that should be accounted for the burned liquidity
     /// @param wethAmount The minimum amount of token1 that should be accounted for the burned liquidity
     function decreaseLiquidity(uint tokenId, uint128 liquidity, uint memeTokenAmount, uint wethAmount) external payable onlyOwner {
-        if (s_nftToTimeLeft[tokenId] > block.timestamp) revert DYM__NotEnoughTimePassed();
+        if (s_nftToTimeLeft[tokenId] > block.timestamp) revert MCD__NotEnoughTimePassed();
 
         INonfungiblePositionManager.DecreaseLiquidityParams memory params = INonfungiblePositionManager.DecreaseLiquidityParams({
             tokenId: tokenId, // The ID of the token for which liquidity was decreased
@@ -156,12 +156,12 @@ contract MemeCoinDexer is Ownable, IERC721Receiver {
     /// @notice Burns a token ID, which deletes it from the NFT contract. The token must have 0 liquidity and all tokens must be collected first.
     /// @param tokenId The ID of the token that is being burned
     function burn(uint tokenId) external payable onlyOwner {
-        if (s_nftToTimeLeft[tokenId] > block.timestamp) revert DYM__NotEnoughTimePassed();
+        if (s_nftToTimeLeft[tokenId] > block.timestamp) revert MCD__NotEnoughTimePassed();
 
         INonfungiblePositionManager(NFT_POSITION_MANAGER).burn(tokenId);
     }
 
-    //////////////////////////////////// @notice DYM Getter Functions ////////////////////////////////////
+    //////////////////////////////////// @notice MCD Getter Functions ////////////////////////////////////
 
     /// @notice Returns all NFT tokens received from NonfungiblePositionManager
     function getAllTokens() external view returns (uint[] memory) {
