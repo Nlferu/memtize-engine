@@ -18,9 +18,9 @@ https://book.getfoundry.sh/
 Deploy Order:
 
 1. MCM
-2. DYM
-3. DFM
-4. Transfer ownership of MCM to DFM
+2. MCD
+3. MPM
+4. Transfer ownership of MCM to MPM
 
 ### Build
 
