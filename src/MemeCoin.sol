@@ -27,7 +27,7 @@ contract MemeCoin is ERC20 {
     /// @param funders Array parallel to 'amounts[]' contains all funders of new ERC20 Meme Token
     /// @param amounts Array parallel to 'funders[]' contains all funds of new ERC20 Meme Token
     /// @param totalFunds Sum of ETH gathered for new ERC20 Meme Token */
-    /// @param dym DexYourMeme contract address
+    /// @param mcd MemeCoinDexer contract address
     constructor(
         string memory name,
         string memory symbol,
@@ -36,14 +36,14 @@ contract MemeCoin is ERC20 {
         address[] memory funders,
         uint[] memory amounts,
         uint totalFunds,
-        address dym
+        address mcd
     ) ERC20(name, symbol) {
         if (funders.length != amounts.length) revert MC__ArraysNotParallel();
 
         /// @dev Minting tokens for the creator, team, and liquidity pool
         _mint(creator, (TOTAL_SUPPLY * CREATOR_PERCENT) / 100);
         _mint(team, (TOTAL_SUPPLY * TEAM_PERCENT) / 100);
-        _mint(dym, (TOTAL_SUPPLY * LIQUIDITY_POOL_PERCENT) / 100);
+        _mint(mcd, (TOTAL_SUPPLY * LIQUIDITY_POOL_PERCENT) / 100);
 
         /// @dev Minting tokens for funders proportionally to their contributions
         uint fundersTokens = (TOTAL_SUPPLY * FUNDERS_PERCENT) / 100;
