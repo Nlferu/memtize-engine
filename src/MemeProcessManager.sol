@@ -60,7 +60,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
     mapping(address => uint) private s_funderToFunds;
 
     /// @dev Events
-    event MemeCreated(address indexed creator, string name, string symbol, uint indexed id);
+    event MemeCreated(uint indexed id, address indexed creator, string name, string symbol);
     event MemeFunded(uint indexed id, uint indexed value);
     event RefundPerformed(address indexed funder, uint indexed amount);
     event MemeKilled(uint indexed id);
@@ -91,7 +91,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
 
         s_unprocessedMemes.push(s_totalMemes);
 
-        emit MemeCreated(msg.sender, name, symbol, s_totalMemes);
+        emit MemeCreated(s_totalMemes, msg.sender, name, symbol);
 
         s_totalMemes += 1;
     }
