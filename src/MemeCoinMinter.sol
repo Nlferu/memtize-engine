@@ -24,8 +24,8 @@ contract MemeCoinMinter is IMemeCoinMinter, Ownable {
 
         emit MemeCoinMinted(address(newCoin), params.name, params.symbol);
 
-        //IMemeCoinDexer(mcd).dexMeme(address(newCoin));
+        IMemeCoinDexer(params.mcd).dexMeme(address(newCoin), params.totalFunds);
 
-        //emit IMemeCoinDexer.MemeDexRequestReceived(address(newCoin));
+        emit IMemeCoinDexer.MemeDexRequestReceived(address(newCoin));
     }
 }
