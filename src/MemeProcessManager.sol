@@ -15,19 +15,19 @@ import {KeeperCompatibleInterface} from "@chainlink/contracts/src/v0.8/interface
 
 contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterface {
     /// @dev Errors
-    error DFM__ZeroAmount();
-    error DFM__InvalidMeme();
-    error DFM__MemeDead();
-    error DFM__TransferFailed();
-    error DFM__NothingToRefund();
-    error DFM__UpkeepNotNeeded();
+    error MPM__ZeroAmount();
+    error MPM__InvalidMeme();
+    error MPM__MemeDead();
+    error MPM__TransferFailed();
+    error MPM__NothingToRefund();
+    error MPM__UpkeepNotNeeded();
 
     /// @dev Constants
     uint private constant HYPE = 1 ether;
 
     /// @dev Immutables
     address private immutable i_mcm;
-    address private immutable i_dym;
+    address private immutable i_mcd;
     uint private immutable i_interval;
 
     /// @dev Variables
@@ -69,9 +69,9 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
     event MemesProcessed(bool indexed performed);
 
     /// @dev Constructor
-    constructor(address mcm, address dym, uint interval) Ownable(msg.sender) {
+    constructor(address mcm, address mcd, uint interval) Ownable(msg.sender) {
         i_mcm = mcm;
-        i_dym = dym;
+        i_mcd = mcd;
         i_interval = interval;
         s_lastTimeStamp = block.timestamp;
     }
@@ -98,10 +98,10 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
     /// @notice Allows to send funds for given meme
     /// @param id Meme id that we want to work with
     function fundMeme(uint id) external payable {
-        if (msg.value <= 0) revert DFM__ZeroAmount();
-        if (id >= s_totalMemes) revert DFM__InvalidMeme();
+        if (msg.value <= 0) revert MPM__ZeroAmount();
+        if (id >= s_totalMemes) revert MPM__InvalidMeme();
         Meme storage meme = s_memes[id];
-        if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
+        if (meme.idToMemeStatus == MemeStatus.DEAD) revert MPM__MemeDead();
 
         meme.idToTotalFunds += msg.value;
         if (meme.idToFunderToFunds[msg.sender] == 0) meme.idToFunders.push(msg.sender);
@@ -117,14 +117,14 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
         if (amount > 0) {
             s_funderToFunds[msg.sender] = 0;
         } else {
-            revert DFM__NothingToRefund();
+            revert MPM__NothingToRefund();
         }
 
         (bool success, ) = msg.sender.call{value: amount}("");
 
         if (!success) {
             s_funderToFunds[msg.sender] = amount;
-            revert DFM__TransferFailed();
+            revert MPM__TransferFailed();
         }
 
         emit RefundPerformed(msg.sender, amount);
@@ -136,7 +136,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
     /// @param id Meme id that we want to work with
     function hypeMeme(uint id) internal {
         Meme storage meme = s_memes[id];
-        if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
+        if (meme.idToMemeStatus == MemeStatus.DEAD) revert MPM__MemeDead();
 
         address[] memory recipients = meme.idToFunders;
         uint[] memory amounts = new uint[](recipients.length);
@@ -154,14 +154,14 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
             recipients: recipients,
             amounts: amounts,
             totalFunds: meme.idToTotalFunds,
-            dym: i_dym
+            dym: i_mcd
         });
 
         IMemeCoinMinter(i_mcm).mintCoinAndRequestDex(params);
 
         /// @dev If success, sending funds directly to DYM contract
-        (bool success, ) = i_dym.call{value: meme.idToTotalFunds}("");
-        if (!success) revert DFM__TransferFailed();
+        (bool success, ) = i_mcd.call{value: meme.idToTotalFunds}("");
+        if (!success) revert MPM__TransferFailed();
 
         emit TransferSuccessfull(meme.idToTotalFunds);
         emit MemeHyped(id);
@@ -171,7 +171,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
     /// @param id Meme id that we want to work with
     function killMeme(uint id) internal {
         Meme storage meme = s_memes[id];
-        if (meme.idToMemeStatus == MemeStatus.DEAD) revert DFM__MemeDead();
+        if (meme.idToMemeStatus == MemeStatus.DEAD) revert MPM__MemeDead();
 
         address[] memory funders = meme.idToFunders;
 
@@ -206,7 +206,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
     function performUpkeep(bytes calldata /* performData */) external override {
         (bool upkeepNeeded, ) = checkUpkeep("");
 
-        if (!upkeepNeeded) revert DFM__UpkeepNotNeeded();
+        if (!upkeepNeeded) revert MPM__UpkeepNotNeeded();
 
         uint[] memory unprocessedMemes = s_unprocessedMemes;
 
@@ -242,6 +242,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
     /// @notice Returns all data associated with given meme
     /// @param id Meme id that we want to work with
     function getMemeData(uint id) external view returns (address, string memory, string memory, uint, uint, address[] memory, uint[] memory funds, MemeStatus) {
+        if (id >= s_totalMemes) revert MPM__InvalidMeme();
         Meme storage meme = s_memes[id];
 
         funds = new uint[](meme.idToFunders.length);
