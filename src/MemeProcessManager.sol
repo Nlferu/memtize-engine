@@ -76,7 +76,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
         s_lastTimeStamp = block.timestamp;
     }
 
-    //////////////////////////////////// @notice DFM External Functions ////////////////////////////////////
+    //////////////////////////////////// @notice MPM External Functions ////////////////////////////////////
 
     /// @notice It is creating new meme with basic ERC20 data and starts timer, which is telling if meme is alive or dead
     /// @param name Meme id that we want to work with
@@ -131,7 +131,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
         emit RefundPerformed(msg.sender, amount);
     }
 
-    //////////////////////////////////// @notice DFM Internal Functions ////////////////////////////////////
+    //////////////////////////////////// @notice MPM Internal Functions ////////////////////////////////////
 
     /// @notice Sends request to MCM for creation of meme
     /// @param id Meme id that we want to work with
@@ -155,12 +155,12 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
             recipients: recipients,
             amounts: amounts,
             totalFunds: meme.idToTotalFunds,
-            dym: i_mcd
+            mcd: i_mcd
         });
 
         IMemeCoinMinter(i_mcm).mintCoinAndRequestDex(params);
 
-        /// @dev If success, sending funds directly to DYM contract
+        /// @dev If success, sending funds directly to MCD contract
         (bool success, ) = i_mcd.call{value: meme.idToTotalFunds}("");
         if (!success) revert MPM__TransferFailed();
 
@@ -187,7 +187,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
         emit MemeKilled(id);
     }
 
-    //////////////////////////////////// @notice DFM Chainlink Automation Functions ////////////////////////////////////
+    //////////////////////////////////// @notice MPM Chainlink Automation Functions ////////////////////////////////////
 
     /// @notice Checks if the contract requires work to be done
     /// @param 'checkData' Data passed to the contract when checking for upkeep
@@ -230,7 +230,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
         emit MemesProcessed(true);
     }
 
-    //////////////////////////////////// @notice DFM Getter Functions ////////////////////////////////////
+    //////////////////////////////////// @notice MPM Getter Functions ////////////////////////////////////
 
     /// @notice Temporary function for testing purposes -> it should be replaced with GraphQl
     /// @notice Returns total funds available for refund for given funder
