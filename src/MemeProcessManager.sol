@@ -146,6 +146,10 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
             amounts[i] = meme.idToFunderToFunds[recipients[i]];
         }
 
+        /// @dev Sending funds directly to MCD contract
+        (bool success, ) = i_mcd.call{value: meme.idToTotalFunds}("");
+        if (!success) revert MPM__TransferFailed();
+
         /// @dev Calling mint token fn from MCM contract
         IMemeCoinMinter.MintParams memory params = IMemeCoinMinter.MintParams({
             name: meme.idToName,
@@ -159,10 +163,6 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
         });
 
         IMemeCoinMinter(i_mcm).mintCoinAndRequestDex(params);
-
-        /// @dev If success, sending funds directly to MCD contract
-        (bool success, ) = i_mcd.call{value: meme.idToTotalFunds}("");
-        if (!success) revert MPM__TransferFailed();
 
         emit TransferSuccessfull(meme.idToTotalFunds);
         emit MemeHyped(id);
