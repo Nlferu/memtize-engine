@@ -27,7 +27,7 @@ contract MemeCoinMinter is Ownable {
     /// @param recipients Array parallel to 'amounts[]' contains all funders of new ERC20 Meme Token
     /// @param amounts Array parallel to 'recipients[]' contains all funds of new ERC20 Meme Token
     /// @param totalFunds Sum of ETH gathered for new ERC20 Meme Token
-    /// @param dym DexYourMeme contract address
+    /// @param mcd MemeCoinDexer contract address
     function mintCoinAndRequestDex(
         string memory name,
         string memory symbol,
@@ -36,13 +36,13 @@ contract MemeCoinMinter is Ownable {
         address[] memory recipients,
         uint[] memory amounts,
         uint totalFunds,
-        address dym
+        address mcd
     ) external onlyOwner {
-        MemeCoin newCoin = new MemeCoin(name, symbol, creator, team, recipients, amounts, totalFunds, dym);
+        MemeCoin newCoin = new MemeCoin(name, symbol, creator, team, recipients, amounts, totalFunds, mcd);
 
         emit MemeCoinMinted(address(newCoin), name, symbol);
 
-        IMemeCoinDexer(dym).dexMeme(address(newCoin));
+        IMemeCoinDexer(mcd).dexMeme(address(newCoin));
 
         emit IMemeCoinDexer.MemeDexRequestReceived(address(newCoin));
     }
