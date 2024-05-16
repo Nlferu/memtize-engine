@@ -239,7 +239,7 @@ contract MemeProcessManagerTest is Test {
         assert(firstTimeStamp < lastTimeStamp);
     }
 
-    function test_CanRefund() public {
+    function test_CanRefund() public skipFork {
         vm.prank(USER_THREE);
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
 
@@ -269,7 +269,7 @@ contract MemeProcessManagerTest is Test {
         assertEq(USER.balance, userBalance + 0.44 ether);
     }
 
-    function test_CantRefundToInvalidRecipient() public {
+    function test_CantRefundToInvalidRecipient() public skipFork {
         vm.prank(USER_TWO);
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
 
