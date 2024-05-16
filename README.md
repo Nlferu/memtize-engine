@@ -34,6 +34,14 @@ $ forge build
 $ forge test
 ```
 
+#### Full Coverage
+
+To get full coverage go to `test/unit/MemeProcessManagerTest.t.sol` find `skipFork()` modifier and comment it's if statement, then run below:
+
+```bash
+$ make testForkSepoliaCoverage
+```
+
 ### Format
 
 ```shell
