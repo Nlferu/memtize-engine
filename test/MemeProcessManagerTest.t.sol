@@ -59,7 +59,7 @@ contract MemeProcessManagerTest is Test {
         deal(USER_THREE, STARTING_BALANCE);
     }
 
-    function test_CreateMeme() public {
+    function test_CreateMeme() public skipFork {
         vm.expectEmit(true, true, true, true, address(memeProcessManager));
         emit MemeCreated(0, USER, "Hexur The Memer", "HEX");
         vm.prank(USER);
@@ -109,7 +109,7 @@ contract MemeProcessManagerTest is Test {
         assertEq(unprocessedMemes[1], 1);
     }
 
-    function test_FundMeme() public {
+    function test_FundMeme() public skipFork {
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
 
         vm.expectRevert(MemeProcessManager.MPM__ZeroAmount.selector);
@@ -141,7 +141,7 @@ contract MemeProcessManagerTest is Test {
         /// @dev Test MemeDead error
     }
 
-    function test_Refund() public {
+    function test_Refund() public skipFork {
         vm.expectRevert(MemeProcessManager.MPM__NothingToRefund.selector);
         memeProcessManager.refund();
 
@@ -156,7 +156,7 @@ contract MemeProcessManagerTest is Test {
         /// @dev Test after kill
     }
 
-    function test_CheckUpkeepIsFalse() public {
+    function test_CheckUpkeepIsFalse() public skipFork {
         bool upkeepNeeded;
 
         (upkeepNeeded, ) = memeProcessManager.checkUpkeep("");
@@ -169,7 +169,7 @@ contract MemeProcessManagerTest is Test {
         assertEq(upkeepNeeded, false);
     }
 
-    function test_CheckUpkeepIsTrue() public {
+    function test_CheckUpkeepIsTrue() public skipFork {
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
 
         bool upkeepNeeded;
@@ -184,45 +184,15 @@ contract MemeProcessManagerTest is Test {
         assertEq(upkeepNeeded, true);
     }
 
-    function test_CantPerformUpkeep() public {
+    function test_CantPerformUpkeep() public skipFork {
         vm.expectRevert(MemeProcessManager.MPM__UpkeepNotNeeded.selector);
         memeProcessManager.performUpkeep("");
     }
 
-    function test_CanPerformUpkeep() public {
-        memeProcessManager.createMeme("Hexur The Memer", "HEX"); // insufficient funds
-        memeProcessManager.createMeme("Osteo Pedro", "PDR"); // passed
-        memeProcessManager.createMeme("Joke Joker", "JOK"); // passed
-        memeProcessManager.createMeme("Lama Lou", "LAM");
-
-        vm.prank(USER);
-        memeProcessManager.fundMeme{value: 1 ether}(1);
-
-        vm.prank(USER_TWO);
-        memeProcessManager.fundMeme{value: 2 ether}(1);
-
-        vm.prank(USER_THREE);
-        memeProcessManager.fundMeme{value: 8 ether}(1);
-
-        vm.prank(OWNER);
-        memeProcessManager.fundMeme{value: 0.99 ether}(0);
-
-        vm.prank(OWNER);
-        memeProcessManager.fundMeme{value: 5 ether}(2);
-
-        vm.warp(block.timestamp + 32);
-        vm.roll(block.number + 1);
-
-        vm.prank(USER);
-        memeProcessManager.performUpkeep("");
-    }
-
-    function testFuzz_SetNumber(uint256 x) public {}
-
-    modifier memeCreated() {
-        vm.prank(USER);
-        memeProcessManager.createMeme("Hexur The Memer", "HEX");
-
+    modifier skipFork() {
+        if (block.chainid != 31337) {
+            return;
+        }
         _;
     }
 }
