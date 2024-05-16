@@ -60,6 +60,8 @@ contract MemeProcessManagerTest is Test {
         deal(USER_THREE, STARTING_BALANCE);
     }
 
+    function test_Constructor() public {}
+
     function test_CreateMeme() public skipFork {
         vm.expectEmit(true, true, true, true, address(memeProcessManager));
         emit MemeCreated(0, USER, "Hexur The Memer", "HEX");
