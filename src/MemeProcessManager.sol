@@ -150,6 +150,12 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
         (bool success, ) = i_mcd.call{value: meme.idToTotalFunds}("");
         if (!success) revert MPM__TransferFailed();
 
+        /** @dev Reversal of 45% (45% of total supply of crafted ERC20 is taken for liquidity pool) from MemeCoin to get correct TOTAL_SUPPLY
+         * This gives us 100 000 000 ERC20 per 1 ETH to craft
+         * Initial price is given in Q64.96 format and it is not so precise. In this case we need to do below instead of just (* 100/45) to reverse 45%
+         */
+        uint memeCoinAmount = ((meme.idToTotalFunds * (10 ** 8)) * 100_000_001) / 45_000_000;
+
         /// @dev Calling mint token fn from MCM contract
         IMemeCoinMinter.MintParams memory params = IMemeCoinMinter.MintParams({
             name: meme.idToName,
@@ -158,6 +164,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
             team: owner(),
             recipients: recipients,
             amounts: amounts,
+            totalMemeCoins: memeCoinAmount,
             totalFunds: meme.idToTotalFunds,
             mcd: i_mcd
         });
