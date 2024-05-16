@@ -140,8 +140,6 @@ contract MemeProcessManagerTest is Test {
         assertEq(funders[1], OWNER);
         assertEq(funds[0], 1 ether);
         assertEq(funds[1], 3 ether);
-
-        /// @dev Test MemeDead error
     }
 
     function test_Refund() public skipFork {
@@ -155,8 +153,6 @@ contract MemeProcessManagerTest is Test {
 
         vm.expectRevert(MemeProcessManager.MPM__NothingToRefund.selector);
         memeProcessManager.refund();
-
-        /// @dev Test after kill
     }
 
     function test_CheckUpkeepIsFalse() public skipFork {
