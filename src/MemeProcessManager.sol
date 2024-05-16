@@ -231,7 +231,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
             }
         }
 
-        s_unprocessedMemes = new uint[](0);
+        delete s_unprocessedMemes;
         s_lastTimeStamp = block.timestamp;
 
         emit MemesProcessed(true);
@@ -264,5 +264,9 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
 
     function getUnprocessedMemes() external view returns (uint[] memory) {
         return s_unprocessedMemes;
+    }
+
+    function getLastTimeStamp() external view returns (uint) {
+        return s_lastTimeStamp;
     }
 }
