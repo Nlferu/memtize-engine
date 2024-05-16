@@ -4,9 +4,8 @@ pragma solidity ^0.8.24;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {INonfungiblePositionManager} from "./Interfaces/INonfungiblePositionManager.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-contract MemeCoinDexer is Ownable, IERC721Receiver {
+contract MemeCoinDexer is Ownable {
     /// @dev Errors
     error MCD__SwapETHFailed();
     error MCD__DexMemeFailed();
@@ -25,13 +24,10 @@ contract MemeCoinDexer is Ownable, IERC721Receiver {
     /** @dev Calculation Formula: ((sqrtPriceX96**2)/(2**192))*(10**(token0 decimals - token1 decimals))
      * This  gives us the price of token0 in token1, where token0 -> meme token ERC20, token1 -> WETH
      */
-    /// @dev InitialPrice expression: 0.01 WETH for 1 000 000 AST | 79228162514264337593543950 -> 0.1 WETH for 100 000 AST
+    /// @dev InitialPrice expression: 1 WETH for 100 000 000 ERC20 | 79228162514264337593543950 -> 1 WETH for 1 000 000 ERC20
     uint160 private constant INITIAL_PRICE = 7922816251426433759354395;
     address private constant WETH_ADDRESS = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
     uint24 private constant FEE = 3000;
-    /// @dev Previously 1_000_000 for 0.1 WETH
-    //uint private WETH_AMOUNT = 0.1 * 10 ** 18; /// @dev ERROR -> take this value from Minter
-    uint private constant MEME_AMOUNT = 450_000 * 10 ** 18; /// @dev ERROR -> take this value from Minter THIS CAN STAY CONSTANT
 
     /// @dev Mappings
     mapping(uint => uint) private s_nftToTimeLeft;
@@ -39,8 +35,8 @@ contract MemeCoinDexer is Ownable, IERC721Receiver {
     /// @dev Events
     event FundsReceived(uint indexed amount);
     event Swapped_ETH_For_WETH(uint indexed amount);
-    event MemeDexRequestReceived(address indexed token);
-    event MemeDexedSuccessfully(address indexed token);
+    event MemeDexRequestReceived(address indexed coin);
+    event MemeDexedSuccessfully(address indexed coin, uint indexed nftId);
 
     /// @dev Constructor
     constructor(address mcm) Ownable(msg.sender) {
@@ -55,28 +51,28 @@ contract MemeCoinDexer is Ownable, IERC721Receiver {
     }
 
     /// @notice Swaps ETH into WETH, creates, initializes and adds liquidity pool for new meme token
-    /// @param memeToken Address of ERC20 meme token minted by MCM contract
-    function dexMeme(address memeToken, uint wethAmount) external {
+    /// @param memeCoinAddress Address of ERC20 meme token minted by MCM contract
+    function dexMeme(address memeCoinAddress, uint wethAmount, uint memeCoinAmount) external {
         if (msg.sender != i_mcm) revert MCD__NotMemeCoinMinterCaller();
-        emit MemeDexRequestReceived(memeToken);
+        emit MemeDexRequestReceived(memeCoinAddress);
 
         swapETH();
 
         /// @dev Creating And Initializing Pool
-        INonfungiblePositionManager(NFT_POSITION_MANAGER).createAndInitializePoolIfNecessary(memeToken, WETH_ADDRESS, FEE, INITIAL_PRICE);
+        INonfungiblePositionManager(NFT_POSITION_MANAGER).createAndInitializePoolIfNecessary(memeCoinAddress, WETH_ADDRESS, FEE, INITIAL_PRICE);
 
         // Approve tokens for the position manager
         IERC20(WETH_ADDRESS).approve(NFT_POSITION_MANAGER, wethAmount);
-        IERC20(memeToken).approve(NFT_POSITION_MANAGER, MEME_AMOUNT);
+        IERC20(memeCoinAddress).approve(NFT_POSITION_MANAGER, memeCoinAmount);
 
         // Add liquidity to the new pool using mint
         INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager.MintParams({
-            token0: memeToken,
+            token0: memeCoinAddress,
             token1: WETH_ADDRESS,
             fee: FEE, // Fee tier 0.30%
             tickLower: -887220, // Near 0 price
             tickUpper: 887220, // Extremely high price
-            amount0Desired: MEME_AMOUNT, // Meme token amount sent to manager to provide liquidity
+            amount0Desired: memeCoinAmount, // Meme token amount sent to manager to provide liquidity
             amount1Desired: wethAmount, // WETH token amount sent to manager to provide liquidity
             amount0Min: 0,
             amount1Min: 0,
@@ -86,19 +82,12 @@ contract MemeCoinDexer is Ownable, IERC721Receiver {
 
         (uint tokenId, , , ) = INonfungiblePositionManager(NFT_POSITION_MANAGER).mint(params);
 
-        /// s_received_NFTs.push(tokenId); -> @dev CHECK IF 'onERC721Received()' adds it properly
         s_nftToTimeLeft[tokenId] = (block.timestamp + 52 weeks);
-        s_memeCoinsDexed.push(memeToken);
-
-        emit MemeDexedSuccessfully(memeToken);
-    }
-
-    /// @notice This is needed as NonfungiblePositionManager is issuing NFT once we initialize liquidity pool
-    /// @param tokenId The ID of the NFT
-    function onERC721Received(address /* operator */, address /* from */, uint tokenId, bytes memory /* data */) external override returns (bytes4) {
+        s_memeCoinsDexed.push(memeCoinAddress);
+        /// @dev NonfungiblePositionManager is minting NFT directly to this contract, so we do not need 'IERC721Receiver' with 'onERC721Received()'
         s_received_NFTs.push(tokenId);
 
-        return this.onERC721Received.selector;
+        emit MemeDexedSuccessfully(memeCoinAddress, tokenId);
     }
 
     //////////////////////////////////// @notice MCD Internal Functions ////////////////////////////////////
