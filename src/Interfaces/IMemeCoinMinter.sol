@@ -14,6 +14,7 @@ interface IMemeCoinMinter {
     /// @param team Dex Your Meme team wallet address
     /// @param recipients Array parallel to 'amounts[]' contains all funders of new ERC20 Meme Token
     /// @param amounts Array parallel to 'recipients[]' contains all funds of new ERC20 Meme Token
+    /// @param totalMemeCoins Amount of new ERC20 to be crafted
     /// @param totalFunds Sum of ETH gathered for new ERC20 Meme Token
     /// @param mcd MemeCoinDexer contract address
     struct MintParams {
@@ -23,6 +24,7 @@ interface IMemeCoinMinter {
         address team;
         address[] recipients;
         uint256[] amounts;
+        uint256 totalMemeCoins;
         uint256 totalFunds;
         address mcd;
     }
