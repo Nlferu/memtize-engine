@@ -25,6 +25,3 @@ NFT: 15471
 https://app.uniswap.org/pools/15471
 
 Formula for price calculation: price = ((sqrtPriceX96**2)/(2**192))\*(10\*\*(token0 decimals - token1 decimals))
-
-0.100_000_000_000_000_005
-100_000.000_000_000_000_000_005
