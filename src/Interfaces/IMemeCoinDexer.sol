@@ -8,5 +8,7 @@ interface IMemeCoinDexer {
 
     /// @notice Creates, initializes and adds liquidity pool for new meme token
     /// @param memeToken Meme token address to be dexed
-    function dexMeme(address memeToken, uint wethAmount) external;
+    /// @param wethAmount WETH tokens amount
+    /// @param memeCoinAmount Meme coin tokens amount
+    function dexMeme(address memeToken, uint wethAmount, uint memeCoinAmount) external;
 }
