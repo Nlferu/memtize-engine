@@ -87,7 +87,7 @@ contract MemeProcessManagerTest is Test {
         assertEq(creator, USER);
         assertEq(name, "Hexur The Memer");
         assertEq(symbol, "HEX");
-        assertEq(timeLeft, 30 days + 1);
+        assertEq(timeLeft, block.timestamp + 30 days);
         assertEq(totalFunds, 0);
         assertEq(funders.length, 0);
         assertEq(funds.length, 0);
@@ -98,7 +98,7 @@ contract MemeProcessManagerTest is Test {
         assertEq(creator, OWNER);
         assertEq(name, "Hastur User Fool");
         assertEq(symbol, "HUF");
-        assertEq(timeLeft, 30 days + 1);
+        assertEq(timeLeft, block.timestamp + 30 days);
         assertEq(totalFunds, 0);
         assertEq(funders.length, 0);
         assertEq(funds.length, 0);
@@ -208,25 +208,15 @@ contract MemeProcessManagerTest is Test {
         emit MemeKilled(0);
         memeProcessManager.performUpkeep("");
 
-        address creator;
-        string memory name;
-        string memory symbol;
-        uint timeLeft;
-        uint totalFunds;
-        address[] memory funders;
-        uint[] memory funds;
         MemeProcessManager.MemeStatus status;
 
-        (creator, name, symbol, timeLeft, totalFunds, funders, funds, status) = memeProcessManager.getMemeData(0);
-
+        (, , , , , , , status) = memeProcessManager.getMemeData(0);
         assert(status == MemeProcessManager.MemeStatus.DEAD);
 
-        (creator, name, symbol, timeLeft, totalFunds, funders, funds, status) = memeProcessManager.getMemeData(1);
-
+        (, , , , , , , status) = memeProcessManager.getMemeData(1);
         assert(status == MemeProcessManager.MemeStatus.DEAD);
 
-        (creator, name, symbol, timeLeft, totalFunds, funders, funds, status) = memeProcessManager.getMemeData(2);
-
+        (, , , , , , , status) = memeProcessManager.getMemeData(2);
         assert(status == MemeProcessManager.MemeStatus.DEAD);
 
         uint[] memory unprocessedMemes = memeProcessManager.getUnprocessedMemes();
@@ -235,6 +225,10 @@ contract MemeProcessManagerTest is Test {
         uint lastTimeStamp = memeProcessManager.getLastTimeStamp();
         assertEq(block.timestamp, lastTimeStamp);
         assert(firstTimeStamp < lastTimeStamp);
+
+        vm.prank(USER);
+        vm.expectRevert(MemeProcessManager.MPM__MemeDead.selector);
+        memeProcessManager.fundMeme{value: 0.55 ether}(1);
     }
 
     function test_CanRefund() public skipFork {
@@ -291,9 +285,9 @@ contract MemeProcessManagerTest is Test {
     }
 
     modifier skipFork() {
-        if (block.chainid != 31337) {
-            return;
-        }
+        /// @dev Comment below 'if' statement line to perform full coverage test with command 'make testForkSepoliaCoverage'
+        // if (block.chainid != 31337) return;
+
         _;
     }
 }
