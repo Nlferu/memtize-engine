@@ -5,6 +5,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {MemeCoinMinter} from "../src/MemeCoinMinter.sol";
 import {MemeCoinDexer} from "../src/MemeCoinDexer.sol";
 import {MemeProcessManager} from "../src/MemeProcessManager.sol";
+import {InvalidRecipient} from "../test/mocks/InvalidRecipient.sol";
 import {DeployMCM} from "../script/DeployMCM.s.sol";
 import {DeployMCD} from "../script/DeployMCD.s.sol";
 import {DeployMPM} from "../script/DeployMPM.s.sol";
@@ -187,6 +188,108 @@ contract MemeProcessManagerTest is Test {
     function test_CantPerformUpkeep() public skipFork {
         vm.expectRevert(MemeProcessManager.MPM__UpkeepNotNeeded.selector);
         memeProcessManager.performUpkeep("");
+    }
+
+    function test_CanKillMeme() public skipFork {
+        memeProcessManager.createMeme("Hexur The Memer", "HEX");
+        memeProcessManager.createMeme("Osteo Pedro", "PDR");
+        memeProcessManager.createMeme("Joke Joker", "JOK");
+
+        vm.prank(USER);
+        memeProcessManager.fundMeme{value: 0.44 ether}(0);
+
+        vm.prank(OWNER);
+        memeProcessManager.fundMeme{value: 0.55 ether}(0);
+
+        uint firstTimeStamp = memeProcessManager.getLastTimeStamp();
+
+        vm.warp(block.timestamp + 30 days + 1);
+        vm.roll(block.number + 1);
+
+        vm.expectEmit(true, true, true, true, address(memeProcessManager));
+        emit MemeKilled(0);
+        memeProcessManager.performUpkeep("");
+
+        address creator;
+        string memory name;
+        string memory symbol;
+        uint timeLeft;
+        uint totalFunds;
+        address[] memory funders;
+        uint[] memory funds;
+        MemeProcessManager.MemeStatus status;
+
+        (creator, name, symbol, timeLeft, totalFunds, funders, funds, status) = memeProcessManager.getMemeData(0);
+
+        assert(status == MemeProcessManager.MemeStatus.DEAD);
+
+        (creator, name, symbol, timeLeft, totalFunds, funders, funds, status) = memeProcessManager.getMemeData(1);
+
+        assert(status == MemeProcessManager.MemeStatus.DEAD);
+
+        (creator, name, symbol, timeLeft, totalFunds, funders, funds, status) = memeProcessManager.getMemeData(2);
+
+        assert(status == MemeProcessManager.MemeStatus.DEAD);
+
+        uint[] memory unprocessedMemes = memeProcessManager.getUnprocessedMemes();
+        assertEq(unprocessedMemes.length, 0);
+
+        uint lastTimeStamp = memeProcessManager.getLastTimeStamp();
+        assertEq(block.timestamp, lastTimeStamp);
+        assert(firstTimeStamp < lastTimeStamp);
+    }
+
+    function test_CanRefund() public {
+        vm.prank(USER_THREE);
+        memeProcessManager.createMeme("Hexur The Memer", "HEX");
+
+        vm.prank(OWNER);
+        memeProcessManager.fundMeme{value: 0.55 ether}(0);
+
+        vm.prank(USER);
+        memeProcessManager.fundMeme{value: 0.44 ether}(0);
+
+        uint ownerBalance = OWNER.balance;
+        uint userBalance = USER.balance;
+
+        vm.warp(block.timestamp + 30 days + 1);
+        vm.roll(block.number + 1);
+
+        memeProcessManager.performUpkeep("");
+
+        vm.expectEmit(true, true, true, true, address(memeProcessManager));
+        emit RefundPerformed(OWNER, 0.55 ether);
+        vm.prank(OWNER);
+        memeProcessManager.refund();
+
+        vm.prank(USER);
+        memeProcessManager.refund();
+
+        assertEq(OWNER.balance, ownerBalance + 0.55 ether);
+        assertEq(USER.balance, userBalance + 0.44 ether);
+    }
+
+    function test_CantRefundToInvalidRecipient() public {
+        vm.prank(USER_TWO);
+        memeProcessManager.createMeme("Hexur The Memer", "HEX");
+
+        InvalidRecipient invalidRecipient = new InvalidRecipient();
+        deal(address(invalidRecipient), STARTING_BALANCE);
+
+        vm.prank(address(invalidRecipient));
+        memeProcessManager.fundMeme{value: 0.55 ether}(0);
+
+        vm.warp(block.timestamp + 30 days + 1);
+        vm.roll(block.number + 1);
+
+        memeProcessManager.performUpkeep("");
+
+        vm.prank(address(invalidRecipient));
+        vm.expectRevert(MemeProcessManager.MPM__TransferFailed.selector);
+        memeProcessManager.refund();
+
+        uint invalidRecipientBalance = memeProcessManager.getFunderToFunds(address(invalidRecipient));
+        assertEq(invalidRecipientBalance, 0.55 ether);
     }
 
     modifier skipFork() {
