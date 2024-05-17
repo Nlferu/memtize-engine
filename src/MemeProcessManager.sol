@@ -137,7 +137,6 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
     /// @param id Meme id that we want to work with
     function hypeMeme(uint id) internal {
         Meme storage meme = s_memes[id];
-        if (meme.idToMemeStatus == MemeStatus.DEAD) revert MPM__MemeDead();
 
         address[] memory recipients = meme.idToFunders;
         uint[] memory amounts = new uint[](recipients.length);
@@ -179,7 +178,6 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
     /// @param id Meme id that we want to work with
     function killMeme(uint id) internal {
         Meme storage meme = s_memes[id];
-        if (meme.idToMemeStatus == MemeStatus.DEAD) revert MPM__MemeDead();
 
         address[] memory funders = meme.idToFunders;
 
@@ -222,13 +220,11 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
             uint memeId = unprocessedMemes[i];
             Meme storage meme = s_memes[memeId];
 
-            if (meme.idToMemeStatus == MemeStatus.ALIVE) {
-                if (meme.idToTotalFunds >= HYPE) hypeMeme(memeId);
+            if (meme.idToTotalFunds >= HYPE && meme.idToMemeStatus == MemeStatus.ALIVE) hypeMeme(memeId);
 
-                if (meme.idToTimeLeft < block.timestamp && meme.idToTotalFunds < HYPE) killMeme(memeId);
+            if (meme.idToTimeLeft < block.timestamp && meme.idToTotalFunds < HYPE && meme.idToMemeStatus == MemeStatus.ALIVE) killMeme(memeId);
 
-                meme.idToMemeStatus = MemeStatus.DEAD;
-            }
+            meme.idToMemeStatus = MemeStatus.DEAD;
         }
 
         delete s_unprocessedMemes;
@@ -266,7 +262,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
         return s_unprocessedMemes;
     }
 
-    function getLastTimeStamp() external view returns (uint) {
-        return s_lastTimeStamp;
+    function getConstructorData() external view returns (address, address, uint, uint) {
+        return (i_mcm, i_mcd, i_interval, s_lastTimeStamp);
     }
 }
