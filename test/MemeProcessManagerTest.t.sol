@@ -60,7 +60,16 @@ contract MemeProcessManagerTest is Test {
         deal(USER_THREE, STARTING_BALANCE);
     }
 
-    function test_Constructor() public {}
+    function test_InitializesCorrectly() public skipFork {
+        MemeProcessManager newMPM = new MemeProcessManager(address(memeCoinMinter), address(memeCoinDexer), INTERVAL);
+
+        (address mcm, address mcd, uint interval, uint time) = newMPM.getConstructorData();
+
+        assertEq(address(memeCoinMinter), mcm, "MCM address not initialized correctly");
+        assertEq(address(memeCoinDexer), mcd, "MCD address not initialized correctly");
+        assertEq(INTERVAL, interval, "Interval not initialized correctly");
+        assertEq(block.timestamp, time, "Last time stamp not initialized correctly");
+    }
 
     function test_CreateMeme() public skipFork {
         vm.expectEmit(true, true, true, true, address(memeProcessManager));
@@ -199,7 +208,7 @@ contract MemeProcessManagerTest is Test {
         vm.prank(OWNER);
         memeProcessManager.fundMeme{value: 0.55 ether}(0);
 
-        uint firstTimeStamp = memeProcessManager.getLastTimeStamp();
+        (, , , uint firstTimeStamp) = memeProcessManager.getConstructorData();
 
         vm.warp(block.timestamp + 30 days + 1);
         vm.roll(block.number + 1);
@@ -222,7 +231,7 @@ contract MemeProcessManagerTest is Test {
         uint[] memory unprocessedMemes = memeProcessManager.getUnprocessedMemes();
         assertEq(unprocessedMemes.length, 0);
 
-        uint lastTimeStamp = memeProcessManager.getLastTimeStamp();
+        (, , , uint lastTimeStamp) = memeProcessManager.getConstructorData();
         assertEq(block.timestamp, lastTimeStamp);
         assert(firstTimeStamp < lastTimeStamp);
 
@@ -282,6 +291,22 @@ contract MemeProcessManagerTest is Test {
 
         uint invalidRecipientBalance = memeProcessManager.getFunderToFunds(address(invalidRecipient));
         assertEq(invalidRecipientBalance, 0.55 ether);
+    }
+
+    function test_KillMemeTransferFailed() public skipFork {
+        InvalidRecipient mockDexer = new InvalidRecipient();
+        MemeProcessManager mockMPM = new MemeProcessManager(address(memeCoinMinter), address(mockDexer), INTERVAL);
+
+        mockMPM.createMeme("Hexur The Memer", "HEX");
+
+        vm.prank(USER);
+        mockMPM.fundMeme{value: 6 ether}(0);
+
+        vm.warp(block.timestamp + 32);
+        vm.roll(block.number + 1);
+
+        vm.expectRevert(MemeProcessManager.MPM__TransferFailed.selector);
+        mockMPM.performUpkeep("");
     }
 
     modifier skipFork() {
