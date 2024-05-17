@@ -5,6 +5,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {MemeCoinMinter} from "../../src/MemeCoinMinter.sol";
 import {MemeCoinDexer} from "../../src/MemeCoinDexer.sol";
 import {MemeProcessManager} from "../../src/MemeProcessManager.sol";
+import {InvalidRecipient} from "../mocks/InvalidRecipient.sol";
 import {DeployMCM} from "../../script/DeployMCM.s.sol";
 import {DeployMCD} from "../../script/DeployMCD.s.sol";
 import {DeployMPM} from "../../script/DeployMPM.s.sol";
@@ -59,7 +60,7 @@ contract ManagerStagingTest is Test {
         deal(USER_THREE, STARTING_BALANCE);
     }
 
-    function test_CanPerformUpkeep() public onlyOnForkNetwork {
+    function test_CanPerformUpkeepAndHypeMeme() public onlyOnForkNetwork {
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
         memeProcessManager.createMeme("Osteo Pedro", "PDR");
         memeProcessManager.createMeme("Joke Joker", "JOK");
@@ -83,7 +84,6 @@ contract ManagerStagingTest is Test {
         vm.warp(block.timestamp + 32);
         vm.roll(block.number + 1);
 
-        vm.prank(USER);
         memeProcessManager.performUpkeep("");
 
         uint dexerBalance = memeCoinDexer.getUserTokenBalance(address(memeCoinDexer), 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14);
