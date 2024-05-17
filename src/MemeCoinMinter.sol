@@ -29,3 +29,5 @@ contract MemeCoinMinter is IMemeCoinMinter, Ownable {
         emit IMemeCoinDexer.MemeDexRequestReceived(address(newCoin));
     }
 }
+
+/// @dev TODO: Functions 50% tests coverage fix
