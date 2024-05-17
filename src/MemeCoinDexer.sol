@@ -167,4 +167,8 @@ contract MemeCoinDexer is Ownable {
     function getUserTokenBalance(address user, address token) external view returns (uint) {
         return IERC20(token).balanceOf(user);
     }
+
+    function getConstructorData() external view returns (address) {
+        return i_mcm;
+    }
 }
