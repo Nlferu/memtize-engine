@@ -32,6 +32,9 @@ testForkSepolia:
 testForkSepoliaCoverage:
 	forge coverage --fork-url $(SEPOLIA_RPC_URL)
 
+testForkSepoliaCoverageReport:
+	forge coverage --fork-url $(SEPOLIA_RPC_URL) --report lcov
+
 testOneFn:
 	forge test --fork-url $(SEPOLIA_RPC_URL) --mt test_CanPerformUpkeep -vvvv
 
