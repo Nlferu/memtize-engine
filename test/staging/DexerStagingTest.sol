@@ -6,9 +6,11 @@ import {MemeCoinMinter} from "../../src/MemeCoinMinter.sol";
 import {MemeCoinDexer} from "../../src/MemeCoinDexer.sol";
 import {MemeProcessManager} from "../../src/MemeProcessManager.sol";
 import {InvalidRecipient} from "../mock/InvalidRecipient.sol";
+import {ISwapRouter} from "../../src/Interfaces/ISwapRouter.sol";
 import {DeployMCM} from "../../script/DeployMCM.s.sol";
 import {DeployMCD} from "../../script/DeployMCD.s.sol";
 import {DeployMPM} from "../../script/DeployMPM.s.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract DexerStagingTest is Test {
     address private constant WETH = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
@@ -42,6 +44,7 @@ contract DexerStagingTest is Test {
 
     address private OWNER;
     address private USER = makeAddr("user");
+    address private DEVIL = makeAddr("devil");
     address private USER_TWO = makeAddr("user_two");
     address private USER_THREE = makeAddr("user_three");
     uint256 private constant STARTING_BALANCE = 100 ether;
@@ -61,9 +64,14 @@ contract DexerStagingTest is Test {
         OWNER = memeProcessManager.owner();
 
         deal(OWNER, STARTING_BALANCE);
+        deal(DEVIL, STARTING_BALANCE);
         deal(USER, STARTING_BALANCE);
         deal(USER_TWO, STARTING_BALANCE);
         deal(USER_THREE, STARTING_BALANCE);
+
+        vm.prank(DEVIL);
+        (bool success, ) = WETH.call{value: 50 ether}(abi.encodeWithSignature("deposit()"));
+        if (success) console.log("Swap for Devil performed successfully!");
     }
 
     function test_CanSetProperBalancesAfterHypeMeme() public memesDexedTimePassed onlyOnForkNetwork {
@@ -96,7 +104,59 @@ contract DexerStagingTest is Test {
     function test_CanCollectFees() public memesDexedTimePassed onlyOnForkNetwork {
         uint[] memory tokens = memeCoinDexer.getAllTokens();
 
-        vm.expectRevert();
+        /// @dev Sepolia
+        address swapRouter02 = 0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E;
+
+        bytes memory path = abi.encodePacked(WETH, uint24(3000), TOKEN_ONE);
+
+        ISwapRouter.ExactInputParams memory params = ISwapRouter.ExactInputParams({
+            path: path,
+            recipient: DEVIL,
+            amountIn: 1 ether,
+            amountOutMinimum: 1_000_000
+        });
+
+        uint wethBal;
+        uint tokenBal;
+
+        wethBal = memeCoinDexer.getUserTokenBalance(DEVIL, WETH);
+        tokenBal = memeCoinDexer.getUserTokenBalance(DEVIL, TOKEN_ONE);
+        console.log("Devil WETH Before: ", wethBal / 1e18);
+        console.log("Devil Token Before: ", tokenBal / 1e18);
+
+        vm.startPrank(DEVIL);
+        IERC20(WETH).approve(swapRouter02, 1 ether);
+        ISwapRouter(swapRouter02).exactInput(params);
+        vm.stopPrank();
+
+        wethBal = memeCoinDexer.getUserTokenBalance(DEVIL, WETH);
+        tokenBal = memeCoinDexer.getUserTokenBalance(DEVIL, TOKEN_ONE);
+        console.log("Devil WETH After: ", wethBal / 1e18);
+        console.log("Devil Token After: ", tokenBal / 1e18);
+
+        bytes memory path_two = abi.encodePacked(TOKEN_ONE, uint24(3000), WETH);
+
+        ISwapRouter.ExactInputParams memory params_two = ISwapRouter.ExactInputParams({
+            path: path_two,
+            recipient: DEVIL,
+            amountIn: 1_000_000 ether,
+            amountOutMinimum: 0.01 ether
+        });
+
+        vm.startPrank(DEVIL);
+        IERC20(TOKEN_ONE).approve(swapRouter02, 1_000_000 ether);
+        ISwapRouter(swapRouter02).exactInput(params_two);
+        vm.stopPrank();
+
+        address[] memory coins = memeCoinDexer.getDexedCoins();
+
+        console.log("Token One: ", tokens[0]);
+        console.log("Token Two: ", tokens[1]);
+        console.log("Coins Dexed: ", coins[0]);
+        console.log("TOKEN_ONE: ", TOKEN_ONE);
+        console.log("Coins Dexed 2nd: ", coins[1]);
+
+        vm.prank(memeCoinDexer.owner());
         memeCoinDexer.collectFees(tokens[0]);
     }
 
