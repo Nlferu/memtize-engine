@@ -36,7 +36,7 @@ testForkSepoliaCoverageReport:
 	forge coverage --fork-url $(SEPOLIA_RPC_URL) --report lcov
 
 testOneFn:
-	forge test --fork-url $(SEPOLIA_RPC_URL) --mt test_CanPerformUpkeep -vvvv
+	forge test --fork-url $(SEPOLIA_RPC_URL) --mt test_CanCollectFees -vvvv
 
 testForkMainnet:
 	forge test --fork-url $(MAINNET_RPC_URL) -vvvv
