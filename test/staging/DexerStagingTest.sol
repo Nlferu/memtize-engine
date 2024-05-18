@@ -66,32 +66,7 @@ contract DexerStagingTest is Test {
         deal(USER_THREE, STARTING_BALANCE);
     }
 
-    function test_CanSetProperBalancesAfterHypeMeme() public onlyOnForkNetwork {
-        memeProcessManager.createMeme("Hexur The Memer", "HEX");
-        memeProcessManager.createMeme("Osteo Pedro", "PDR");
-        memeProcessManager.createMeme("Joke Joker", "JOK");
-        memeProcessManager.createMeme("Lama Lou", "LAM");
-
-        vm.prank(USER);
-        memeProcessManager.fundMeme{value: 1 ether}(1);
-
-        vm.prank(USER_TWO);
-        memeProcessManager.fundMeme{value: 2 ether}(1);
-
-        vm.prank(USER_THREE);
-        memeProcessManager.fundMeme{value: 8 ether}(1);
-
-        vm.prank(OWNER);
-        memeProcessManager.fundMeme{value: 0.99 ether}(0);
-
-        vm.prank(OWNER);
-        memeProcessManager.fundMeme{value: 5 ether}(2);
-
-        vm.warp(block.timestamp + 32);
-        vm.roll(block.number + 1);
-
-        memeProcessManager.performUpkeep("");
-
+    function test_CanSetProperBalancesAfterHypeMeme() public memesDexedTimePassed onlyOnForkNetwork {
         uint dexerBalance = memeCoinDexer.getUserTokenBalance(address(memeCoinDexer), WETH);
         uint dexerErc1 = memeCoinDexer.getUserTokenBalance(address(memeCoinDexer), TOKEN_ONE);
         uint dexerErc2 = memeCoinDexer.getUserTokenBalance(address(memeCoinDexer), TOKEN_TWO);
@@ -116,6 +91,38 @@ contract DexerStagingTest is Test {
 
         assertEq(tokens.length, 2);
         assertEq(dexedMemes.length, 2);
+    }
+
+    function test_CanCollectFees() public memesDexedTimePassed onlyOnForkNetwork {
+        uint[] memory tokens = memeCoinDexer.getAllTokens();
+
+        vm.expectRevert();
+        memeCoinDexer.collectFees(tokens[0]);
+    }
+
+    modifier memesDexedTimePassed() {
+        memeProcessManager.createMeme("Hexur The Memer", "HEX");
+        memeProcessManager.createMeme("Osteo Pedro", "PDR");
+        memeProcessManager.createMeme("Joke Joker", "JOK");
+        memeProcessManager.createMeme("Lama Lou", "LAM");
+
+        vm.prank(USER);
+        memeProcessManager.fundMeme{value: 1 ether}(1);
+        vm.prank(USER_TWO);
+        memeProcessManager.fundMeme{value: 2 ether}(1);
+        vm.prank(USER_THREE);
+        memeProcessManager.fundMeme{value: 8 ether}(1);
+        vm.prank(OWNER);
+        memeProcessManager.fundMeme{value: 0.99 ether}(0);
+        vm.prank(OWNER);
+        memeProcessManager.fundMeme{value: 5 ether}(2);
+
+        vm.warp(block.timestamp + 32);
+        vm.roll(block.number + 1);
+
+        memeProcessManager.performUpkeep("");
+
+        _;
     }
 
     modifier onlyOnForkNetwork() {
