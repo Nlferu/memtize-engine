@@ -56,7 +56,7 @@ contract MemeCoinDexer is Ownable {
         if (msg.sender != i_mcm) revert MCD__NotMemeCoinMinterCaller();
         emit MemeDexRequestReceived(memeCoinAddress);
 
-        swapETH();
+        swapETH(wethAmount);
 
         /// @dev Creating And Initializing Pool
         INonfungiblePositionManager(NFT_POSITION_MANAGER).createAndInitializePoolIfNecessary(memeCoinAddress, WETH_ADDRESS, FEE, INITIAL_PRICE);
@@ -93,8 +93,8 @@ contract MemeCoinDexer is Ownable {
     //////////////////////////////////// @notice MCD Internal Functions ////////////////////////////////////
 
     /// @notice Swaps ETH for WETH to be able to proceed with 'dexMeme()' function
-    function swapETH() internal {
-        (bool success, ) = WETH_ADDRESS.call{value: address(this).balance}(abi.encodeWithSignature("deposit()"));
+    function swapETH(uint wethAmount) internal {
+        (bool success, ) = WETH_ADDRESS.call{value: wethAmount}(abi.encodeWithSignature("deposit()"));
 
         if (!success) revert MCD__SwapETHFailed();
 
@@ -154,6 +154,23 @@ contract MemeCoinDexer is Ownable {
 
         INonfungiblePositionManager(NFT_POSITION_MANAGER).burn(tokenId);
     }
+
+    /// @notice Allows to withdraw all coins pending on contract after burn
+    /// @param coin Address of dexed and burned meme coin or weth
+    function gatherCoins(address coin) external onlyOwner {
+        IERC20(coin).transferFrom(address(this), owner(), IERC20(coin).balanceOf(address(this)));
+
+        emit IERC20.Transfer(address(this), owner(), IERC20(coin).balanceOf(address(this)));
+    }
+
+    // this might be not necessary
+    // function withdraw() external onlyOwner {
+    //     emit WithdrawPerformed(address(this).balance);
+
+    //     (bool success, ) = owner().call{value: address(this).balance}("");
+
+    //     if (!success) revert MCD__TransferFailed();
+    // }
 
     //////////////////////////////////// @notice MCD Getter Functions ////////////////////////////////////
 
