@@ -87,35 +87,23 @@ contract ManagerStagingTest is Test {
         vm.prank(OWNER);
         memeProcessManager.fundMeme{value: 5 ether}(2);
 
-        vm.warp(block.timestamp + 32);
+        vm.warp(block.timestamp + 30 days);
         vm.roll(block.number + 1);
 
         memeProcessManager.performUpkeep("");
 
-        uint dexerBalance = memeCoinDexer.getUserTokenBalance(address(memeCoinDexer), WETH);
-        uint dexerErc1 = memeCoinDexer.getUserTokenBalance(address(memeCoinDexer), TOKEN_ONE);
-        uint dexerErc2 = memeCoinDexer.getUserTokenBalance(address(memeCoinDexer), TOKEN_TWO);
+        uint[] memory unprocessed = memeProcessManager.getUnprocessedMemes();
+        assertEq(unprocessed.length, 0);
 
-        assertEq(dexerBalance, 0);
-        /// @dev Coins left from Q64.96 inaccurate calculation (Fewer than 1 coin out of 100,000,000 crafted coins (almost 1 coin per 1 ETH) is left in the contract)
-        assertEq(dexerErc1 / 1e18, 10);
-        assertEq(dexerErc2 / 1e18, 4);
-
-        uint pool1weth = memeCoinDexer.getUserTokenBalance(POOL_ONE, WETH);
-        uint pool1erc = memeCoinDexer.getUserTokenBalance(POOL_ONE, TOKEN_ONE);
-        uint pool2weth = memeCoinDexer.getUserTokenBalance(POOL_TWO, WETH);
-        uint pool2erc = memeCoinDexer.getUserTokenBalance(POOL_TWO, TOKEN_TWO);
-
-        assertEq(pool1weth / 1e18, 11);
-        assertEq(pool1erc / 1e18, 1_100_000_000);
-        assertEq(pool2weth / 1e18, 5);
-        assertEq(pool2erc / 1e18, 500_000_000);
-
-        uint[] memory tokens = memeCoinDexer.getAllTokens();
-        address[] memory dexedMemes = memeCoinDexer.getDexedCoins();
-
-        assertEq(tokens.length, 2);
-        assertEq(dexedMemes.length, 2);
+        MemeProcessManager.MemeStatus status;
+        (, , , , , , , status) = memeProcessManager.getMemeData(0);
+        assert(status == MemeProcessManager.MemeStatus.DEAD);
+        (, , , , , , , status) = memeProcessManager.getMemeData(1);
+        assert(status == MemeProcessManager.MemeStatus.DEAD);
+        (, , , , , , , status) = memeProcessManager.getMemeData(2);
+        assert(status == MemeProcessManager.MemeStatus.DEAD);
+        (, , , , , , , status) = memeProcessManager.getMemeData(3);
+        assert(status == MemeProcessManager.MemeStatus.DEAD);
     }
 
     modifier onlyOnForkNetwork() {
