@@ -120,7 +120,9 @@ contract MemeCoinDexer is Ownable {
         emit INonfungiblePositionManager.Collect(tokenId, owner(), position.tokensOwed0, position.tokensOwed1);
     }
 
-    /// @dev THIS FUNCTION IS BLOCKED FOR 1 YEAR TO PREVENT RUG PULL ACTIONS ON NEWLY DEXED MEME COINS
+    ///************************************************************************************************//
+    /// @dev THIS FUNCTION IS BLOCKED FOR 1 YEAR TO PREVENT RUG PULL ACTIONS ON NEWLY DEXED MEME COINS //
+    ///************************************************************************************************//
     /// @notice Decreases the amount of liquidity in a position and accounts it to the position
     /// @param tokenId The ID of the token for which liquidity is being decreased
     /// @param liquidity The amount by which liquidity will be decreased
@@ -142,7 +144,9 @@ contract MemeCoinDexer is Ownable {
         emit INonfungiblePositionManager.DecreaseLiquidity(tokenId, liquidity, memeTokenAmount, wethAmount);
     }
 
-    /// @dev THIS FUNCTION IS BLOCKED FOR 1 YEAR TO PREVENT RUG PULL ACTIONS ON NEWLY DEXED MEME COINS
+    ///************************************************************************************************//
+    /// @dev THIS FUNCTION IS BLOCKED FOR 1 YEAR TO PREVENT RUG PULL ACTIONS ON NEWLY DEXED MEME COINS //
+    ///************************************************************************************************//
     /// @notice Burns a token ID, which deletes it from the NFT contract. The token must have 0 liquidity and all tokens must be collected first.
     /// @param tokenId The ID of the token that is being burned
     function burn(uint tokenId) external payable onlyOwner {
