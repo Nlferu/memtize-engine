@@ -106,18 +106,14 @@ contract MemeCoinDexer is Ownable {
     /// @notice Collects up to a maximum amount of fees owed to a specific position to the recipient
     /// @param tokenId The ID of the NFT for which tokens are being collected
     function collectFees(uint tokenId) external payable onlyOwner {
-        INonfungiblePositionManager.NFTPosition memory position = INonfungiblePositionManager(NFT_POSITION_MANAGER).positions(tokenId);
-
         INonfungiblePositionManager.CollectParams memory params = INonfungiblePositionManager.CollectParams({
             tokenId: tokenId, // NFT token Id that represents liquidity pool
             recipient: owner(), // DYM Team wallet address
-            amount0Max: position.tokensOwed0, // ERC20 meme token
-            amount1Max: position.tokensOwed1 // WETH
+            amount0Max: type(uint128).max, // ERC20 (type(uint128).max - Gathering all accumulated fees)
+            amount1Max: type(uint128).max // WETH (type(uint128).max - Gathering all accumulated fees)
         });
 
         INonfungiblePositionManager(NFT_POSITION_MANAGER).collect(params);
-
-        emit INonfungiblePositionManager.Collect(tokenId, owner(), position.tokensOwed0, position.tokensOwed1);
     }
 
     ///************************************************************************************************//
