@@ -30,10 +30,15 @@ contract DecreaseLiquidity is Script {
 }
 
 contract Burn is Script {
-    function run(address mcd, uint tokenId) external {
+    uint private constant SLIPPAGE = 1;
+
+    function run(address mcd, uint tokenId, address pool) external {
         uint256 deployerKey = vm.envUint("PRIVATE_KEY");
+        uint128 liquidity = IUniswapV3Pool(pool).liquidity();
 
         vm.startBroadcast(deployerKey);
+        IMemeCoinDexer(mcd).decreaseLiquidity(tokenId, liquidity, SLIPPAGE, SLIPPAGE);
+        IMemeCoinDexer(mcd).collect(tokenId);
         IMemeCoinDexer(mcd).burn(tokenId);
         vm.stopBroadcast();
     }
