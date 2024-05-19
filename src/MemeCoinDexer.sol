@@ -105,7 +105,7 @@ contract MemeCoinDexer is Ownable {
 
     /// @notice Collects up to a maximum amount of fees owed to a specific position to the recipient
     /// @param tokenId The ID of the NFT for which tokens are being collected
-    function collectFees(uint tokenId) external payable {
+    function collect(uint tokenId) external payable {
         INonfungiblePositionManager.CollectParams memory params = INonfungiblePositionManager.CollectParams({
             tokenId: tokenId, // NFT token Id that represents liquidity pool
             recipient: owner(), // DYM Team wallet address
