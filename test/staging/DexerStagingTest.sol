@@ -19,6 +19,7 @@ contract DexerStagingTest is Test {
     address private constant TOKEN_TWO = 0x35FbaaadF61e69186B7c7Fc2aF92001aEB338f68;
     address private constant POOL_ONE = 0x76e693a8B9C8825bE804CA4e0bEdF9e4D5b92918;
     address private constant POOL_TWO = 0x0b3cb9Bdb44F436E060687B6f9eBf9cBc3c5a326;
+    uint private constant SLIPPAGE = 1;
 
     event MemeCreated(uint indexed id, address indexed creator, string name, string symbol);
     event MemeFunded(uint indexed id, uint indexed value);
@@ -129,6 +130,42 @@ contract DexerStagingTest is Test {
         assertEq(ownerErc20BalanceAfter, ownerErc20Balance + feesOwed0);
         assertEq(ownerWETHBalanceAfter, ownerWETHBalance + feesOwed1);
     }
+
+    function test_CanDecreaseLiquidityAfterTimePass() public memesDexedTimePassed onlyOnForkNetwork {
+        uint[] memory tokens = memeCoinDexer.getAllTokens();
+        memeCoinDexer.collectFees(tokens[0]);
+        uint feeGrowthGlobal0X128 = IUniswapV3Pool(POOL_ONE).feeGrowthGlobal0X128();
+        uint feeGrowthGlobal1X128 = IUniswapV3Pool(POOL_ONE).feeGrowthGlobal1X128();
+        uint128 liquidity = IUniswapV3Pool(POOL_ONE).liquidity();
+
+        vm.prank(memeCoinDexer.owner());
+        vm.expectRevert(MemeCoinDexer.MCD__NotEnoughTimePassed.selector);
+        memeCoinDexer.decreaseLiquidity(tokens[0], liquidity, SLIPPAGE, SLIPPAGE);
+
+        vm.warp(block.timestamp + 52 weeks);
+        vm.roll(block.number + 1);
+
+        uint ownerErc20Balance = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), TOKEN_ONE);
+        uint ownerWETHBalance = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), WETH);
+
+        vm.prank(memeCoinDexer.owner());
+        memeCoinDexer.decreaseLiquidity(tokens[0], liquidity, SLIPPAGE, SLIPPAGE);
+
+        /// @dev After the decrease in liquidity we have to collect liquidated tokens
+        uint128 feesOwed0 = uint128((feeGrowthGlobal0X128 * liquidity) / 2 ** 128);
+        uint256 feesOwed1 = uint128((feeGrowthGlobal1X128 * liquidity) / 2 ** 128);
+
+        memeCoinDexer.collectFees(tokens[0]);
+
+        uint ownerErc20BalanceAfter = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), TOKEN_ONE);
+        uint ownerWETHBalanceAfter = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), WETH);
+
+        /// @dev Value: 1_100_000_000_000_000_597_886_004_026 has been taken from emit that communicated liquidity increase
+        assertEq(ownerErc20BalanceAfter, ownerErc20Balance + 1_100_000_000_000_000_597_886_004_026 + feesOwed0 - SLIPPAGE);
+        assertEq(ownerWETHBalanceAfter, ownerWETHBalance + 11 ether + feesOwed1 - SLIPPAGE);
+    }
+
+    function test_CanBurnAfterTimePass() public memesDexedTimePassed onlyOnForkNetwork {}
 
     modifier memesDexedTimePassed() {
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
