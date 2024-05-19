@@ -26,5 +26,5 @@ https://app.uniswap.org/pools/15471
 
 Formula for price calculation: price = ((sqrtPriceX96**2)/(2**192))\*(10\*\*(token0 decimals - token1 decimals))
 
--   HelperConfig.s.sol
--   Figure out whats wrong with Collect test
+-   HelperConfig.s.sol (add Polygon, Avalanche)
+-   Clear unused imports
