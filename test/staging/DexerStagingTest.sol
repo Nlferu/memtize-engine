@@ -195,6 +195,19 @@ contract DexerStagingTest is Test {
         memeCoinDexer.burn(tokens[0]);
     }
 
+    function test_CanGatherCoins() public memesDexedTimePassed onlyOnForkNetwork {
+        vm.startPrank(memeCoinDexer.owner());
+        memeCoinDexer.gatherCoins(TOKEN_ONE);
+        memeCoinDexer.gatherCoins(TOKEN_TWO);
+        vm.stopPrank();
+
+        uint balance_one = memeCoinDexer.getUserTokenBalance(address(memeCoinDexer), TOKEN_ONE);
+        uint balance_two = memeCoinDexer.getUserTokenBalance(address(memeCoinDexer), TOKEN_ONE);
+
+        assertEq(balance_one, 0);
+        assertEq(balance_two, 0);
+    }
+
     modifier memesDexedTimePassed() {
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
         memeProcessManager.createMeme("Osteo Pedro", "PDR");
