@@ -6,11 +6,12 @@ import {MemeCoinMinter} from "../../src/MemeCoinMinter.sol";
 import {MemeCoinDexer} from "../../src/MemeCoinDexer.sol";
 import {MemeProcessManager} from "../../src/MemeProcessManager.sol";
 import {InvalidRecipient} from "../mock/InvalidRecipient.sol";
-import {ISwapRouter} from "../../src/Interfaces/ISwapRouter.sol";
 import {DeployMCM} from "../../script/DeployMCM.s.sol";
 import {DeployMCD} from "../../script/DeployMCD.s.sol";
 import {DeployMPM} from "../../script/DeployMPM.s.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {ISwapRouter} from "../../src/Interfaces/ISwapRouter.sol";
+import {IUniswapV3Pool} from "../../src/Interfaces/IUniswapV3Pool.sol";
 
 contract DexerStagingTest is Test {
     address private constant WETH = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
@@ -101,8 +102,63 @@ contract DexerStagingTest is Test {
         assertEq(dexedMemes.length, 2);
     }
 
-    function test_CanCollectFees() public memesDexedTimePassed onlyOnForkNetwork {
+    function test_CanCollectFees() public memesDexedTimePassed swapPerformedToAccumulateFees onlyOnForkNetwork {
+        uint feeGrowthGlobal0X128 = IUniswapV3Pool(POOL_ONE).feeGrowthGlobal0X128();
+        uint feeGrowthGlobal1X128 = IUniswapV3Pool(POOL_ONE).feeGrowthGlobal1X128();
+        uint128 liquidity = IUniswapV3Pool(POOL_ONE).liquidity();
+
+        /// @dev Precalculated fees feeGrowthInside0LastX128/feeGrowthInside1LastX128 -> this will be 0
+        // uint128 feesOwed0 = (((feeGrowthGlobal0X128 - feeGrowthInside0LastX128) * liquidity) / 2**128);
+        // uint128 feesOwed1 = (((feeGrowthGlobal1X128 - feeGrowthInside1LastX128) * liquidity) / 2**128);
+        uint128 feesOwed0 = uint128((feeGrowthGlobal0X128 * liquidity) / 2 ** 128);
+        uint256 feesOwed1 = uint128((feeGrowthGlobal1X128 * liquidity) / 2 ** 128);
+        console.log("Gathered Fees ERC20: ", feesOwed0);
+        console.log("Gathered Fees WETH: ", feesOwed1);
+
+        uint ownerErc20Balance = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), TOKEN_ONE);
+        uint ownerWETHBalance = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), WETH);
+
         uint[] memory tokens = memeCoinDexer.getAllTokens();
+
+        vm.prank(memeCoinDexer.owner());
+        memeCoinDexer.collectFees(tokens[0]);
+
+        uint ownerErc20BalanceAfter = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), TOKEN_ONE);
+        uint ownerWETHBalanceAfter = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), WETH);
+
+        assertEq(ownerErc20BalanceAfter, ownerErc20Balance + feesOwed0);
+        assertEq(ownerWETHBalanceAfter, ownerWETHBalance + feesOwed1);
+    }
+
+    modifier memesDexedTimePassed() {
+        memeProcessManager.createMeme("Hexur The Memer", "HEX");
+        memeProcessManager.createMeme("Osteo Pedro", "PDR");
+        memeProcessManager.createMeme("Joke Joker", "JOK");
+        memeProcessManager.createMeme("Lama Lou", "LAM");
+
+        vm.prank(USER);
+        memeProcessManager.fundMeme{value: 1 ether}(1);
+        vm.prank(USER_TWO);
+        memeProcessManager.fundMeme{value: 2 ether}(1);
+        vm.prank(USER_THREE);
+        memeProcessManager.fundMeme{value: 8 ether}(1);
+        vm.prank(OWNER);
+        memeProcessManager.fundMeme{value: 0.99 ether}(0);
+        vm.prank(OWNER);
+        memeProcessManager.fundMeme{value: 5 ether}(2);
+
+        vm.warp(block.timestamp + 32);
+        vm.roll(block.number + 1);
+
+        memeProcessManager.performUpkeep("");
+
+        _;
+    }
+
+    modifier swapPerformedToAccumulateFees() {
+        (, int24 currentTick, , , , , ) = IUniswapV3Pool(POOL_ONE).slot0();
+        bool isInRangee = (currentTick >= -887220 && currentTick <= 887220);
+        console.log("Is Trade In Range:", isInRangee);
 
         /// @dev Sepolia
         address swapRouter02 = 0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E;
@@ -147,40 +203,6 @@ contract DexerStagingTest is Test {
         IERC20(TOKEN_ONE).approve(swapRouter02, 1_000_000 ether);
         ISwapRouter(swapRouter02).exactInput(params_two);
         vm.stopPrank();
-
-        address[] memory coins = memeCoinDexer.getDexedCoins();
-
-        console.log("Token One: ", tokens[0]);
-        console.log("Token Two: ", tokens[1]);
-        console.log("Coins Dexed: ", coins[0]);
-        console.log("TOKEN_ONE: ", TOKEN_ONE);
-        console.log("Coins Dexed 2nd: ", coins[1]);
-
-        vm.prank(memeCoinDexer.owner());
-        memeCoinDexer.collectFees(tokens[0]);
-    }
-
-    modifier memesDexedTimePassed() {
-        memeProcessManager.createMeme("Hexur The Memer", "HEX");
-        memeProcessManager.createMeme("Osteo Pedro", "PDR");
-        memeProcessManager.createMeme("Joke Joker", "JOK");
-        memeProcessManager.createMeme("Lama Lou", "LAM");
-
-        vm.prank(USER);
-        memeProcessManager.fundMeme{value: 1 ether}(1);
-        vm.prank(USER_TWO);
-        memeProcessManager.fundMeme{value: 2 ether}(1);
-        vm.prank(USER_THREE);
-        memeProcessManager.fundMeme{value: 8 ether}(1);
-        vm.prank(OWNER);
-        memeProcessManager.fundMeme{value: 0.99 ether}(0);
-        vm.prank(OWNER);
-        memeProcessManager.fundMeme{value: 5 ether}(2);
-
-        vm.warp(block.timestamp + 32);
-        vm.roll(block.number + 1);
-
-        memeProcessManager.performUpkeep("");
 
         _;
     }
