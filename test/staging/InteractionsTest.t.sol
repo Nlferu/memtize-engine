@@ -87,13 +87,7 @@ contract InteractionsTest is Test {
 
         uint[] memory tokens = memeCoinDexer.getAllTokens();
 
-        decreaseLiquidity.run(address(memeCoinDexer), tokens[0], POOL);
-        collect.run(address(memeCoinDexer), tokens[0]);
-
-        vm.warp(block.timestamp + 1 weeks);
-        vm.roll(block.number + 1);
-
-        burn.run(address(memeCoinDexer), tokens[0]);
+        burn.run(address(memeCoinDexer), tokens[0], POOL);
     }
 
     function test_GatherCoins() public memesDexedTimePassed onlyOnForkNetwork {
