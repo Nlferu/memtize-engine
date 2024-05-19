@@ -1,67 +1,50 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {MemeCoinDexer} from "../src/MemeCoinDexer.sol";
 import {Script, console} from "forge-std/Script.sol";
+import {MemeCoinDexer} from "../src/MemeCoinDexer.sol";
+import {IMemeCoinDexer} from "../src/Interfaces/IMemeCoinDexer.sol";
+import {IUniswapV3Pool} from "../src/Interfaces/IUniswapV3Pool.sol";
 
-error Interaction_Failed();
-
-interface IERC20 {
-    /** @notice Allows to check token balance for certain address */
-    function balanceOf(address account) external view returns (uint);
-}
-
-contract CollectFees is Script {
-    address private constant DYM_ADDRESS = 0x5f101cdB70bB7081D8AEa072c4E43c6f046A76fE;
-
-    function run() external {
-        swap();
-    }
-
-    function swap() internal {
+contract Collect is Script {
+    function run(address mcd, uint tokenId) external {
         uint256 deployerKey = vm.envUint("PRIVATE_KEY");
 
         vm.startBroadcast(deployerKey);
-        (bool success, ) = DYM_ADDRESS.call(abi.encodeWithSignature("swapETH()"));
-        if (!success) revert Interaction_Failed();
-
-        console.log("Swap performed successfully!");
+        IMemeCoinDexer(mcd).collect(tokenId);
         vm.stopBroadcast();
     }
 }
 
-contract CreatePool is Script {
-    address private constant DYM_ADDRESS = 0x5f101cdB70bB7081D8AEa072c4E43c6f046A76fE;
-    address private constant MEME_COIN = 0x04d2ead8945cF1186Ec4a35AC9eaFe59B109f17d;
+contract DecreaseLiquidity is Script {
+    uint private constant SLIPPAGE = 1;
 
-    function run() external {
-        pool();
-    }
-
-    function pool() internal {
+    function run(address mcd, uint tokenId, address pool) external {
         uint256 deployerKey = vm.envUint("PRIVATE_KEY");
+        uint128 liquidity = IUniswapV3Pool(pool).liquidity();
 
         vm.startBroadcast(deployerKey);
-        (bool success, ) = DYM_ADDRESS.call(abi.encodeWithSignature("dexMeme(address)", MEME_COIN));
-        if (!success) revert Interaction_Failed();
-
-        console.log("Pool created successfully!");
+        IMemeCoinDexer(mcd).decreaseLiquidity(tokenId, liquidity, SLIPPAGE, SLIPPAGE);
         vm.stopBroadcast();
     }
 }
 
-contract CheckTokenBalance is Script {
-    address private constant TOKEN_ADDRESS = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
+contract Burn is Script {
+    function run(address mcd, uint tokenId) external {
+        uint256 deployerKey = vm.envUint("PRIVATE_KEY");
 
-    function checkBalance(address token) internal view returns (uint) {
-        return IERC20(token).balanceOf(address(this));
+        vm.startBroadcast(deployerKey);
+        IMemeCoinDexer(mcd).burn(tokenId);
+        vm.stopBroadcast();
     }
+}
 
-    function run() external view returns (uint) {
-        uint256 balance = checkBalance(TOKEN_ADDRESS);
+contract GatherCoins is Script {
+    function run(address mcd, address coin) external {
+        uint256 deployerKey = vm.envUint("PRIVATE_KEY");
 
-        console.log("Balance Of WETH: ", balance);
-
-        return balance;
+        vm.startBroadcast(deployerKey);
+        IMemeCoinDexer(mcd).gatherCoins(coin);
+        vm.stopBroadcast();
     }
 }
