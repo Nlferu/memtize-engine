@@ -42,7 +42,7 @@ To get full coverage go to `test/unit/MemeProcessManagerTest.t.sol` find `skipFo
 $ make testForkSepoliaCoverage
 ```
 
-![Test Coverage](images/test_coverage.png)
+![Test Coverage](images/tests_coverage.png)
 
 ### Format
 
