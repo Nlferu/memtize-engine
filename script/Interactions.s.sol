@@ -11,7 +11,7 @@ interface IERC20 {
     function balanceOf(address account) external view returns (uint);
 }
 
-contract SwapETH is Script {
+contract CollectFees is Script {
     address private constant DYM_ADDRESS = 0x5f101cdB70bB7081D8AEa072c4E43c6f046A76fE;
 
     function run() external {
