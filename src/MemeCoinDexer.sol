@@ -149,22 +149,12 @@ contract MemeCoinDexer is Ownable {
         INonfungiblePositionManager(NFT_POSITION_MANAGER).burn(tokenId);
     }
 
-    /// @notice Allows to withdraw all coins pending on contract after burn
+    /// @notice Allows to withdraw all coins pending on contract after pool initialization (Q64.96 price format inaccuracy)
     /// @param coin Address of dexed and burned meme coin or weth
     function gatherCoins(address coin) external onlyOwner {
+        IERC20(coin).approve(address(this), IERC20(coin).balanceOf(address(this)));
         IERC20(coin).transferFrom(address(this), owner(), IERC20(coin).balanceOf(address(this)));
-
-        emit IERC20.Transfer(address(this), owner(), IERC20(coin).balanceOf(address(this)));
     }
-
-    // this might be not necessary
-    // function withdraw() external onlyOwner {
-    //     emit WithdrawPerformed(address(this).balance);
-
-    //     (bool success, ) = owner().call{value: address(this).balance}("");
-
-    //     if (!success) revert MCD__TransferFailed();
-    // }
 
     //////////////////////////////////// @notice MCD Getter Functions ////////////////////////////////////
 
