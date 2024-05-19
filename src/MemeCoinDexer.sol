@@ -105,7 +105,7 @@ contract MemeCoinDexer is Ownable {
 
     /// @notice Collects up to a maximum amount of fees owed to a specific position to the recipient
     /// @param tokenId The ID of the NFT for which tokens are being collected
-    function collectFees(uint tokenId) external payable onlyOwner {
+    function collectFees(uint tokenId) external payable {
         INonfungiblePositionManager.CollectParams memory params = INonfungiblePositionManager.CollectParams({
             tokenId: tokenId, // NFT token Id that represents liquidity pool
             recipient: owner(), // DYM Team wallet address
@@ -130,14 +130,12 @@ contract MemeCoinDexer is Ownable {
         INonfungiblePositionManager.DecreaseLiquidityParams memory params = INonfungiblePositionManager.DecreaseLiquidityParams({
             tokenId: tokenId, // The ID of the token for which liquidity was decreased
             liquidity: liquidity, // The amount by which liquidity for the NFT position was decreased
-            amount0Min: memeTokenAmount, // The amount of token0 that was accounted for the decrease in liquidity
-            amount1Min: wethAmount, // The amount of token1 that was accounted for the decrease in liquidity
+            amount0Min: memeTokenAmount, // The amount of token0 that was accounted for the decrease in liquidity (slippage)
+            amount1Min: wethAmount, // The amount of token1 that was accounted for the decrease in liquidity (slippage)
             deadline: block.timestamp + 1200 // 20 minutes deadline
         });
 
         INonfungiblePositionManager(NFT_POSITION_MANAGER).decreaseLiquidity(params);
-
-        emit INonfungiblePositionManager.DecreaseLiquidity(tokenId, liquidity, memeTokenAmount, wethAmount);
     }
 
     ///************************************************************************************************//
