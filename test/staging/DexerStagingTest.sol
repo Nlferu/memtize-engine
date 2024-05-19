@@ -165,7 +165,35 @@ contract DexerStagingTest is Test {
         assertEq(ownerWETHBalanceAfter, ownerWETHBalance + 11 ether + feesOwed1 - SLIPPAGE);
     }
 
-    function test_CanBurnAfterTimePass() public memesDexedTimePassed onlyOnForkNetwork {}
+    function test_CanBurnAfterTimePass() public memesDexedTimePassed onlyOnForkNetwork {
+        uint[] memory tokens = memeCoinDexer.getAllTokens();
+        memeCoinDexer.collectFees(tokens[0]);
+        uint128 liquidity = IUniswapV3Pool(POOL_ONE).liquidity();
+
+        vm.prank(memeCoinDexer.owner());
+        vm.expectRevert(MemeCoinDexer.MCD__NotEnoughTimePassed.selector);
+        memeCoinDexer.decreaseLiquidity(tokens[0], liquidity, SLIPPAGE, SLIPPAGE);
+
+        vm.warp(block.timestamp + 52 weeks);
+        vm.roll(block.number + 1);
+
+        vm.prank(memeCoinDexer.owner());
+        memeCoinDexer.decreaseLiquidity(tokens[0], liquidity, SLIPPAGE, SLIPPAGE);
+        memeCoinDexer.collectFees(tokens[0]);
+
+        vm.warp(block.timestamp - 1 weeks);
+        vm.roll(block.number + 1);
+
+        vm.prank(memeCoinDexer.owner());
+        vm.expectRevert(MemeCoinDexer.MCD__NotEnoughTimePassed.selector);
+        memeCoinDexer.burn(tokens[0]);
+
+        vm.warp(block.timestamp + 1 weeks);
+        vm.roll(block.number + 1);
+
+        vm.prank(memeCoinDexer.owner());
+        memeCoinDexer.burn(tokens[0]);
+    }
 
     modifier memesDexedTimePassed() {
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
