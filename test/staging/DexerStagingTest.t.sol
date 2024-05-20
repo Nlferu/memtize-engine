@@ -2,10 +2,12 @@
 pragma solidity ^0.8.24;
 
 import {Test, console} from "forge-std/Test.sol";
+import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {MemeCoinMinter} from "../../src/MemeCoinMinter.sol";
 import {MemeCoinDexer} from "../../src/MemeCoinDexer.sol";
 import {MemeProcessManager} from "../../src/MemeProcessManager.sol";
 import {InvalidRecipient} from "../mock/InvalidRecipient.sol";
+import {SkipNetwork} from "../mods/SkipNetwork.sol";
 import {DeployMCM} from "../../script/DeployMCM.s.sol";
 import {DeployMCD} from "../../script/DeployMCD.s.sol";
 import {DeployMPM} from "../../script/DeployMPM.s.sol";
@@ -13,8 +15,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ISwapRouter} from "../../src/Interfaces/ISwapRouter.sol";
 import {IUniswapV3Pool} from "../../src/Interfaces/IUniswapV3Pool.sol";
 
-contract DexerStagingTest is Test {
-    address private constant WETH = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
+contract DexerStagingTest is Test, SkipNetwork {
     address private constant TOKEN_ONE = 0x4CA4E161f5A6d2B46D71f0C493fc9325b42A5f5E;
     address private constant TOKEN_TWO = 0x35FbaaadF61e69186B7c7Fc2aF92001aEB338f68;
     address private constant POOL_ONE = 0x76e693a8B9C8825bE804CA4e0bEdF9e4D5b92918;
@@ -34,15 +35,17 @@ contract DexerStagingTest is Test {
         DEAD
     }
 
-    uint private constant INTERVAL = 30;
-
     DeployMCM mcmDeployer;
     DeployMCD mcdDeployer;
     DeployMPM mpmDeployer;
 
+    HelperConfig helperConfig;
     MemeCoinMinter memeCoinMinter;
     MemeCoinDexer memeCoinDexer;
     MemeProcessManager memeProcessManager;
+
+    address wrappedNativeToken;
+    address swapRouter;
 
     address private OWNER;
     address private USER = makeAddr("user");
@@ -52,13 +55,15 @@ contract DexerStagingTest is Test {
     uint256 private constant STARTING_BALANCE = 100 ether;
 
     function setUp() public {
+        helperConfig = new HelperConfig();
         mcmDeployer = new DeployMCM();
         mcdDeployer = new DeployMCD();
         mpmDeployer = new DeployMPM();
 
+        (, wrappedNativeToken, swapRouter, ) = helperConfig.activeNetworkConfig();
         memeCoinMinter = mcmDeployer.run();
         memeCoinDexer = mcdDeployer.run(address(memeCoinMinter));
-        memeProcessManager = mpmDeployer.run(address(memeCoinMinter), address(memeCoinDexer), INTERVAL);
+        memeProcessManager = mpmDeployer.run(address(memeCoinMinter), address(memeCoinDexer));
 
         vm.prank(memeCoinMinter.owner());
         memeCoinMinter.transferOwnership(address(memeProcessManager));
@@ -72,12 +77,12 @@ contract DexerStagingTest is Test {
         deal(USER_THREE, STARTING_BALANCE);
 
         vm.prank(DEVIL);
-        (bool success, ) = WETH.call{value: 50 ether}(abi.encodeWithSignature("deposit()"));
+        (bool success, ) = wrappedNativeToken.call{value: 50 ether}(abi.encodeWithSignature("deposit()"));
         if (success) console.log("Swap for Devil performed successfully!");
     }
 
-    function test_CanSetProperBalancesAfterHypeMeme() public memesDexedTimePassed onlyOnForkNetwork {
-        uint dexerBalance = memeCoinDexer.getUserTokenBalance(address(memeCoinDexer), WETH);
+    function test_CanSetProperBalancesAfterHypeMeme() public memesDexed skipLocalNetwork {
+        uint dexerBalance = memeCoinDexer.getUserTokenBalance(address(memeCoinDexer), wrappedNativeToken);
         uint dexerErc1 = memeCoinDexer.getUserTokenBalance(address(memeCoinDexer), TOKEN_ONE);
         uint dexerErc2 = memeCoinDexer.getUserTokenBalance(address(memeCoinDexer), TOKEN_TWO);
 
@@ -86,14 +91,14 @@ contract DexerStagingTest is Test {
         assertEq(dexerErc1 / 1e18, 10);
         assertEq(dexerErc2 / 1e18, 4);
 
-        uint pool1weth = memeCoinDexer.getUserTokenBalance(POOL_ONE, WETH);
+        uint pool1wnt = memeCoinDexer.getUserTokenBalance(POOL_ONE, wrappedNativeToken);
         uint pool1erc = memeCoinDexer.getUserTokenBalance(POOL_ONE, TOKEN_ONE);
-        uint pool2weth = memeCoinDexer.getUserTokenBalance(POOL_TWO, WETH);
+        uint pool2wnt = memeCoinDexer.getUserTokenBalance(POOL_TWO, wrappedNativeToken);
         uint pool2erc = memeCoinDexer.getUserTokenBalance(POOL_TWO, TOKEN_TWO);
 
-        assertEq(pool1weth / 1e18, 11);
+        assertEq(pool1wnt / 1e18, 11);
         assertEq(pool1erc / 1e18, 1_100_000_000);
-        assertEq(pool2weth / 1e18, 5);
+        assertEq(pool2wnt / 1e18, 5);
         assertEq(pool2erc / 1e18, 500_000_000);
 
         uint[] memory tokens = memeCoinDexer.getAllTokens();
@@ -103,7 +108,7 @@ contract DexerStagingTest is Test {
         assertEq(dexedMemes.length, 2);
     }
 
-    function test_CanCollect() public memesDexedTimePassed swapPerformedToAccumulateFees onlyOnForkNetwork {
+    function test_CanCollect() public memesDexed swapsPerformed skipLocalNetwork {
         uint feeGrowthGlobal0X128 = IUniswapV3Pool(POOL_ONE).feeGrowthGlobal0X128();
         uint feeGrowthGlobal1X128 = IUniswapV3Pool(POOL_ONE).feeGrowthGlobal1X128();
         uint128 liquidity = IUniswapV3Pool(POOL_ONE).liquidity();
@@ -114,10 +119,10 @@ contract DexerStagingTest is Test {
         uint128 feesOwed0 = uint128((feeGrowthGlobal0X128 * liquidity) / 2 ** 128);
         uint256 feesOwed1 = uint128((feeGrowthGlobal1X128 * liquidity) / 2 ** 128);
         console.log("Gathered Fees ERC20: ", feesOwed0);
-        console.log("Gathered Fees WETH: ", feesOwed1);
+        console.log("Gathered Fees Wrapped Native Token: ", feesOwed1);
 
         uint ownerErc20Balance = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), TOKEN_ONE);
-        uint ownerWETHBalance = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), WETH);
+        uint ownerWntBalance = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), wrappedNativeToken);
 
         uint[] memory tokens = memeCoinDexer.getAllTokens();
 
@@ -125,13 +130,13 @@ contract DexerStagingTest is Test {
         memeCoinDexer.collect(tokens[0]);
 
         uint ownerErc20BalanceAfter = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), TOKEN_ONE);
-        uint ownerWETHBalanceAfter = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), WETH);
+        uint ownerWntBalanceAfter = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), wrappedNativeToken);
 
         assertEq(ownerErc20BalanceAfter, ownerErc20Balance + feesOwed0);
-        assertEq(ownerWETHBalanceAfter, ownerWETHBalance + feesOwed1);
+        assertEq(ownerWntBalanceAfter, ownerWntBalance + feesOwed1);
     }
 
-    function test_CanDecreaseLiquidityAfterTimePass() public memesDexedTimePassed onlyOnForkNetwork {
+    function test_CanDecreaseLiquidityAfterTimePass() public memesDexed skipLocalNetwork {
         uint[] memory tokens = memeCoinDexer.getAllTokens();
         memeCoinDexer.collect(tokens[0]);
         uint feeGrowthGlobal0X128 = IUniswapV3Pool(POOL_ONE).feeGrowthGlobal0X128();
@@ -146,7 +151,7 @@ contract DexerStagingTest is Test {
         vm.roll(block.number + 1);
 
         uint ownerErc20Balance = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), TOKEN_ONE);
-        uint ownerWETHBalance = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), WETH);
+        uint ownerWntBalance = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), wrappedNativeToken);
 
         vm.prank(memeCoinDexer.owner());
         memeCoinDexer.decreaseLiquidity(tokens[0], liquidity, SLIPPAGE, SLIPPAGE);
@@ -158,14 +163,14 @@ contract DexerStagingTest is Test {
         memeCoinDexer.collect(tokens[0]);
 
         uint ownerErc20BalanceAfter = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), TOKEN_ONE);
-        uint ownerWETHBalanceAfter = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), WETH);
+        uint ownerWntBalanceAfter = memeCoinDexer.getUserTokenBalance(memeCoinDexer.owner(), wrappedNativeToken);
 
         /// @dev Value: 1_100_000_000_000_000_597_886_004_026 has been taken from emit that communicated liquidity increase
         assertEq(ownerErc20BalanceAfter, ownerErc20Balance + 1_100_000_000_000_000_597_886_004_026 + feesOwed0 - SLIPPAGE);
-        assertEq(ownerWETHBalanceAfter, ownerWETHBalance + 11 ether + feesOwed1 - SLIPPAGE);
+        assertEq(ownerWntBalanceAfter, ownerWntBalance + 11 ether + feesOwed1 - SLIPPAGE);
     }
 
-    function test_CanBurnAfterTimePass() public memesDexedTimePassed onlyOnForkNetwork {
+    function test_CanBurnAfterTimePass() public memesDexed skipLocalNetwork {
         uint[] memory tokens = memeCoinDexer.getAllTokens();
         uint128 liquidity = IUniswapV3Pool(POOL_ONE).liquidity();
 
@@ -190,7 +195,7 @@ contract DexerStagingTest is Test {
         memeCoinDexer.burn(tokens[0]);
     }
 
-    function test_CanGatherCoins() public memesDexedTimePassed onlyOnForkNetwork {
+    function test_CanGatherCoins() public memesDexed skipLocalNetwork {
         vm.startPrank(memeCoinDexer.owner());
         memeCoinDexer.gatherCoins(TOKEN_ONE);
         memeCoinDexer.gatherCoins(TOKEN_TWO);
@@ -203,7 +208,23 @@ contract DexerStagingTest is Test {
         assertEq(balance_two, 0);
     }
 
-    modifier memesDexedTimePassed() {
+    function test_CanThrowErrorWhenSwapFails() public skipLocalNetwork {
+        deal(address(memeCoinDexer), 100 ether);
+
+        InvalidRecipient mockContract;
+
+        // Deploy the MockContract and assign it to a Wrapped Native Token address
+        vm.etch(wrappedNativeToken, type(InvalidRecipient).creationCode);
+
+        // Initialize the mockContract instance with the Wrapped Native Token address
+        mockContract = InvalidRecipient(wrappedNativeToken);
+
+        vm.prank(address(memeCoinMinter));
+        vm.expectRevert(MemeCoinDexer.MCD__SwapETHFailed.selector);
+        memeCoinDexer.dexMeme(address(memeCoinMinter), 1000, 1000000);
+    }
+
+    modifier memesDexed() {
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
         memeProcessManager.createMeme("Osteo Pedro", "PDR");
         memeProcessManager.createMeme("Joke Joker", "JOK");
@@ -228,15 +249,12 @@ contract DexerStagingTest is Test {
         _;
     }
 
-    modifier swapPerformedToAccumulateFees() {
+    modifier swapsPerformed() {
         (, int24 currentTick, , , , , ) = IUniswapV3Pool(POOL_ONE).slot0();
         bool isInRangee = (currentTick >= -887220 && currentTick <= 887220);
         console.log("Is Trade In Range:", isInRangee);
 
-        /// @dev Sepolia
-        address swapRouter02 = 0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E;
-
-        bytes memory path = abi.encodePacked(WETH, uint24(3000), TOKEN_ONE);
+        bytes memory path = abi.encodePacked(wrappedNativeToken, uint24(3000), TOKEN_ONE);
 
         ISwapRouter.ExactInputParams memory params = ISwapRouter.ExactInputParams({
             path: path,
@@ -245,25 +263,25 @@ contract DexerStagingTest is Test {
             amountOutMinimum: 1_000_000
         });
 
-        uint wethBal;
+        uint wntBal;
         uint tokenBal;
 
-        wethBal = memeCoinDexer.getUserTokenBalance(DEVIL, WETH);
+        wntBal = memeCoinDexer.getUserTokenBalance(DEVIL, wrappedNativeToken);
         tokenBal = memeCoinDexer.getUserTokenBalance(DEVIL, TOKEN_ONE);
-        console.log("Devil WETH Before: ", wethBal / 1e18);
+        console.log("Devil Wrapped Native Token Before: ", wntBal / 1e18);
         console.log("Devil Token Before: ", tokenBal / 1e18);
 
         vm.startPrank(DEVIL);
-        IERC20(WETH).approve(swapRouter02, 1 ether);
-        ISwapRouter(swapRouter02).exactInput(params);
+        IERC20(wrappedNativeToken).approve(swapRouter, 1 ether);
+        ISwapRouter(swapRouter).exactInput(params);
         vm.stopPrank();
 
-        wethBal = memeCoinDexer.getUserTokenBalance(DEVIL, WETH);
+        wntBal = memeCoinDexer.getUserTokenBalance(DEVIL, wrappedNativeToken);
         tokenBal = memeCoinDexer.getUserTokenBalance(DEVIL, TOKEN_ONE);
-        console.log("Devil WETH After: ", wethBal / 1e18);
+        console.log("Devil Wrapped Native Token After: ", wntBal / 1e18);
         console.log("Devil Token After: ", tokenBal / 1e18);
 
-        bytes memory path_two = abi.encodePacked(TOKEN_ONE, uint24(3000), WETH);
+        bytes memory path_two = abi.encodePacked(TOKEN_ONE, uint24(3000), wrappedNativeToken);
 
         ISwapRouter.ExactInputParams memory params_two = ISwapRouter.ExactInputParams({
             path: path_two,
@@ -273,15 +291,9 @@ contract DexerStagingTest is Test {
         });
 
         vm.startPrank(DEVIL);
-        IERC20(TOKEN_ONE).approve(swapRouter02, 1_000_000 ether);
-        ISwapRouter(swapRouter02).exactInput(params_two);
+        IERC20(TOKEN_ONE).approve(swapRouter, 1_000_000 ether);
+        ISwapRouter(swapRouter).exactInput(params_two);
         vm.stopPrank();
-
-        _;
-    }
-
-    modifier onlyOnForkNetwork() {
-        if (block.chainid == 31337) return;
 
         _;
     }
