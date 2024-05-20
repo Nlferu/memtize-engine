@@ -36,7 +36,7 @@ $ forge test
 
 #### Full Coverage
 
-To get full coverage go to `test/unit/MemeProcessManagerTest.t.sol` find `skipFork()` modifier and comment it's if statement, then run below:
+To get full coverage go to `test/mods/SkipNetwork.t.sol` find `skipForkNetwork()` modifier and comment it's if statement, then run below:
 
 ```bash
 $ make testForkSepoliaCoverage
