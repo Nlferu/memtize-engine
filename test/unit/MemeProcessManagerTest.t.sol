@@ -6,11 +6,12 @@ import {MemeCoinDexer} from "../../src/MemeCoinDexer.sol";
 import {MemeProcessManager} from "../../src/MemeProcessManager.sol";
 import {MemeCoinMinter} from "../../src/MemeCoinMinter.sol";
 import {InvalidRecipient} from "../mock/InvalidRecipient.sol";
+import {SkipNetwork} from "../mods/SkipNetwork.sol";
 import {DeployMCD} from "../../script/DeployMCD.s.sol";
 import {DeployMPM} from "../../script/DeployMPM.s.sol";
 import {DeployMCM} from "../../script/DeployMCM.s.sol";
 
-contract MemeProcessManagerTest is Test {
+contract MemeProcessManagerTest is Test, SkipNetwork {
     event MemeCreated(uint indexed id, address indexed creator, string name, string symbol);
     event MemeFunded(uint indexed id, uint indexed value);
     event RefundPerformed(address indexed funder, uint indexed amount);
@@ -47,7 +48,7 @@ contract MemeProcessManagerTest is Test {
 
         memeCoinMinter = mcmDeployer.run();
         memeCoinDexer = mcdDeployer.run(address(memeCoinMinter));
-        memeProcessManager = mpmDeployer.run(address(memeCoinMinter), address(memeCoinDexer), INTERVAL);
+        memeProcessManager = mpmDeployer.run(address(memeCoinMinter), address(memeCoinDexer));
 
         vm.prank(memeCoinMinter.owner());
         memeCoinMinter.transferOwnership(address(memeProcessManager));
@@ -60,7 +61,7 @@ contract MemeProcessManagerTest is Test {
         deal(USER_THREE, STARTING_BALANCE);
     }
 
-    function test_InitializesCorrectly() public skipFork {
+    function test_InitializesCorrectly() public skipForkNetwork {
         MemeProcessManager newMPM = new MemeProcessManager(address(memeCoinMinter), address(memeCoinDexer), INTERVAL);
 
         (address mcm, address mcd, uint interval, uint time) = newMPM.getConstructorData();
@@ -71,7 +72,7 @@ contract MemeProcessManagerTest is Test {
         assertEq(block.timestamp, time, "Last time stamp not initialized correctly");
     }
 
-    function test_CreateMeme() public skipFork {
+    function test_CreateMeme() public skipForkNetwork {
         vm.expectEmit(true, true, true, true, address(memeProcessManager));
         emit MemeCreated(0, USER, "Hexur The Memer", "HEX");
         vm.prank(USER);
@@ -121,7 +122,7 @@ contract MemeProcessManagerTest is Test {
         assertEq(unprocessedMemes[1], 1);
     }
 
-    function test_FundMeme() public skipFork {
+    function test_FundMeme() public skipForkNetwork {
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
 
         vm.expectRevert(MemeProcessManager.MPM__ZeroAmount.selector);
@@ -151,7 +152,7 @@ contract MemeProcessManagerTest is Test {
         assertEq(funds[1], 3 ether);
     }
 
-    function test_Refund() public skipFork {
+    function test_Refund() public skipForkNetwork {
         vm.expectRevert(MemeProcessManager.MPM__NothingToRefund.selector);
         memeProcessManager.refund();
 
@@ -164,7 +165,7 @@ contract MemeProcessManagerTest is Test {
         memeProcessManager.refund();
     }
 
-    function test_CheckUpkeepIsFalse() public skipFork {
+    function test_CheckUpkeepIsFalse() public skipForkNetwork {
         bool upkeepNeeded;
 
         (upkeepNeeded, ) = memeProcessManager.checkUpkeep("");
@@ -177,7 +178,7 @@ contract MemeProcessManagerTest is Test {
         assertEq(upkeepNeeded, false);
     }
 
-    function test_CheckUpkeepIsTrue() public skipFork {
+    function test_CheckUpkeepIsTrue() public skipForkNetwork {
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
 
         bool upkeepNeeded;
@@ -192,12 +193,12 @@ contract MemeProcessManagerTest is Test {
         assertEq(upkeepNeeded, true);
     }
 
-    function test_CantPerformUpkeep() public skipFork {
+    function test_CantPerformUpkeep() public skipForkNetwork {
         vm.expectRevert(MemeProcessManager.MPM__UpkeepNotNeeded.selector);
         memeProcessManager.performUpkeep("");
     }
 
-    function test_CanKillMeme() public skipFork {
+    function test_CanKillMeme() public skipForkNetwork {
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
         memeProcessManager.createMeme("Osteo Pedro", "PDR");
         memeProcessManager.createMeme("Joke Joker", "JOK");
@@ -240,7 +241,7 @@ contract MemeProcessManagerTest is Test {
         memeProcessManager.fundMeme{value: 0.55 ether}(1);
     }
 
-    function test_CanRefund() public skipFork {
+    function test_CanRefund() public skipForkNetwork {
         vm.prank(USER_THREE);
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
 
@@ -270,7 +271,7 @@ contract MemeProcessManagerTest is Test {
         assertEq(USER.balance, userBalance + 0.44 ether);
     }
 
-    function test_CantRefundToInvalidRecipient() public skipFork {
+    function test_CantRefundToInvalidRecipient() public skipForkNetwork {
         vm.prank(USER_TWO);
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
 
@@ -293,7 +294,7 @@ contract MemeProcessManagerTest is Test {
         assertEq(invalidRecipientBalance, 0.55 ether);
     }
 
-    function test_KillMemeTransferFailed() public skipFork {
+    function test_KillMemeTransferFailed() public skipForkNetwork {
         InvalidRecipient mockDexer = new InvalidRecipient();
         MemeProcessManager mockMPM = new MemeProcessManager(address(memeCoinMinter), address(mockDexer), INTERVAL);
 
@@ -307,12 +308,5 @@ contract MemeProcessManagerTest is Test {
 
         vm.expectRevert(MemeProcessManager.MPM__TransferFailed.selector);
         mockMPM.performUpkeep("");
-    }
-
-    modifier skipFork() {
-        /// @dev Comment below 'if' statement line to perform full coverage test with command 'make testForkSepoliaCoverage'
-        // if (block.chainid != 31337) return;
-
-        _;
     }
 }
