@@ -3,10 +3,11 @@ pragma solidity ^0.8.24;
 
 import {Test, console} from "forge-std/Test.sol";
 import {MemeCoin} from "../../src/MemeCoin.sol";
+import {SkipNetwork} from "../mods/SkipNetwork.sol";
 import {IMemeCoinMinter} from "../../src/Interfaces/IMemeCoinMinter.sol";
 
-contract MemeCoinMinterTest is Test {
-    function test_CantDeployMemeCoin() public skipFork {
+contract MemeCoinMinterTest is Test, SkipNetwork {
+    function test_CantDeployMemeCoin() public skipForkNetwork {
         address[] memory recipients = new address[](3);
         recipients[0] = address(this);
         recipients[1] = address(this);
@@ -32,7 +33,7 @@ contract MemeCoinMinterTest is Test {
         new MemeCoin(params);
     }
 
-    function test_MemeCoinConstructor() public skipFork {
+    function test_MemeCoinConstructor() public skipForkNetwork {
         address[] memory recipients = new address[](3);
         recipients[0] = address(this);
         recipients[1] = address(this);
@@ -59,12 +60,5 @@ contract MemeCoinMinterTest is Test {
 
         assertEq(memeCoinMinter.name(), "Test");
         assertEq(memeCoinMinter.symbol(), "TST");
-    }
-
-    modifier skipFork() {
-        /// @dev Comment below 'if' statement line to perform full coverage test with command 'make testForkSepoliaCoverage'
-        // if (block.chainid != 31337) return;
-
-        _;
     }
 }
