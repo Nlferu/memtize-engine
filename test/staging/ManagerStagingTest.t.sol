@@ -6,12 +6,12 @@ import {MemeCoinMinter} from "../../src/MemeCoinMinter.sol";
 import {MemeCoinDexer} from "../../src/MemeCoinDexer.sol";
 import {MemeProcessManager} from "../../src/MemeProcessManager.sol";
 import {InvalidRecipient} from "../mock/InvalidRecipient.sol";
+import {SkipNetwork} from "../mods/SkipNetwork.sol";
 import {DeployMCM} from "../../script/DeployMCM.s.sol";
 import {DeployMCD} from "../../script/DeployMCD.s.sol";
 import {DeployMPM} from "../../script/DeployMPM.s.sol";
 
-contract ManagerStagingTest is Test {
-    address private constant WETH = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
+contract ManagerStagingTest is Test, SkipNetwork {
     address private constant TOKEN_ONE = 0x4CA4E161f5A6d2B46D71f0C493fc9325b42A5f5E;
     address private constant TOKEN_TWO = 0x35FbaaadF61e69186B7c7Fc2aF92001aEB338f68;
     address private constant POOL_ONE = 0x76e693a8B9C8825bE804CA4e0bEdF9e4D5b92918;
@@ -29,8 +29,6 @@ contract ManagerStagingTest is Test {
         ALIVE,
         DEAD
     }
-
-    uint private constant INTERVAL = 30;
 
     DeployMCM mcmDeployer;
     DeployMCD mcdDeployer;
@@ -53,7 +51,7 @@ contract ManagerStagingTest is Test {
 
         memeCoinMinter = mcmDeployer.run();
         memeCoinDexer = mcdDeployer.run(address(memeCoinMinter));
-        memeProcessManager = mpmDeployer.run(address(memeCoinMinter), address(memeCoinDexer), INTERVAL);
+        memeProcessManager = mpmDeployer.run(address(memeCoinMinter), address(memeCoinDexer));
 
         vm.prank(memeCoinMinter.owner());
         memeCoinMinter.transferOwnership(address(memeProcessManager));
@@ -66,7 +64,7 @@ contract ManagerStagingTest is Test {
         deal(USER_THREE, STARTING_BALANCE);
     }
 
-    function test_CanPerformUpkeepAndHypeMeme() public onlyOnForkNetwork {
+    function test_CanPerformUpkeepAndHypeMeme() public skipLocalNetwork {
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
         memeProcessManager.createMeme("Osteo Pedro", "PDR");
         memeProcessManager.createMeme("Joke Joker", "JOK");
@@ -104,11 +102,5 @@ contract ManagerStagingTest is Test {
         assert(status == MemeProcessManager.MemeStatus.DEAD);
         (, , , , , , , status) = memeProcessManager.getMemeData(3);
         assert(status == MemeProcessManager.MemeStatus.DEAD);
-    }
-
-    modifier onlyOnForkNetwork() {
-        if (block.chainid == 31337) return;
-
-        _;
     }
 }
