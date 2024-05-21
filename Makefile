@@ -79,17 +79,20 @@ endif
 deployDYM:
 	@forge script script/DeployDYM.s.sol:DeployDYM $(NETWORK_ARGS)
 
-deployDFM:
+deployMCD:
 	@forge script script/DeployDFM.s.sol:DeployDFM $(NETWORK_ARGS)
 
-deployAST:
+deployMCM:
 	@forge script script/DeployAsta.s.sol:DeployAsta $(NETWORK_ARGS)
 
-swapETH:
-	@forge script script/Interactions.s.sol:SwapETH $(NETWORK_ARGS)
-
-createPool:
+deployMPM:
 	@forge script script/Interactions.s.sol:CreatePool $(NETWORK_ARGS)
 
-balance:
-	@forge script script/Interactions.s.sol:CheckTokenBalance $(NETWORK_ARGS)
+collect:
+	@forge script script/Interactions.s.sol:Collect $(NETWORK_ARGS)
+
+decreaseLiquidity:
+	@forge script script/Interactions.s.sol:DecreaseLiquidity $(NETWORK_ARGS)
+
+burn:
+	@forge script script/Interactions.s.sol:Burn $(NETWORK_ARGS)
