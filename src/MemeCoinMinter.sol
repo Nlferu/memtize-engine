@@ -2,9 +2,9 @@
 pragma solidity ^0.8.24;
 
 import {MemeCoin} from "./MemeCoin.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IMemeCoinDexer} from "./Interfaces/IMemeCoinDexer.sol";
 import {IMemeCoinMinter} from "./Interfaces/IMemeCoinMinter.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @dev This contract acts as a meme coin factory. Once a meme coin is successfully created, it requests listing on Uniswap
