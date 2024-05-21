@@ -15,3 +15,8 @@ Pool: 0x33e8872d2500c028CBe615E8aFE6e6eA7B6Bb18C
 
 NFT: 15471
 https://app.uniswap.org/pools/15471
+
+Sepolia Shortened Timers Project Version:
+MemeCoinMinter: 0xd50Ba86d476D3d2CbFA3F5a92462ef95EAA437Ec
+MemeCoinDexer: 0x5B4C3787A12e2Ee9Ad1890065e1111ea213eb37b
+MemeProcessManager: 0x42D723B73867B000bEE295A7acEb5037E4f5e62e
