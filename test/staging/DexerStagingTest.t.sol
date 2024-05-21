@@ -3,14 +3,12 @@ pragma solidity ^0.8.24;
 
 import {Test, console} from "forge-std/Test.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
+import {DeployDYM} from "../../script/DeployDYM.s.sol";
 import {MemeCoinMinter} from "../../src/MemeCoinMinter.sol";
 import {MemeCoinDexer} from "../../src/MemeCoinDexer.sol";
 import {MemeProcessManager} from "../../src/MemeProcessManager.sol";
 import {InvalidRecipient} from "../mock/InvalidRecipient.sol";
 import {SkipNetwork} from "../mods/SkipNetwork.sol";
-import {DeployMCM} from "../../script/DeployMCM.s.sol";
-import {DeployMCD} from "../../script/DeployMCD.s.sol";
-import {DeployMPM} from "../../script/DeployMPM.s.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ISwapRouter} from "../../src/Interfaces/ISwapRouter.sol";
 import {IUniswapV3Pool} from "../../src/Interfaces/IUniswapV3Pool.sol";
@@ -22,24 +20,8 @@ contract DexerStagingTest is Test, SkipNetwork {
     address private constant POOL_TWO = 0x0b3cb9Bdb44F436E060687B6f9eBf9cBc3c5a326;
     uint private constant SLIPPAGE = 1;
 
-    event MemeCreated(uint indexed id, address indexed creator, string name, string symbol);
-    event MemeFunded(uint indexed id, uint indexed value);
-    event RefundPerformed(address indexed funder, uint indexed amount);
-    event MemeKilled(uint indexed id);
-    event MemeHyped(uint indexed id);
-    event TransferSuccessfull(uint indexed amount);
-    event MemesProcessed(bool indexed performed);
-
-    enum MemeStatus {
-        ALIVE,
-        DEAD
-    }
-
-    DeployMCM mcmDeployer;
-    DeployMCD mcdDeployer;
-    DeployMPM mpmDeployer;
-
     HelperConfig helperConfig;
+    DeployDYM dymDeployer;
     MemeCoinMinter memeCoinMinter;
     MemeCoinDexer memeCoinDexer;
     MemeProcessManager memeProcessManager;
@@ -56,17 +38,10 @@ contract DexerStagingTest is Test, SkipNetwork {
 
     function setUp() public {
         helperConfig = new HelperConfig();
-        mcmDeployer = new DeployMCM();
-        mcdDeployer = new DeployMCD();
-        mpmDeployer = new DeployMPM();
+        dymDeployer = new DeployDYM();
 
         (, wrappedNativeToken, swapRouter, ) = helperConfig.activeNetworkConfig();
-        memeCoinMinter = mcmDeployer.run();
-        memeCoinDexer = mcdDeployer.run(address(memeCoinMinter));
-        memeProcessManager = mpmDeployer.run(address(memeCoinMinter), address(memeCoinDexer));
-
-        vm.prank(memeCoinMinter.owner());
-        memeCoinMinter.transferOwnership(address(memeProcessManager));
+        (memeCoinMinter, memeCoinDexer, memeProcessManager) = dymDeployer.run();
 
         OWNER = memeProcessManager.owner();
 
@@ -224,6 +199,7 @@ contract DexerStagingTest is Test, SkipNetwork {
         memeCoinDexer.dexMeme(address(memeCoinMinter), 1000, 1000000);
     }
 
+    /// @dev Modifiers
     modifier memesDexed() {
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
         memeProcessManager.createMeme("Osteo Pedro", "PDR");
