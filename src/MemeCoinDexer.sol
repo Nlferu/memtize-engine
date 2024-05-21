@@ -13,7 +13,7 @@ contract MemeCoinDexer is Ownable {
     error MCD__NotEnoughTimePassed();
 
     /// @dev Immutables
-    address private immutable i_mcm;
+    address private immutable i_memeCoinMinter;
     address private immutable i_nftPositionManager;
     address private immutable i_wrappedNativeToken;
 
@@ -39,8 +39,8 @@ contract MemeCoinDexer is Ownable {
     event MemeDexedSuccessfully(address indexed coin, uint indexed nftId);
 
     /// @dev Constructor
-    constructor(address mcm, address nftPositionManager, address wrappedNativeToken) Ownable(msg.sender) {
-        i_mcm = mcm;
+    constructor(address memeCoinMinter, address nftPositionManager, address wrappedNativeToken) Ownable(msg.sender) {
+        i_memeCoinMinter = memeCoinMinter;
         i_nftPositionManager = nftPositionManager;
         i_wrappedNativeToken = wrappedNativeToken;
     }
@@ -55,7 +55,7 @@ contract MemeCoinDexer is Ownable {
     /// @notice Swaps ETH into WETH, creates, initializes and adds liquidity pool for new meme token
     /// @param memeCoinAddress Address of ERC20 meme token minted by MCM contract
     function dexMeme(address memeCoinAddress, uint wethAmount, uint memeCoinAmount) external {
-        if (msg.sender != i_mcm) revert MCD__NotAllowedCaller();
+        if (msg.sender != i_memeCoinMinter) revert MCD__NotAllowedCaller();
 
         emit MemeDexRequestReceived(memeCoinAddress);
 
@@ -182,6 +182,6 @@ contract MemeCoinDexer is Ownable {
 
     /// @notice Returns constructor immutables
     function getConstructorData() external view returns (address, address, address) {
-        return (i_mcm, i_nftPositionManager, i_wrappedNativeToken);
+        return (i_memeCoinMinter, i_nftPositionManager, i_wrappedNativeToken);
     }
 }
