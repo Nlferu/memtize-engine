@@ -2,23 +2,19 @@
 pragma solidity ^0.8.24;
 
 import {Test, console} from "forge-std/Test.sol";
+import {DeployDYM} from "../../script/DeployDYM.s.sol";
+import {DeployMPM} from "../../script/DeployMPM.s.sol";
 import {MemeCoinDexer} from "../../src/MemeCoinDexer.sol";
 import {MemeProcessManager} from "../../src/MemeProcessManager.sol";
 import {MemeCoinMinter} from "../../src/MemeCoinMinter.sol";
 import {InvalidRecipient} from "../mock/InvalidRecipient.sol";
 import {SkipNetwork} from "../mods/SkipNetwork.sol";
-import {DeployMCD} from "../../script/DeployMCD.s.sol";
-import {DeployMPM} from "../../script/DeployMPM.s.sol";
-import {DeployMCM} from "../../script/DeployMCM.s.sol";
 
 contract MemeProcessManagerTest is Test, SkipNetwork {
     event MemeCreated(uint indexed id, address indexed creator, string name, string symbol);
     event MemeFunded(uint indexed id, uint indexed value);
     event RefundPerformed(address indexed funder, uint indexed amount);
     event MemeKilled(uint indexed id);
-    event MemeHyped(uint indexed id);
-    event TransferSuccessfull(uint indexed amount);
-    event MemesProcessed(bool indexed performed);
 
     enum MemeStatus {
         ALIVE,
@@ -27,10 +23,8 @@ contract MemeProcessManagerTest is Test, SkipNetwork {
 
     uint private constant INTERVAL = 30;
 
-    DeployMCM mcmDeployer;
-    DeployMCD mcdDeployer;
+    DeployDYM dymDeployer;
     DeployMPM mpmDeployer;
-
     MemeCoinMinter memeCoinMinter;
     MemeCoinDexer memeCoinDexer;
     MemeProcessManager memeProcessManager;
@@ -42,16 +36,9 @@ contract MemeProcessManagerTest is Test, SkipNetwork {
     uint256 private constant STARTING_BALANCE = 100 ether;
 
     function setUp() public {
-        mcmDeployer = new DeployMCM();
-        mcdDeployer = new DeployMCD();
-        mpmDeployer = new DeployMPM();
+        dymDeployer = new DeployDYM();
 
-        memeCoinMinter = mcmDeployer.run();
-        memeCoinDexer = mcdDeployer.run(address(memeCoinMinter));
-        memeProcessManager = mpmDeployer.run(address(memeCoinMinter), address(memeCoinDexer));
-
-        vm.prank(memeCoinMinter.owner());
-        memeCoinMinter.transferOwnership(address(memeProcessManager));
+        (memeCoinMinter, memeCoinDexer, memeProcessManager) = dymDeployer.run();
 
         OWNER = memeProcessManager.owner();
 
@@ -296,7 +283,8 @@ contract MemeProcessManagerTest is Test, SkipNetwork {
 
     function test_KillMemeTransferFailed() public skipForkNetwork {
         InvalidRecipient mockDexer = new InvalidRecipient();
-        MemeProcessManager mockMPM = new MemeProcessManager(address(memeCoinMinter), address(mockDexer), INTERVAL);
+        mpmDeployer = new DeployMPM();
+        MemeProcessManager mockMPM = mpmDeployer.run(address(memeCoinMinter), address(mockDexer));
 
         mockMPM.createMeme("Hexur The Memer", "HEX");
 
