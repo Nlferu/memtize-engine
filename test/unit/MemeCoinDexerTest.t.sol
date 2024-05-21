@@ -2,17 +2,17 @@
 pragma solidity ^0.8.24;
 
 import {Test, console} from "forge-std/Test.sol";
-import {HelperConfig} from "../../script/HelperConfig.s.sol";
+import {DeployMCM} from "../../script/DeployMCM.s.sol";
+import {DeployMCD} from "../../script/DeployMCD.s.sol";
 import {MemeCoinDexer} from "../../src/MemeCoinDexer.sol";
 import {MemeCoinMinter} from "../../src/MemeCoinMinter.sol";
 import {InvalidRecipient} from "../mock/InvalidRecipient.sol";
 import {SkipNetwork} from "../mods/SkipNetwork.sol";
-import {DeployMCM} from "../../script/DeployMCM.s.sol";
 
 contract MemeCoinDexerTest is Test, SkipNetwork {
     DeployMCM mcmDeployer;
+    DeployMCD mcdDeployer;
 
-    HelperConfig helperConfig;
     MemeCoinMinter memeCoinMinter;
     MemeCoinDexer memeCoinDexer;
 
@@ -20,9 +20,11 @@ contract MemeCoinDexerTest is Test, SkipNetwork {
     address wrappedNativeToken;
 
     function setUp() public {
-        helperConfig;
         mcmDeployer = new DeployMCM();
+        mcdDeployer = new DeployMCD();
+
         memeCoinMinter = mcmDeployer.run();
+        memeCoinDexer = mcdDeployer.run(address(memeCoinMinter));
     }
 
     function test_InitializesDexerCorrectly() public skipForkNetwork {
@@ -35,7 +37,6 @@ contract MemeCoinDexerTest is Test, SkipNetwork {
     }
 
     function test_DexMemeCallableOnlyByMCM() public skipForkNetwork {
-        memeCoinDexer = new MemeCoinDexer(address(memeCoinMinter), nftPositionManager, wrappedNativeToken);
         address USER = makeAddr("user");
         deal(USER, 100 ether);
 
