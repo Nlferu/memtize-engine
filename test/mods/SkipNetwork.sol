@@ -2,9 +2,11 @@
 pragma solidity ^0.8.24;
 
 contract SkipNetwork {
+    /// @dev Events
     event ForkNetworkSkipped();
     event LocalNetworkSkipped();
 
+    /// @dev Modifiers
     modifier skipForkNetwork() {
         /// @dev Comment below 'if' statement line to perform full coverage test with command 'make testForkSepoliaCoverage'
         // if (block.chainid != 31337) return;
