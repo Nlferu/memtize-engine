@@ -3,29 +3,22 @@ pragma solidity ^0.8.24;
 
 import {Test, console} from "forge-std/Test.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
+import {DeployDYM} from "../../script/DeployDYM.s.sol";
 import {MemeCoinMinter} from "../../src/MemeCoinMinter.sol";
 import {MemeCoinDexer} from "../../src/MemeCoinDexer.sol";
 import {MemeProcessManager} from "../../src/MemeProcessManager.sol";
-import {InvalidRecipient} from "../mock/InvalidRecipient.sol";
 import {SkipNetwork} from "../mods/SkipNetwork.sol";
 import {Collect, DecreaseLiquidity, Burn, GatherCoins} from "../../script/Interactions.s.sol";
-import {DeployMCM} from "../../script/DeployMCM.s.sol";
-import {DeployMCD} from "../../script/DeployMCD.s.sol";
-import {DeployMPM} from "../../script/DeployMPM.s.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ISwapRouter} from "../../src/Interfaces/ISwapRouter.sol";
-import {IUniswapV3Pool} from "../../src/Interfaces/IUniswapV3Pool.sol";
 
 contract InteractionsTest is Test, SkipNetwork {
     address private constant TOKEN = 0x4CA4E161f5A6d2B46D71f0C493fc9325b42A5f5E;
     address private constant POOL = 0x76e693a8B9C8825bE804CA4e0bEdF9e4D5b92918;
     uint private constant SLIPPAGE = 1;
 
-    DeployMCM mcmDeployer;
-    DeployMCD mcdDeployer;
-    DeployMPM mpmDeployer;
-
     HelperConfig helperConfig;
+    DeployDYM dymDeployer;
     MemeCoinMinter memeCoinMinter;
     MemeCoinDexer memeCoinDexer;
     MemeProcessManager memeProcessManager;
@@ -44,17 +37,10 @@ contract InteractionsTest is Test, SkipNetwork {
 
     function setUp() public {
         helperConfig = new HelperConfig();
-        mcmDeployer = new DeployMCM();
-        mcdDeployer = new DeployMCD();
-        mpmDeployer = new DeployMPM();
+        dymDeployer = new DeployDYM();
 
         (, wrappedNativeToken, swapRouter, ) = helperConfig.activeNetworkConfig();
-        memeCoinMinter = mcmDeployer.run();
-        memeCoinDexer = mcdDeployer.run(address(memeCoinMinter));
-        memeProcessManager = mpmDeployer.run(address(memeCoinMinter), address(memeCoinDexer));
-
-        vm.prank(memeCoinMinter.owner());
-        memeCoinMinter.transferOwnership(address(memeProcessManager));
+        (memeCoinMinter, memeCoinDexer, memeProcessManager) = dymDeployer.run();
 
         OWNER = memeProcessManager.owner();
 
@@ -100,6 +86,7 @@ contract InteractionsTest is Test, SkipNetwork {
         gatherCoins.run(address(memeCoinDexer), TOKEN);
     }
 
+    /// @dev Modifiers
     modifier memesDexed() {
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
 
