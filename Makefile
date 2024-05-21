@@ -77,7 +77,7 @@ ifeq ($(findstring --network sepolia,$(ARGS)),--network sepolia)
 endif
 
 deployDYM:
-	@forge script script/DeployDYM.s.sol:DeployDYM $(NETWORK_ARGS)
+	forge script script/DeployDYM.s.sol:DeployDYM $(NETWORK_ARGS) --legacy
 
 deployMCD:
 	@forge script script/DeployDFM.s.sol:DeployDFM $(NETWORK_ARGS)
