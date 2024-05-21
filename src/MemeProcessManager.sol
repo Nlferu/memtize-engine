@@ -65,7 +65,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
     event RefundPerformed(address indexed funder, uint indexed amount);
     event MemeKilled(uint indexed id);
     event MemeHyped(uint indexed id);
-    event TransferSuccessfull(uint indexed amount);
+    event TransferSuccessful(uint indexed amount);
     event MemesProcessed(bool indexed performed);
 
     /// @dev Constructor
@@ -170,7 +170,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
 
         IMemeCoinMinter(i_mcm).mintCoinAndRequestDex(params);
 
-        emit TransferSuccessfull(meme.idToTotalFunds);
+        emit TransferSuccessful(meme.idToTotalFunds);
         emit MemeHyped(id);
     }
 
