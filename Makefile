@@ -23,23 +23,46 @@ update:; forge update
 
 build:; forge build
 
-test:
-	@forge test
-
-testForkSepolia:
-	forge test --fork-url $(SEPOLIA_RPC_URL) -vvvv
-
-testForkSepoliaCoverage:
-	forge coverage --fork-url $(SEPOLIA_RPC_URL)
-
-testForkSepoliaCoverageReport:
-	forge coverage --fork-url $(SEPOLIA_RPC_URL) --report lcov
+test:; forge test
 
 testOneFn:
-	forge test --fork-url $(SEPOLIA_RPC_URL) --mt test_CollectFees -vvvv
+	@forge test --fork-url $(SEPOLIA_RPC_URL) --mt test_CanPerformUpkeepAndHypeMeme -vvvv
 
 testForkMainnet:
-	forge test --fork-url $(MAINNET_RPC_URL) -vvvv
+	@forge test --fork-url $(MAINNET_RPC_URL)
+
+testForkMainnetCoverage:
+	@forge coverage --fork-url $(MAINNET_RPC_URL)
+
+testForkMainnetCoverageReport:
+	@forge coverage --fork-url $(MAINNET_RPC_URL) --report lcov
+
+testForkPolygon:
+	@forge test --fork-url $(POLYGON_RPC_URL)
+
+testForkPolygonCoverage:
+	@forge coverage --fork-url $(POLYGON_RPC_URL)
+
+testForkPolygonCoverageReport:
+	@forge coverage --fork-url $(POLYGON_RPC_URL) --report lcov
+
+testForkAvalanche:
+	@forge test --fork-url $(AVALANCHE_RPC_URL)
+
+testForkAvalancheCoverage:
+	@forge coverage --fork-url $(AVALANCHE_RPC_URL)
+
+testForkAvalancheCoverageReport:
+	@forge coverage --fork-url $(AVALANCHE_RPC_URL) --report lcov
+
+testForkSepolia:
+	@forge test --fork-url $(SEPOLIA_RPC_URL)
+
+testForkSepoliaCoverage:
+	@forge coverage --fork-url $(SEPOLIA_RPC_URL)
+
+testForkSepoliaCoverageReport:
+	@forge coverage --fork-url $(SEPOLIA_RPC_URL) --report lcov
 
 snapshot:; forge snapshot
 
