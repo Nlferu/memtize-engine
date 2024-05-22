@@ -1,26 +1,17 @@
-# Dex Your Meme
+# Memtize Engine
 
-**Building something cool for Chainlink Block Magic Hackathon**
+**Memtize consists of:**
 
-DYM consists of:
-
--   **x**: xxxxxxxxxxxxxx
--   **x**: xxxxxxxxxxxxxx
--   **x**: xxxxxxxxxxxxxx
--   **x**: xxxxxxxxxxxxxx
+-   **Meme Coin**: Template for crafting new meme coins.
+-   **Meme Coin Minter**: Contract responsible for minting meme coins among all participants (creator, memtize, funders, liquidity pool).
+-   **Meme Coin Dexer**: Creating liquidity pool on Uniswap v3 and adding liquidity to it for newly crafted coins, so rest of community can trade that coin.
+-   **Meme Process Manager**: Allows creating and funding memes. It automatically hype (listing on Uniswap v3) or kill (delete) based on time passed and funds gathered for each meme.
 
 ## Documentation
 
 https://book.getfoundry.sh/
 
 ## Usage
-
-Deploy Order:
-
-1. MCM
-2. MCD
-3. MPM
-4. Transfer ownership of MCM to MPM
 
 ### Build
 
