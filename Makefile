@@ -77,22 +77,31 @@ ifeq ($(findstring --network sepolia,$(ARGS)),--network sepolia)
 endif
 
 deployDYM:
-	forge script script/DeployDYM.s.sol:DeployDYM $(NETWORK_ARGS) --legacy
+	@forge script script/DeployDYM.s.sol:DeployDYM $(NETWORK_ARGS) --legacy
 
 deployMCD:
-	@forge script script/DeployDFM.s.sol:DeployDFM $(NETWORK_ARGS)
+	@forge script script/DeployMCD.s.sol:DeployMCD $(NETWORK_ARGS)
 
 deployMCM:
-	@forge script script/DeployAsta.s.sol:DeployAsta $(NETWORK_ARGS)
+	@forge script script/DeployMCM.s.sol:DeployMCM $(NETWORK_ARGS)
 
 deployMPM:
-	@forge script script/Interactions.s.sol:CreatePool $(NETWORK_ARGS)
+	@forge script script/DeployMPM.s.sol:DeployMPM $(NETWORK_ARGS)
+
+# Update Params To Make Proper Calls
+MCD:= 0x5B4C3787A12e2Ee9Ad1890065e1111ea213eb37b
+TOKEN_ID:= 777
+POOL:= 0x5B4C3787A12e2Ee9Ad1890065e1111ea213eb37b
+COIN:= 0x5B4C3787A12e2Ee9Ad1890065e1111ea213eb37b
 
 collect:
-	@forge script script/Interactions.s.sol:Collect $(NETWORK_ARGS)
+	@forge script script/Interactions.s.sol:Collect $(NETWORK_ARGS) --sig "run(address,uint256)" $(MCD) $(TOKEN_ID)
 
 decreaseLiquidity:
-	@forge script script/Interactions.s.sol:DecreaseLiquidity $(NETWORK_ARGS)
+	@forge script script/Interactions.s.sol:DecreaseLiquidity $(NETWORK_ARGS) --sig "run(address,uint256,address)" $(MCD) $(TOKEN_ID) $(POOL)
 
 burn:
-	@forge script script/Interactions.s.sol:Burn $(NETWORK_ARGS)
+	@forge script script/Interactions.s.sol:Burn $(NETWORK_ARGS) --sig "run(address,uint256,address)" $(MCD) $(TOKEN_ID) $(POOL)
+
+gather:
+	@forge script script/Interactions.s.sol:GatherCoins $(NETWORK_ARGS) --sig "run(address,address)" $(MCD) $(COIN)
