@@ -1,4 +1,3 @@
--   Update Makefile scripts
 -   Check Moonbeam multicall -> https://github.com/moonbeam-foundation/moonbeam/blob/master/precompiles/batch/Batch.sol
 
 DYM -> 0x32Cc6a652D06728aAAd9d59Eba6CAddC61b29585
@@ -20,3 +19,16 @@ Sepolia Shortened Timers Project Version:
 MemeCoinMinter: 0xd50Ba86d476D3d2CbFA3F5a92462ef95EAA437Ec
 MemeCoinDexer: 0x5B4C3787A12e2Ee9Ad1890065e1111ea213eb37b
 MemeProcessManager: 0x42D723B73867B000bEE295A7acEb5037E4f5e62e
+
+Scroll Sepolia Deployment:
+MemeCoinMinter: 0x32edbbEDbE769725F1bB8Acf9fB43E070eE77cd3
+MemeCoinDexer: 0x590Fb54FEB1A3aBd8D2D853756F2172a3210c359
+MemeProcessManager: 0x4f848df81370275ABFBD91E798E4Cddc48A8BBac
+
+Amoy Deployment:
+MemeCoinMinter:
+MemeCoinDexer:
+MemeProcessManager:
+
+Faucet:
+https://faucet.chainstack.com/
