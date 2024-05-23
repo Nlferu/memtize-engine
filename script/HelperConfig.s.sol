@@ -18,6 +18,7 @@ contract HelperConfig is Script {
         if (block.chainid == 137) activeNetworkConfig = getPolygonConfig();
         if (block.chainid == 43114) activeNetworkConfig = getAvalancheConfig();
         if (block.chainid == 11155111) activeNetworkConfig = getSepoliaConfig();
+        if (block.chainid == 534351) activeNetworkConfig = getScrollSepoliaConfig();
         if (block.chainid == 31337) activeNetworkConfig = getLocalConfig();
     }
 
@@ -50,6 +51,15 @@ contract HelperConfig is Script {
 
     function getSepoliaConfig() public view returns (NetworkConfig memory sepoliaNetworkConfig) {
         sepoliaNetworkConfig = NetworkConfig({
+            nftPositionManager: 0x1238536071E1c677A632429e3655c799b22cDA52,
+            wrappedNativeToken: 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14,
+            swapRouter: 0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E,
+            deployerKey: vm.envUint("PRIVATE_KEY")
+        });
+    }
+
+    function getScrollSepoliaConfig() public view returns (NetworkConfig memory scrollSepoliaNetworkConfig) {
+        scrollSepoliaNetworkConfig = NetworkConfig({
             nftPositionManager: 0x1238536071E1c677A632429e3655c799b22cDA52,
             wrappedNativeToken: 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14,
             swapRouter: 0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E,
