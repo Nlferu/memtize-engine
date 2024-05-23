@@ -76,6 +76,10 @@ ifeq ($(findstring --network sepolia,$(ARGS)),--network sepolia)
 	NETWORK_ARGS:= --rpc-url $(SEPOLIA_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(ETHERSCAN_API_KEY) -vvvv
 endif
 
+ifeq ($(findstring --network scrollSepolia,$(ARGS)),--network scrollSepolia)
+	NETWORK_ARGS:= --rpc-url $(SCROLL_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(SCROLL_API_KEY) -vvvv
+endif
+
 deployDYM:
 	@forge script script/DeployDYM.s.sol:DeployDYM $(NETWORK_ARGS) --legacy
 
