@@ -26,7 +26,7 @@ build:; forge build
 test:; forge test
 
 testOneFn:
-	@forge test --fork-url $(SEPOLIA_RPC_URL) --mt test_CanPerformUpkeepAndHypeMeme -vvvv
+	@forge test --fork-url $(MAINNET_RPC_URL) --mt test_CanPerformUpkeepAndHypeMeme -vvvv
 
 testForkMainnet:
 	@forge test --fork-url $(MAINNET_RPC_URL)
