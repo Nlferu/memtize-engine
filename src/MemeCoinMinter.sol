@@ -20,6 +20,8 @@ contract MemeCoinMinter is IMemeCoinMinter, Ownable {
     /// @notice Deploys new ERC20 Meme Token
     /// @param params IMemeCoinMinter
     function mintCoinAndRequestDex(MintParams calldata params) external onlyOwner {
+        /// @dev BUG
+        new MemeCoin(params);
         MemeCoin newCoin = new MemeCoin(params);
 
         emit MemeCoinMinted(address(newCoin), params.name, params.symbol);
