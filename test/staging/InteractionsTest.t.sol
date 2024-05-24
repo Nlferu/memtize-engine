@@ -60,38 +60,8 @@ contract InteractionsTest is Test, SkipNetwork {
         decreaseLiquidity = new DecreaseLiquidity();
         burn = new Burn();
         gatherCoins = new GatherCoins();
-    }
 
-    function test_Collect() public memesDexed swapsPerformed skipLocalNetwork {
-        uint[] memory tokens = memeCoinDexer.getAllTokens();
-
-        collect.run(address(memeCoinDexer), tokens[0]);
-    }
-
-    function test_DecreaseLiquidity() public memesDexed skipLocalNetwork {
-        vm.warp(block.timestamp + 52 weeks);
-        vm.roll(block.number + 1);
-
-        uint[] memory tokens = memeCoinDexer.getAllTokens();
-
-        decreaseLiquidity.run(address(memeCoinDexer), tokens[0], POOL);
-    }
-
-    function test_Burn() public memesDexed skipLocalNetwork {
-        vm.warp(block.timestamp + 52 weeks);
-        vm.roll(block.number + 1);
-
-        uint[] memory tokens = memeCoinDexer.getAllTokens();
-
-        burn.run(address(memeCoinDexer), tokens[0], POOL);
-    }
-
-    function test_GatherCoins() public memesDexed skipLocalNetwork {
-        gatherCoins.run(address(memeCoinDexer), TOKEN);
-    }
-
-    /// @dev Modifiers
-    modifier memesDexed() {
+        /// @dev Dexing Meme
         memeProcessManager.createMeme("Hexur The Memer", "HEX");
 
         vm.prank(USER);
@@ -106,10 +76,37 @@ contract InteractionsTest is Test, SkipNetwork {
 
         TOKEN = dexedCoins[0];
         POOL = IUniswapV3Factory(INonfungiblePositionManager(nftPositionManager).factory()).getPool(TOKEN, wrappedNativeToken, 3000);
-
-        _;
     }
 
+    function test_Collect() public swapsPerformed skipLocalNetwork {
+        uint[] memory tokens = memeCoinDexer.getAllTokens();
+
+        collect.run(address(memeCoinDexer), tokens[0]);
+    }
+
+    function test_DecreaseLiquidity() public skipLocalNetwork {
+        vm.warp(block.timestamp + 52 weeks);
+        vm.roll(block.number + 1);
+
+        uint[] memory tokens = memeCoinDexer.getAllTokens();
+
+        decreaseLiquidity.run(address(memeCoinDexer), tokens[0], POOL);
+    }
+
+    function test_Burn() public skipLocalNetwork {
+        vm.warp(block.timestamp + 52 weeks);
+        vm.roll(block.number + 1);
+
+        uint[] memory tokens = memeCoinDexer.getAllTokens();
+
+        burn.run(address(memeCoinDexer), tokens[0], POOL);
+    }
+
+    function test_GatherCoins() public skipLocalNetwork {
+        gatherCoins.run(address(memeCoinDexer), TOKEN);
+    }
+
+    /// @dev Modifiers
     modifier swapsPerformed() {
         bytes memory path = abi.encodePacked(wrappedNativeToken, uint24(3000), TOKEN);
 
