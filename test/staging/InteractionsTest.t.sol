@@ -15,9 +15,10 @@ import {IUniswapV3Factory} from "../../src/Interfaces/IUniswapV3Factory.sol";
 import {INonfungiblePositionManager} from "../../src/Interfaces/INonfungiblePositionManager.sol";
 
 contract InteractionsTest is Test, SkipNetwork {
-    address private constant TOKEN = 0x4CA4E161f5A6d2B46D71f0C493fc9325b42A5f5E;
-    address private constant POOL = 0x76e693a8B9C8825bE804CA4e0bEdF9e4D5b92918;
     uint private constant SLIPPAGE = 1;
+
+    address private TOKEN;
+    address private POOL;
 
     HelperConfig helperConfig;
     DeployDYM dymDeployer;
