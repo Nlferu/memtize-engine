@@ -12,12 +12,14 @@ import {SkipNetwork} from "../mods/SkipNetwork.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ISwapRouter} from "../../src/Interfaces/ISwapRouter.sol";
 import {IUniswapV3Pool} from "../../src/Interfaces/IUniswapV3Pool.sol";
+import {IUniswapV3Factory} from "../../src/Interfaces/IUniswapV3Factory.sol";
+import {INonfungiblePositionManager} from "../../src/Interfaces/INonfungiblePositionManager.sol";
 
 contract DexerStagingTest is Test, SkipNetwork {
-    address private constant TOKEN_ONE = 0x4CA4E161f5A6d2B46D71f0C493fc9325b42A5f5E;
-    address private constant TOKEN_TWO = 0x35FbaaadF61e69186B7c7Fc2aF92001aEB338f68;
-    address private constant POOL_ONE = 0x76e693a8B9C8825bE804CA4e0bEdF9e4D5b92918;
-    address private constant POOL_TWO = 0x0b3cb9Bdb44F436E060687B6f9eBf9cBc3c5a326;
+    address private TOKEN_ONE;
+    address private TOKEN_TWO;
+    address private POOL_ONE;
+    address private POOL_TWO;
     uint private constant SLIPPAGE = 1;
 
     HelperConfig helperConfig;
@@ -26,6 +28,7 @@ contract DexerStagingTest is Test, SkipNetwork {
     MemeCoinDexer memeCoinDexer;
     MemeProcessManager memeProcessManager;
 
+    address nftPositionManager;
     address wrappedNativeToken;
     address swapRouter;
 
@@ -40,7 +43,7 @@ contract DexerStagingTest is Test, SkipNetwork {
         helperConfig = new HelperConfig();
         dymDeployer = new DeployDYM();
 
-        (, wrappedNativeToken, swapRouter, ) = helperConfig.activeNetworkConfig();
+        (nftPositionManager, wrappedNativeToken, swapRouter, ) = helperConfig.activeNetworkConfig();
         (memeCoinMinter, memeCoinDexer, memeProcessManager) = dymDeployer.run();
 
         OWNER = memeProcessManager.owner();
@@ -54,9 +57,37 @@ contract DexerStagingTest is Test, SkipNetwork {
         vm.prank(DEVIL);
         (bool success, ) = wrappedNativeToken.call{value: 50 ether}(abi.encodeWithSignature("deposit()"));
         if (success) console.log("Swap for Devil performed successfully!");
+
+        /// @dev Dexing Memes
+        memeProcessManager.createMeme("Hexur The Memer", "HEX");
+        memeProcessManager.createMeme("Osteo Pedro", "PDR");
+        memeProcessManager.createMeme("Joke Joker", "JOK");
+        memeProcessManager.createMeme("Lama Lou", "LAM");
+
+        vm.prank(USER);
+        memeProcessManager.fundMeme{value: 1 ether}(1);
+        vm.prank(USER_TWO);
+        memeProcessManager.fundMeme{value: 2 ether}(1);
+        vm.prank(USER_THREE);
+        memeProcessManager.fundMeme{value: 8 ether}(1);
+        vm.prank(OWNER);
+        memeProcessManager.fundMeme{value: 0.99 ether}(0);
+        vm.prank(OWNER);
+        memeProcessManager.fundMeme{value: 5 ether}(2);
+
+        vm.warp(block.timestamp + 32);
+        vm.roll(block.number + 1);
+
+        memeProcessManager.performUpkeep("");
+
+        address[] memory dexedCoins = memeCoinDexer.getDexedCoins();
+        TOKEN_ONE = dexedCoins[0];
+        TOKEN_TWO = dexedCoins[1];
+        POOL_ONE = IUniswapV3Factory(INonfungiblePositionManager(nftPositionManager).factory()).getPool(TOKEN_ONE, wrappedNativeToken, 3000);
+        POOL_TWO = IUniswapV3Factory(INonfungiblePositionManager(nftPositionManager).factory()).getPool(TOKEN_TWO, wrappedNativeToken, 3000);
     }
 
-    function test_CanSetProperBalancesAfterHypeMeme() public memesDexed skipLocalNetwork {
+    function test_CanSetProperBalancesAfterHypeMeme() public skipLocalNetwork {
         uint dexerBalance = memeCoinDexer.getUserTokenBalance(address(memeCoinDexer), wrappedNativeToken);
         uint dexerErc1 = memeCoinDexer.getUserTokenBalance(address(memeCoinDexer), TOKEN_ONE);
         uint dexerErc2 = memeCoinDexer.getUserTokenBalance(address(memeCoinDexer), TOKEN_TWO);
@@ -83,7 +114,7 @@ contract DexerStagingTest is Test, SkipNetwork {
         assertEq(dexedMemes.length, 2);
     }
 
-    function test_CanCollect() public memesDexed swapsPerformed skipLocalNetwork {
+    function test_CanCollect() public swapsPerformed skipLocalNetwork {
         uint feeGrowthGlobal0X128 = IUniswapV3Pool(POOL_ONE).feeGrowthGlobal0X128();
         uint feeGrowthGlobal1X128 = IUniswapV3Pool(POOL_ONE).feeGrowthGlobal1X128();
         uint128 liquidity = IUniswapV3Pool(POOL_ONE).liquidity();
@@ -111,7 +142,7 @@ contract DexerStagingTest is Test, SkipNetwork {
         assertEq(ownerWntBalanceAfter, ownerWntBalance + feesOwed1);
     }
 
-    function test_CanDecreaseLiquidityAfterTimePass() public memesDexed skipLocalNetwork {
+    function test_CanDecreaseLiquidityAfterTimePass() public skipLocalNetwork {
         uint[] memory tokens = memeCoinDexer.getAllTokens();
         memeCoinDexer.collect(tokens[0]);
         uint feeGrowthGlobal0X128 = IUniswapV3Pool(POOL_ONE).feeGrowthGlobal0X128();
@@ -145,7 +176,7 @@ contract DexerStagingTest is Test, SkipNetwork {
         assertEq(ownerWntBalanceAfter, ownerWntBalance + 11 ether + feesOwed1 - SLIPPAGE);
     }
 
-    function test_CanBurnAfterTimePass() public memesDexed skipLocalNetwork {
+    function test_CanBurnAfterTimePass() public skipLocalNetwork {
         uint[] memory tokens = memeCoinDexer.getAllTokens();
         uint128 liquidity = IUniswapV3Pool(POOL_ONE).liquidity();
 
@@ -170,7 +201,7 @@ contract DexerStagingTest is Test, SkipNetwork {
         memeCoinDexer.burn(tokens[0]);
     }
 
-    function test_CanGatherCoins() public memesDexed skipLocalNetwork {
+    function test_CanGatherCoins() public skipLocalNetwork {
         vm.startPrank(memeCoinDexer.owner());
         memeCoinDexer.gatherCoins(TOKEN_ONE);
         memeCoinDexer.gatherCoins(TOKEN_TWO);
@@ -200,31 +231,6 @@ contract DexerStagingTest is Test, SkipNetwork {
     }
 
     /// @dev Modifiers
-    modifier memesDexed() {
-        memeProcessManager.createMeme("Hexur The Memer", "HEX");
-        memeProcessManager.createMeme("Osteo Pedro", "PDR");
-        memeProcessManager.createMeme("Joke Joker", "JOK");
-        memeProcessManager.createMeme("Lama Lou", "LAM");
-
-        vm.prank(USER);
-        memeProcessManager.fundMeme{value: 1 ether}(1);
-        vm.prank(USER_TWO);
-        memeProcessManager.fundMeme{value: 2 ether}(1);
-        vm.prank(USER_THREE);
-        memeProcessManager.fundMeme{value: 8 ether}(1);
-        vm.prank(OWNER);
-        memeProcessManager.fundMeme{value: 0.99 ether}(0);
-        vm.prank(OWNER);
-        memeProcessManager.fundMeme{value: 5 ether}(2);
-
-        vm.warp(block.timestamp + 32);
-        vm.roll(block.number + 1);
-
-        memeProcessManager.performUpkeep("");
-
-        _;
-    }
-
     modifier swapsPerformed() {
         (, int24 currentTick, , , , , ) = IUniswapV3Pool(POOL_ONE).slot0();
         bool isInRangee = (currentTick >= -887220 && currentTick <= 887220);
