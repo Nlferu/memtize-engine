@@ -26,6 +26,9 @@ interface INonfungiblePositionManager {
     /// @param amount1 The amount of token1 owed to the position that was collected
     event Collect(uint256 indexed tokenId, address recipient, uint256 amount0, uint256 amount1);
 
+    /// @return Returns the address of the Uniswap V3 factory
+    function factory() external view returns (address);
+
     /// @notice Creates a new pool if it does not exist, then initializes if not initialized
     /// @dev This method can be bundled with others via IMulticall for the first action (e.g. mint) performed against a pool
     /// @param token0 The contract address of token0 of the pool
