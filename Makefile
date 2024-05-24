@@ -80,6 +80,10 @@ ifeq ($(findstring --network scrollSepolia,$(ARGS)),--network scrollSepolia)
 	NETWORK_ARGS:= --rpc-url $(SCROLL_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(SCROLL_API_KEY) -vvvv
 endif
 
+ifeq ($(findstring --network moonbeam,$(ARGS)),--network moonbeam)
+	NETWORK_ARGS:= --rpc-url $(MOONBEAM_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(MOONBEAM_API_KEY) -vvvv
+endif
+
 deployDYM:
 	@forge script script/DeployDYM.s.sol:DeployDYM $(NETWORK_ARGS) --legacy
 
