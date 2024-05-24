@@ -81,8 +81,10 @@ contract DexerStagingTest is Test, SkipNetwork {
         memeProcessManager.performUpkeep("");
 
         address[] memory dexedCoins = memeCoinDexer.getDexedCoins();
+
         TOKEN_ONE = dexedCoins[0];
         TOKEN_TWO = dexedCoins[1];
+
         POOL_ONE = IUniswapV3Factory(INonfungiblePositionManager(nftPositionManager).factory()).getPool(TOKEN_ONE, wrappedNativeToken, 3000);
         POOL_TWO = IUniswapV3Factory(INonfungiblePositionManager(nftPositionManager).factory()).getPool(TOKEN_TWO, wrappedNativeToken, 3000);
     }
