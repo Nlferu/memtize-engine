@@ -17,8 +17,9 @@ contract HelperConfig is Script {
         if (block.chainid == 1) activeNetworkConfig = getMainnetConfig();
         if (block.chainid == 137) activeNetworkConfig = getPolygonConfig();
         if (block.chainid == 43114) activeNetworkConfig = getAvalancheConfig();
-        if (block.chainid == 11155111) activeNetworkConfig = getSepoliaConfig();
+        if (block.chainid == xx) activeNetworkConfig = getMoonbeamConfig();
         if (block.chainid == 534351) activeNetworkConfig = getScrollSepoliaConfig();
+        if (block.chainid == 11155111) activeNetworkConfig = getSepoliaConfig();
         if (block.chainid == 31337) activeNetworkConfig = getLocalConfig();
     }
 
