@@ -17,7 +17,7 @@ contract HelperConfig is Script {
         if (block.chainid == 1) activeNetworkConfig = getMainnetConfig();
         if (block.chainid == 137) activeNetworkConfig = getPolygonConfig();
         if (block.chainid == 43114) activeNetworkConfig = getAvalancheConfig();
-        if (block.chainid == xx) activeNetworkConfig = getMoonbeamConfig();
+        if (block.chainid == 1287) activeNetworkConfig = getMoonbeamConfig();
         if (block.chainid == 534351) activeNetworkConfig = getScrollSepoliaConfig();
         if (block.chainid == 11155111) activeNetworkConfig = getSepoliaConfig();
         if (block.chainid == 31337) activeNetworkConfig = getLocalConfig();
@@ -43,6 +43,15 @@ contract HelperConfig is Script {
 
     function getAvalancheConfig() public view returns (NetworkConfig memory avalancheNetworkConfig) {
         avalancheNetworkConfig = NetworkConfig({
+            nftPositionManager: 0x655C406EBFa14EE2006250925e54ec43AD184f8B,
+            wrappedNativeToken: 0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7,
+            swapRouter: 0xbb00FF08d01D300023C629E8fFfFcb65A5a578cE,
+            deployerKey: vm.envUint("PRIVATE_KEY")
+        });
+    }
+
+    function getMoonbeamConfig() public view returns (NetworkConfig memory moonbeamNetworkConfig) {
+        moonbeamNetworkConfig = NetworkConfig({
             nftPositionManager: 0x655C406EBFa14EE2006250925e54ec43AD184f8B,
             wrappedNativeToken: 0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7,
             swapRouter: 0xbb00FF08d01D300023C629E8fFfFcb65A5a578cE,
