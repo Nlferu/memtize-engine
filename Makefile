@@ -76,12 +76,12 @@ ifeq ($(findstring --network sepolia,$(ARGS)),--network sepolia)
 	NETWORK_ARGS:= --rpc-url $(SEPOLIA_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(ETHERSCAN_API_KEY) -vvvv
 endif
 
-ifeq ($(findstring --network scrollSepolia,$(ARGS)),--network scrollSepolia)
-	NETWORK_ARGS:= --rpc-url $(SCROLL_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(SCROLL_API_KEY) -vvvv
-endif
-
 ifeq ($(findstring --network moonbeam,$(ARGS)),--network moonbeam)
 	NETWORK_ARGS:= --rpc-url $(MOONBEAM_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(MOONBEAM_API_KEY) -vvvv
+endif
+
+ifeq ($(findstring --network scroll,$(ARGS)),--network scroll)
+	NETWORK_ARGS:= --rpc-url $(SCROLL_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(SCROLL_API_KEY) -vvvv
 endif
 
 deployDYM:
@@ -96,11 +96,14 @@ deployMCM:
 deployMPM:
 	@forge script script/DeployMPM.s.sol:DeployMPM $(NETWORK_ARGS)
 
+deployMoon:
+	@forge script script/DeployMoonDYM.s.sol:DeployMoonDYM $(NETWORK_ARGS) --legacy
+
 # Update Params To Make Proper Calls
 MCD:= 0x5B4C3787A12e2Ee9Ad1890065e1111ea213eb37b
-TOKEN_ID:= 777
-POOL:= 0x5B4C3787A12e2Ee9Ad1890065e1111ea213eb37b
-COIN:= 0x5B4C3787A12e2Ee9Ad1890065e1111ea213eb37b
+TOKEN_ID:= 0
+POOL:= 0x0000000000000000000000000000000000000000
+COIN:= 0x0000000000000000000000000000000000000000
 
 collect:
 	@forge script script/Interactions.s.sol:Collect $(NETWORK_ARGS) --sig "run(address,uint256)" $(MCD) $(TOKEN_ID)
