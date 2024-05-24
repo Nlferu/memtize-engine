@@ -49,8 +49,8 @@ contract HelperConfig is Script {
         });
     }
 
-    function getSepoliaConfig() public view returns (NetworkConfig memory sepoliaNetworkConfig) {
-        sepoliaNetworkConfig = NetworkConfig({
+    function getScrollSepoliaConfig() public view returns (NetworkConfig memory scrollSepoliaNetworkConfig) {
+        scrollSepoliaNetworkConfig = NetworkConfig({
             nftPositionManager: 0x1238536071E1c677A632429e3655c799b22cDA52,
             wrappedNativeToken: 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14,
             swapRouter: 0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E,
@@ -58,8 +58,8 @@ contract HelperConfig is Script {
         });
     }
 
-    function getScrollSepoliaConfig() public view returns (NetworkConfig memory scrollSepoliaNetworkConfig) {
-        scrollSepoliaNetworkConfig = NetworkConfig({
+    function getSepoliaConfig() public view returns (NetworkConfig memory sepoliaNetworkConfig) {
+        sepoliaNetworkConfig = NetworkConfig({
             nftPositionManager: 0x1238536071E1c677A632429e3655c799b22cDA52,
             wrappedNativeToken: 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14,
             swapRouter: 0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E,
