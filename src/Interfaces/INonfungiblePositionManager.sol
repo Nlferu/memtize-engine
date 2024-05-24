@@ -29,6 +29,15 @@ interface INonfungiblePositionManager {
     /// @return Returns the address of the Uniswap V3 factory
     function factory() external view returns (address);
 
+    /// @return Returns the amount of tokens owner by owner
+    /// @param owner Wallet address to be checked
+    function balanceOf(address owner) external view returns (uint256);
+
+    /// @return Returns the tokenId of Owner by index
+    /// @param owner Wallet address to be checked
+    /// @param index Index of tokenId to check
+    function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256);
+
     /// @notice Creates a new pool if it does not exist, then initializes if not initialized
     /// @dev This method can be bundled with others via IMulticall for the first action (e.g. mint) performed against a pool
     /// @param token0 The contract address of token0 of the pool
