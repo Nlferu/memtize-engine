@@ -11,6 +11,8 @@ import {SkipNetwork} from "../mods/SkipNetwork.sol";
 import {Collect, DecreaseLiquidity, Burn, GatherCoins} from "../../script/Interactions.s.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ISwapRouter} from "../../src/Interfaces/ISwapRouter.sol";
+import {IUniswapV3Factory} from "../../src/Interfaces/IUniswapV3Factory.sol";
+import {INonfungiblePositionManager} from "../../src/Interfaces/INonfungiblePositionManager.sol";
 
 contract InteractionsTest is Test, SkipNetwork {
     address private constant TOKEN = 0x4CA4E161f5A6d2B46D71f0C493fc9325b42A5f5E;
@@ -27,6 +29,7 @@ contract InteractionsTest is Test, SkipNetwork {
     Burn burn;
     GatherCoins gatherCoins;
 
+    address nftPositionManager;
     address wrappedNativeToken;
     address swapRouter;
 
@@ -39,7 +42,7 @@ contract InteractionsTest is Test, SkipNetwork {
         helperConfig = new HelperConfig();
         dymDeployer = new DeployDYM();
 
-        (, wrappedNativeToken, swapRouter, ) = helperConfig.activeNetworkConfig();
+        (nftPositionManager, wrappedNativeToken, swapRouter, ) = helperConfig.activeNetworkConfig();
         (memeCoinMinter, memeCoinDexer, memeProcessManager) = dymDeployer.run();
 
         OWNER = memeProcessManager.owner();
@@ -97,6 +100,11 @@ contract InteractionsTest is Test, SkipNetwork {
         vm.roll(block.number + 1);
 
         memeProcessManager.performUpkeep("");
+
+        address[] memory dexedCoins = memeCoinDexer.getDexedCoins();
+
+        TOKEN = dexedCoins[0];
+        POOL = IUniswapV3Factory(INonfungiblePositionManager(nftPositionManager).factory()).getPool(TOKEN, wrappedNativeToken, 3000);
 
         _;
     }
