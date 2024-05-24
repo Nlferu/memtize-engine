@@ -16,11 +16,12 @@ import {IUniswapV3Factory} from "../../src/Interfaces/IUniswapV3Factory.sol";
 import {INonfungiblePositionManager} from "../../src/Interfaces/INonfungiblePositionManager.sol";
 
 contract DexerStagingTest is Test, SkipNetwork {
+    uint private constant SLIPPAGE = 1;
+
     address private TOKEN_ONE;
     address private TOKEN_TWO;
     address private POOL_ONE;
     address private POOL_TWO;
-    uint private constant SLIPPAGE = 1;
 
     HelperConfig helperConfig;
     DeployDYM dymDeployer;
