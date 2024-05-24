@@ -5,6 +5,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {INonfungiblePositionManager} from "./Interfaces/INonfungiblePositionManager.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IMoonbeamBatch} from "./Interfaces/IMoonbeamBatch.sol";
+import {IERC721Enumerable} from "@openzeppelin/contracts/interfaces/IERC721Enumerable.sol";
 
 contract MemeCoinDexer is Ownable {
     /// @dev Errors
@@ -61,34 +62,6 @@ contract MemeCoinDexer is Ownable {
 
         emit MemeDexRequestReceived(memeCoinAddress);
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        swapETH(wethAmount);
-
-        /// @dev Creating and initializing pool
-        INonfungiblePositionManager(i_nftPositionManager).createAndInitializePoolIfNecessary(memeCoinAddress, i_wrappedNativeToken, FEE, INITIAL_PRICE);
-
-        /// @dev Approve tokens for the position manager
-        IERC20(i_wrappedNativeToken).approve(i_nftPositionManager, wethAmount);
-        IERC20(memeCoinAddress).approve(i_nftPositionManager, memeCoinAmount);
-
-        /// @dev Add liquidity to the new pool using mint
-        INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager.MintParams({
-            token0: memeCoinAddress,
-            token1: i_wrappedNativeToken,
-            fee: FEE, // Fee tier 0.30%
-            tickLower: -887220, // Near 0 price
-            tickUpper: 887220, // Extremely high price
-            amount0Desired: memeCoinAmount, // Meme token amount sent to manager to provide liquidity
-            amount1Desired: wethAmount, // WETH token amount sent to manager to provide liquidity
-            amount0Min: 0,
-            amount1Min: 0,
-            recipient: address(this), // Address that will receive NFT representing liquidity pool
-            deadline: block.timestamp + 1200 // 20 minutes deadline
-        });
-
-        (uint tokenId, , , ) = INonfungiblePositionManager(i_nftPositionManager).mint(params);
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
         /// @dev MOONBEAM Batch
         (address[] memory tos, uint256[] memory values, bytes[] memory calls, uint64[] memory gasLimits) = prepareBatchCalls(
             memeCoinAddress,
@@ -97,6 +70,14 @@ contract MemeCoinDexer is Ownable {
         );
 
         IMoonbeamBatch(BATCH).batchAll(tos, values, calls, gasLimits);
+
+        uint tokens;
+        uint tokenId;
+
+        if (tokens > 0) {
+            tokens = INonfungiblePositionManager(i_nftPositionManager).balanceOf(address(this));
+            tokenId = INonfungiblePositionManager(i_nftPositionManager).tokenOfOwnerByIndex(address(this), tokens - 1);
+        }
 
         /// @dev Saving dexed coin, it's time left for liquidity pool burn and NFT tokenId
         s_nftToTimeLeft[tokenId] = (block.timestamp + 52 weeks);
