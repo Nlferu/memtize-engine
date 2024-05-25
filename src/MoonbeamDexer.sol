@@ -163,14 +163,14 @@ contract MoonbeamDexer is Ownable {
         return (tos, values, calls, gasLimits);
     }
 
-    //////////////////////////////////// @notice DYM Team Functions ////////////////////////////////////
+    //////////////////////////////////// @notice Memtize Team Functions ////////////////////////////////////
 
     /// @notice Collects up to a maximum amount of fees owed to a specific position to the recipient
     /// @param tokenId The ID of the NFT for which tokens are being collected
     function collect(uint tokenId) external payable {
         INonfungiblePositionManager.CollectParams memory params = INonfungiblePositionManager.CollectParams({
             tokenId: tokenId, // NFT token Id that represents liquidity pool
-            recipient: owner(), // DYM Team wallet address
+            recipient: owner(), // Memtize Team wallet address
             amount0Max: type(uint128).max, // ERC20 (type(uint128).max - Gathering all accumulated fees)
             amount1Max: type(uint128).max // WETH (type(uint128).max - Gathering all accumulated fees)
         });
