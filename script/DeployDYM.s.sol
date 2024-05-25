@@ -7,7 +7,7 @@ import {MemeCoinDexer} from "../src/MemeCoinDexer.sol";
 import {MemeCoinMinter} from "../src/MemeCoinMinter.sol";
 import {MemeProcessManager} from "../src/MemeProcessManager.sol";
 
-/// @dev Deploys Dex Your Meme Project
+/// @dev Deploys Memtize Project
 contract DeployDYM is Script {
     uint private constant INTERVAL = 30;
 
