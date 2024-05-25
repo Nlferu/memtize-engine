@@ -7,7 +7,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IMoonbeamBatch} from "./Interfaces/IMoonbeamBatch.sol";
 import {IERC721Enumerable} from "@openzeppelin/contracts/interfaces/IERC721Enumerable.sol";
 
-contract MemeCoinDexer is Ownable {
+contract MoonbeamDexer is Ownable {
     /// @dev Errors
     error MCD__SwapETHFailed();
     error MCD__DexMemeFailed();
