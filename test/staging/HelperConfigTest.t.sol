@@ -45,10 +45,10 @@ contract HelperConfigTest is Test {
         assertEq(config.deployerKey, vm.envUint("PRIVATE_KEY"));
     }
 
-    function test_ScrollSepoliaConfig() public {
+    function test_ScrollConfig() public {
         vm.chainId(534351);
         helperConfig = new HelperConfig();
-        HelperConfig.NetworkConfig memory config = helperConfig.getScrollSepoliaConfig();
+        HelperConfig.NetworkConfig memory config = helperConfig.getScrollConfig();
 
         assertEq(config.nftPositionManager, 0x1238536071E1c677A632429e3655c799b22cDA52);
         assertEq(config.wrappedNativeToken, 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14);
