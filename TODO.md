@@ -15,20 +15,37 @@ Pool: 0x33e8872d2500c028CBe615E8aFE6e6eA7B6Bb18C
 NFT: 15471
 https://app.uniswap.org/pools/15471
 
+DEPLOYMENTS:
+
 Sepolia Shortened Timers Project Version:
 MemeCoinMinter: 0xd50Ba86d476D3d2CbFA3F5a92462ef95EAA437Ec
 MemeCoinDexer: 0x5B4C3787A12e2Ee9Ad1890065e1111ea213eb37b
 MemeProcessManager: 0x42D723B73867B000bEE295A7acEb5037E4f5e62e
 
-Scroll Sepolia Deployment:
-MemeCoinMinter: 0x32edbbEDbE769725F1bB8Acf9fB43E070eE77cd3
-MemeCoinDexer: 0x590Fb54FEB1A3aBd8D2D853756F2172a3210c359
-MemeProcessManager: 0x4f848df81370275ABFBD91E798E4Cddc48A8BBac
+Sepolia Deployments:
+MemeCoinMinter: 0xd50Ba86d476D3d2CbFA3F5a92462ef95EAA437Ec
+MemeCoinDexer: 0x5B4C3787A12e2Ee9Ad1890065e1111ea213eb37b
+MemeProcessManager: 0x42D723B73867B000bEE295A7acEb5037E4f5e62e
 
-Amoy Deployment:
+Amoy Deployments:
 MemeCoinMinter:
 MemeCoinDexer:
 MemeProcessManager:
+
+Fuji Deployments:
+MemeCoinMinter:
+MemeCoinDexer:
+MemeProcessManager:
+
+Moonbeam Deployments:
+MemeCoinMinter: 0x89C9040709ebce46e3b68E75c2664653E9816c9B
+MemeCoinDexer: 0xaBC27F4fa9dae4829575A3DF7958b9d80872c8a8
+MemeProcessManager: 0x4B8907E0e9Ad03650E6f734d4bbb2Ce65a3dC27D
+
+Scroll Deployments:
+MemeCoinMinter: 0x32edbbEDbE769725F1bB8Acf9fB43E070eE77cd3
+MemeCoinDexer: 0x590Fb54FEB1A3aBd8D2D853756F2172a3210c359
+MemeProcessManager: 0x4f848df81370275ABFBD91E798E4Cddc48A8BBac
 
 Faucet:
 https://faucet.chainstack.com/
