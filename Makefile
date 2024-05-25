@@ -76,6 +76,14 @@ ifeq ($(findstring --network sepolia,$(ARGS)),--network sepolia)
 	NETWORK_ARGS:= --rpc-url $(SEPOLIA_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(ETHERSCAN_API_KEY) -vvvv
 endif
 
+ifeq ($(findstring --network amoy,$(ARGS)),--network amoy)
+	NETWORK_ARGS:= --rpc-url $(AMOY_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(POLYGON_API_KEY) -vvvv
+endif
+
+ifeq ($(findstring --network fuji,$(ARGS)),--network fuji)
+	NETWORK_ARGS:= --rpc-url $(FUJI_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(ETHERSCAN_API_KEY) -vvvv
+endif
+
 ifeq ($(findstring --network moonbeam,$(ARGS)),--network moonbeam)
 	NETWORK_ARGS:= --rpc-url $(MOONBEAM_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(MOONBEAM_API_KEY) -vvvv
 endif
