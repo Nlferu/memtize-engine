@@ -11,7 +11,7 @@ interface IMemeCoinMinter {
     /// @param name Name of new ERC20 Meme Token
     /// @param symbol Symbol of new ERC20 Meme Token
     /// @param creator Meme creator wallet address
-    /// @param team Dex Your Meme team wallet address
+    /// @param team Memtize team wallet address
     /// @param recipients Array parallel to 'amounts[]' contains all funders of new ERC20 Meme Token
     /// @param amounts Array parallel to 'recipients[]' contains all funds of new ERC20 Meme Token
     /// @param totalMemeCoins Amount of new ERC20 to be crafted
