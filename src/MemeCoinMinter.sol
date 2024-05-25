@@ -12,15 +12,15 @@ import {IMemeCoinMinter} from "./Interfaces/IMemeCoinMinter.sol";
 
 contract MemeCoinMinter is IMemeCoinMinter, Ownable {
     /// @dev Constructor
-    /// @notice Owner of this contract is DFM contract
+    /// @notice Owner of this contract is MPM contract
     constructor() Ownable(msg.sender) {}
 
-    /////////////////////// @notice MCM External Functions (Callable only by DFM contract) ///////////////////////
+    /////////////////////// @notice MCM External Functions (Callable only by MPM contract) ///////////////////////
 
     /// @notice Deploys new ERC20 Meme Token
     /// @param params IMemeCoinMinter
     function mintCoinAndRequestDex(MintParams calldata params) external onlyOwner {
-        /// @dev BUG Working on smarter fix
+        /// @dev BUG HERE:
         new MemeCoin(params);
         MemeCoin newCoin = new MemeCoin(params);
 
