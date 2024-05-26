@@ -49,3 +49,8 @@ MemeProcessManager: 0x4f848df81370275ABFBD91E798E4Cddc48A8BBac
 
 Faucet:
 https://faucet.chainstack.com/
+
+TODO:
+Run and save tests for each network
+Setup final deployment on Sepolia
+Setup Chainlink Keeper for main contract
