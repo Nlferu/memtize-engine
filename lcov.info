@@ -1,7 +1,7 @@
 TN:
-SF:script/DeployDYM.s.sol
-FN:16,DeployDYM.run
-FNDA:22,DeployDYM.run
+SF:script/DeployMemtize.s.sol
+FN:16,DeployMemtize.run
+FNDA:22,DeployMemtize.run
 DA:17,22
 DA:17,22
 DA:17,22
