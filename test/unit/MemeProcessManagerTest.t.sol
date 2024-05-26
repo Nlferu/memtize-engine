@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {Test, console} from "forge-std/Test.sol";
-import {DeployDYM} from "../../script/DeployDYM.s.sol";
+import {DeployMemtize} from "../../script/DeployMemtize.s.sol";
 import {DeployMPM} from "../../script/DeployMPM.s.sol";
 import {MemeCoinDexer} from "../../src/MemeCoinDexer.sol";
 import {MemeProcessManager} from "../../src/MemeProcessManager.sol";
@@ -23,7 +23,7 @@ contract MemeProcessManagerTest is Test, SkipNetwork {
 
     uint private constant INTERVAL = 30;
 
-    DeployDYM dymDeployer;
+    DeployMemtize memtizeDeployer;
     DeployMPM mpmDeployer;
     MemeCoinMinter memeCoinMinter;
     MemeCoinDexer memeCoinDexer;
@@ -36,9 +36,9 @@ contract MemeProcessManagerTest is Test, SkipNetwork {
     uint256 private constant STARTING_BALANCE = 100 ether;
 
     function setUp() public {
-        dymDeployer = new DeployDYM();
+        memtizeDeployer = new DeployMemtize();
 
-        (memeCoinMinter, memeCoinDexer, memeProcessManager) = dymDeployer.run();
+        (memeCoinMinter, memeCoinDexer, memeProcessManager) = memtizeDeployer.run();
 
         OWNER = memeProcessManager.owner();
 
