@@ -37,6 +37,15 @@ testForkMainnetCoverage:
 testForkMainnetCoverageReport:
 	@forge coverage --fork-url $(MAINNET_RPC_URL) --report lcov
 
+testForkSepolia:
+	@forge test --fork-url $(SEPOLIA_RPC_URL)
+
+testForkSepoliaCoverage:
+	@forge coverage --fork-url $(SEPOLIA_RPC_URL)
+
+testForkSepoliaCoverageReport:
+	@forge coverage --fork-url $(SEPOLIA_RPC_URL) --report lcov
+
 testForkPolygon:
 	@forge test --fork-url $(POLYGON_RPC_URL)
 
@@ -55,16 +64,8 @@ testForkAvalancheCoverage:
 testForkAvalancheCoverageReport:
 	@forge coverage --fork-url $(AVALANCHE_RPC_URL) --report lcov
 
-testForkSepolia:
-	@forge test --fork-url $(SEPOLIA_RPC_URL)
-
-testForkSepoliaCoverage:
-	@forge coverage --fork-url $(SEPOLIA_RPC_URL)
-
-testForkSepoliaCoverageReport:
-	@forge coverage --fork-url $(SEPOLIA_RPC_URL) --report lcov
-
-snapshot:; forge snapshot
+snapshot:
+	@forge snapshot --fork-url $(MAINNET_RPC_URL)
 
 format:; forge fmt
 
@@ -92,8 +93,8 @@ ifeq ($(findstring --network scroll,$(ARGS)),--network scroll)
 	NETWORK_ARGS:= --rpc-url $(SCROLL_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(SCROLL_API_KEY) -vvvv
 endif
 
-deployDYM:
-	@forge script script/DeployDYM.s.sol:DeployDYM $(NETWORK_ARGS) --legacy
+deployMemtize:
+	@forge script script/DeployMemtize.s.sol:DeployMemtize $(NETWORK_ARGS) --legacy
 
 deployMCD:
 	@forge script script/DeployMCD.s.sol:DeployMCD $(NETWORK_ARGS)
@@ -105,7 +106,7 @@ deployMPM:
 	@forge script script/DeployMPM.s.sol:DeployMPM $(NETWORK_ARGS)
 
 deployMoon:
-	@forge script script/DeployMoonDYM.s.sol:DeployMoonDYM $(NETWORK_ARGS) --legacy
+	@forge script script/DeployMoonMemtize.s.sol:DeployMoonMemtize $(NETWORK_ARGS) --legacy
 
 # Update Params To Make Proper Calls
 MCD:= 0x5B4C3787A12e2Ee9Ad1890065e1111ea213eb37b
