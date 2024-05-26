@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 import {Test, console} from "forge-std/Test.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
-import {DeployDYM} from "../../script/DeployDYM.s.sol";
+import {DeployMemtize} from "../../script/DeployMemtize.s.sol";
 import {MemeCoinMinter} from "../../src/MemeCoinMinter.sol";
 import {MemeCoinDexer} from "../../src/MemeCoinDexer.sol";
 import {MemeProcessManager} from "../../src/MemeProcessManager.sol";
@@ -21,7 +21,7 @@ contract InteractionsTest is Test, SkipNetwork {
     address private POOL;
 
     HelperConfig helperConfig;
-    DeployDYM dymDeployer;
+    DeployMemtize memtizeDeployer;
     MemeCoinMinter memeCoinMinter;
     MemeCoinDexer memeCoinDexer;
     MemeProcessManager memeProcessManager;
@@ -41,10 +41,10 @@ contract InteractionsTest is Test, SkipNetwork {
 
     function setUp() public {
         helperConfig = new HelperConfig();
-        dymDeployer = new DeployDYM();
+        memtizeDeployer = new DeployMemtize();
 
         (nftPositionManager, wrappedNativeToken, swapRouter, ) = helperConfig.activeNetworkConfig();
-        (memeCoinMinter, memeCoinDexer, memeProcessManager) = dymDeployer.run();
+        (memeCoinMinter, memeCoinDexer, memeProcessManager) = memtizeDeployer.run();
 
         OWNER = memeProcessManager.owner();
 
