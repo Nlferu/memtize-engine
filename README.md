@@ -11,31 +11,31 @@ Website: https://www.
 
 ## Deployments
 
-#### Sepolia Shortened Timers Project Version:
+#### Sepolia:
 
--   MemeCoinMinter: 0xd50Ba86d476D3d2CbFA3F5a92462ef95EAA437Ec
--   MemeCoinDexer: 0x5B4C3787A12e2Ee9Ad1890065e1111ea213eb37b
--   MemeProcessManager: 0x42D723B73867B000bEE295A7acEb5037E4f5e62e
+-   MemeCoinMinter: 0x01941F4859349cb2CB8FBAD0FD840BCB6823424D
+-   MemeCoinDexer: 0x225f1E4F39B0e036925D02D390c635537C5D6a96
+-   MemeProcessManager: 0xB98BEcb2023a9eADC7A8AE62D033253352540b77
 
-#### Amoy Deployments:
+#### Amoy:
 
 -   MemeCoinMinter: 0x9b48eD75cd5b758c94339f1Db298458aE226814D
 -   MemeCoinDexer: 0xE56c44b93e1210Dd6FD40c589d528b1572488732
 -   MemeProcessManager: 0xAE253FE1226B576800ac11352F77131a7E6835Dd
 
-#### Fuji Deployments:
+#### Fuji:
 
 -   MemeCoinMinter: 0x89C9040709ebce46e3b68E75c2664653E9816c9B
 -   MemeCoinDexer: 0xaBC27F4fa9dae4829575A3DF7958b9d80872c8a8
 -   MemeProcessManager: 0x4B8907E0e9Ad03650E6f734d4bbb2Ce65a3dC27D
 
-#### Moonbeam Deployments:
+#### Moonbeam:
 
 -   MemeCoinMinter: 0x89C9040709ebce46e3b68E75c2664653E9816c9B
 -   MemeCoinDexer: 0xaBC27F4fa9dae4829575A3DF7958b9d80872c8a8
 -   MemeProcessManager: 0x4B8907E0e9Ad03650E6f734d4bbb2Ce65a3dC27D
 
-#### Scroll Deployments:
+#### Scroll:
 
 -   MemeCoinMinter: 0x32edbbEDbE769725F1bB8Acf9fB43E070eE77cd3
 -   MemeCoinDexer: 0x590Fb54FEB1A3aBd8D2D853756F2172a3210c359
