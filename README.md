@@ -19,9 +19,9 @@ Website: https://www.
 
 #### Amoy Deployments:
 
--   MemeCoinMinter:
--   MemeCoinDexer:
--   MemeProcessManager:
+-   MemeCoinMinter: 0x9b48eD75cd5b758c94339f1Db298458aE226814D
+-   MemeCoinDexer: 0xE56c44b93e1210Dd6FD40c589d528b1572488732
+-   MemeProcessManager: 0xAE253FE1226B576800ac11352F77131a7E6835Dd
 
 #### Fuji Deployments:
 
