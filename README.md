@@ -1,11 +1,45 @@
 # Memtize Engine
 
+Website: https://www.
+
 **Memtize consists of:**
 
 -   **Meme Coin**: Template for crafting new meme coins.
 -   **Meme Coin Minter**: Coins factory contract for minting meme coins among all participants (creator, memtize, funders, liquidity pool).
 -   **Meme Coin Dexer**: Creating liquidity pool on Uniswap v3 and adding liquidity to it for newly crafted coins, so rest of community can trade that coin.
 -   **Meme Process Manager**: Allows creating and funding memes. It automatically hype (listing on Uniswap v3) or kill (delete) based on time passed and funds gathered for each meme.
+
+## Deployments
+
+#### Sepolia Shortened Timers Project Version:
+
+-   MemeCoinMinter: 0xd50Ba86d476D3d2CbFA3F5a92462ef95EAA437Ec
+-   MemeCoinDexer: 0x5B4C3787A12e2Ee9Ad1890065e1111ea213eb37b
+-   MemeProcessManager: 0x42D723B73867B000bEE295A7acEb5037E4f5e62e
+
+#### Amoy Deployments:
+
+-   MemeCoinMinter:
+-   MemeCoinDexer:
+-   MemeProcessManager:
+
+#### Fuji Deployments:
+
+-   MemeCoinMinter:
+-   MemeCoinDexer:
+-   MemeProcessManager:
+
+#### Moonbeam Deployments:
+
+-   MemeCoinMinter: 0x89C9040709ebce46e3b68E75c2664653E9816c9B
+-   MemeCoinDexer: 0xaBC27F4fa9dae4829575A3DF7958b9d80872c8a8
+-   MemeProcessManager: 0x4B8907E0e9Ad03650E6f734d4bbb2Ce65a3dC27D
+
+#### Scroll Deployments:
+
+-   MemeCoinMinter: 0x32edbbEDbE769725F1bB8Acf9fB43E070eE77cd3
+-   MemeCoinDexer: 0x590Fb54FEB1A3aBd8D2D853756F2172a3210c359
+-   MemeProcessManager: 0x4f848df81370275ABFBD91E798E4Cddc48A8BBac
 
 ## Documentation
 
