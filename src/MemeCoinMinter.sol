@@ -20,7 +20,8 @@ contract MemeCoinMinter is IMemeCoinMinter, Ownable {
     /// @notice Deploys new ERC20 Meme Token
     /// @param params IMemeCoinMinter
     function mintCoinAndRequestDex(MintParams calldata params) external onlyOwner {
-        /// @dev BUG HERE:
+        /// @dev BUG HERE reported on Uniswap: https://github.com/Uniswap/v3-periphery/issues/386
+        // -> below line (new MemeCoin(params)) is needed for fork tests to pass:
         new MemeCoin(params);
         MemeCoin newCoin = new MemeCoin(params);
 
