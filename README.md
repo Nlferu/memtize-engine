@@ -25,9 +25,9 @@ Website: https://www.
 
 #### Fuji Deployments:
 
--   MemeCoinMinter:
--   MemeCoinDexer:
--   MemeProcessManager:
+-   MemeCoinMinter: 0x89C9040709ebce46e3b68E75c2664653E9816c9B
+-   MemeCoinDexer: 0xaBC27F4fa9dae4829575A3DF7958b9d80872c8a8
+-   MemeProcessManager: 0x4B8907E0e9Ad03650E6f734d4bbb2Ce65a3dC27D
 
 #### Moonbeam Deployments:
 
