@@ -61,8 +61,8 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
 
     /// @dev Events
     event MemeCreated(uint indexed id, address indexed creator, string name, string symbol);
-    event MemeFunded(uint indexed id, uint indexed value);
-    event RefundPerformed(address indexed funder, uint indexed amount);
+    event MemeFunded(uint indexed id, address indexed funder, uint indexed value);
+    event RefundPerformed(address indexed funder, uint indexed value);
     event MemeKilled(uint indexed id);
     event MemeHyped(uint indexed id);
     event TransferSuccessful(uint indexed amount);
@@ -108,7 +108,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
         if (meme.idToFunderToFunds[msg.sender] == 0) meme.idToFunders.push(msg.sender);
         meme.idToFunderToFunds[msg.sender] += msg.value;
 
-        emit MemeFunded(id, msg.value);
+        emit MemeFunded(id, msg.sender, msg.value);
     }
 
     /// @notice Allows users to withdraw funds from dead memes
