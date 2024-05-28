@@ -180,6 +180,8 @@ contract MemeCoinDexer is Ownable {
         return IERC20(token).balanceOf(user);
     }
 
+    /// @dev In production below getter will be removed as we are using graphQL to read data anyway
+
     /// @notice Returns constructor immutables
     function getConstructorData() external view returns (address, address, address) {
         return (i_memeCoinMinter, i_nftPositionManager, i_wrappedNativeToken);
