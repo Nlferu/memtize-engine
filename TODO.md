@@ -18,5 +18,4 @@ https://faucet.chainstack.com/
 
 TODO:
 Run and save tests for each network
-Setup final deployment on Sepolia
 Setup Chainlink Keeper for main contract
