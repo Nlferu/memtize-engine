@@ -235,6 +235,8 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
 
     //////////////////////////////////// @notice MPM Getter Functions ////////////////////////////////////
 
+    /// @dev In production almost all getter will be removed as we are using graphQL to read data anyway
+
     /// @notice Temporary function for testing purposes -> it should be replaced with GraphQl
     /// @notice Returns total funds available for refund for given funder
     /// @param funder wallet address of funder
