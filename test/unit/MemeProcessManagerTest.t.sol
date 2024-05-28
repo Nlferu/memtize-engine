@@ -12,7 +12,7 @@ import {SkipNetwork} from "../mods/SkipNetwork.sol";
 
 contract MemeProcessManagerTest is Test, SkipNetwork {
     event MemeCreated(uint indexed id, address indexed creator, string name, string symbol);
-    event MemeFunded(uint indexed id, uint indexed value);
+    event MemeFunded(uint indexed id, address indexed funder, uint indexed value);
     event RefundPerformed(address indexed funder, uint indexed amount);
     event MemeKilled(uint indexed id);
 
@@ -121,12 +121,12 @@ contract MemeProcessManagerTest is Test, SkipNetwork {
         memeProcessManager.fundMeme{value: 1 ether}(1);
 
         vm.expectEmit(true, true, true, true, address(memeProcessManager));
-        emit MemeFunded(0, 1 ether);
+        emit MemeFunded(0, USER, 1 ether);
         vm.prank(USER);
         memeProcessManager.fundMeme{value: 1 ether}(0);
 
         vm.expectEmit(true, true, true, true, address(memeProcessManager));
-        emit MemeFunded(0, 3 ether);
+        emit MemeFunded(0, OWNER, 3 ether);
         vm.prank(OWNER);
         memeProcessManager.fundMeme{value: 3 ether}(0);
 
