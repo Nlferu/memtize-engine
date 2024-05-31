@@ -17,5 +17,6 @@ Faucet:
 https://faucet.chainstack.com/
 
 TODO:
+Deploy Memtize on Sepolia
 Run and save tests for each network
 Setup Chainlink Keeper for main contract
