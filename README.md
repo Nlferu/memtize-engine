@@ -1,6 +1,8 @@
 # Memtize
 
-## **Website:** https://memetize.vercel.app/
+## **Demo Website:** https://memtize.vercel.app/ (Note that it is still in development)
+
+_Some features may be incomplete or subject to change on the website._
 
 ### **Memtize consists of:**
 
