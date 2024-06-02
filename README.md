@@ -13,9 +13,9 @@ Website: https://www.
 
 #### Sepolia:
 
--   MemeCoinMinter: 0x01941F4859349cb2CB8FBAD0FD840BCB6823424D
--   MemeCoinDexer: 0x225f1E4F39B0e036925D02D390c635537C5D6a96
--   MemeProcessManager: 0xB98BEcb2023a9eADC7A8AE62D033253352540b77
+-   MemeCoinMinter: 0x1a5b3875066855c211CC95492344b2916730d1E6
+-   MemeCoinDexer: 0xE9a85e8e3f437E819979fe68a15b2205a7e0b8f5
+-   MemeProcessManager: 0x1Ce85D4d4dc2f4Df8C1Bd2F7Dce483EC3F0aa1F3
 
 #### Amoy:
 
@@ -94,7 +94,9 @@ To get full coverage go to `test/mods/SkipNetwork.t.sol` find `skipForkNetwork()
 
 Our protocol has been tested fully on all above networks and has reached below results for each network:
 
-![Test Coverage](images/tests_coverage.png)
+![Test Coverage](images/mainnet_test_coverage.png)
+
+For rest tests and gas snapshot go into `./images` folder.
 
 ### ⌨ Other Commands
 
