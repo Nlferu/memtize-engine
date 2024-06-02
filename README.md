@@ -170,19 +170,19 @@ Our protocol has been tested fully on all above networks and has reached below r
 
 #### <u>**Ethereum Mainnet**</u>:
 
-![Test Coverage](tests-coverage/mainnet_test_coverage.png)
+![Test Coverage](images/mainnet_test_coverage.png)
 
 #### <u>**Sepolia**</u>:
 
-![Test Coverage](tests-coverage/sepolia_test_coverage.png)
+![Test Coverage](images/sepolia_test_coverage.png)
 
 #### <u>**Polygon**</u>:
 
-![Test Coverage](tests-coverage/polygon_test_coverage.png)
+![Test Coverage](images/polygon_test_coverage.png)
 
 #### <u>**Avalanche**</u>:
 
-![Test Coverage](tests-coverage/avalanche_test_coverage.png)
+![Test Coverage](images/avalanche_test_coverage.png)
 
 ## 📃 **Documentation**
 
@@ -212,4 +212,4 @@ This one is set to Mainnet, so first go to `test/mods/SkipNetwork.sol` find `ski
 $ make snapshot
 ```
 
-![Logo](tests-coverage/memtize.jpg)
+![Logo](images/memtize.jpg)
