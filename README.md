@@ -9,7 +9,7 @@ Website: https://www.
 -   **Meme Coin Dexer**: Creating liquidity pool on Uniswap v3 and adding liquidity to it for newly crafted coins, so rest of community can trade that coin.
 -   **Meme Process Manager**: Allows creating and funding memes. It automatically hype (listing on Uniswap v3) or kill (delete) based on time passed and funds gathered for each meme.
 
-## Deployments
+## 🚀 Deployments
 
 #### Sepolia:
 
@@ -92,11 +92,25 @@ To get full coverage go to `test/mods/SkipNetwork.t.sol` find `skipForkNetwork()
 *   `make testForkAvalanche`
 *   `make testForkAvalancheCoverage`
 
-Our protocol has been tested fully on all above networks and has reached below results for each network:
+Our protocol has been tested fully on all above networks and has reached below results:
 
-![Test Coverage](images/mainnet_test_coverage.png)
+#### <u>Ethereum Mainnet</u>:
 
-For rest tests and gas snapshot go into `./images` folder.
+![Test Coverage](tests-coverage/mainnet_test_coverage.png)
+
+#### <u>Sepolia</u>:
+
+![Test Coverage](tests-coverage/sepolia_test_coverage.png)
+
+#### <u>Polygon</u>:
+
+![Test Coverage](tests-coverage/polygon_test_coverage.png)
+
+#### <u>Avalanche</u>:
+
+![Test Coverage](tests-coverage/avalanche_test_coverage.png)
+
+For rest tests and gas snapshot go into `./tests-coverage` folder.
 
 ### ⌨ Other Commands
 
@@ -116,7 +130,7 @@ $ forge fmt
 
 #### Gas Snapshots
 
-This one is set to Mainnet, so first go to `test/mods/SkipNetwork.t.sol` find `skipForkNetwork()` modifier and comment it's if statement
+This one is set to Mainnet, so first go to `test/mods/SkipNetwork.sol` find `skipForkNetwork()` modifier and comment it's if statement
 
 ```bash
 $ make snapshot
