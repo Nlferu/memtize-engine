@@ -123,10 +123,7 @@ contract MemeProcessManager is Ownable, ReentrancyGuard, KeeperCompatibleInterfa
 
         (bool success, ) = msg.sender.call{value: amount}("");
 
-        if (!success) {
-            s_funderToFunds[msg.sender] = amount;
-            revert MPM__TransferFailed();
-        }
+        if (!success) revert MPM__TransferFailed();
 
         emit RefundPerformed(msg.sender, amount);
     }
