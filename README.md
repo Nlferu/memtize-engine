@@ -1,6 +1,6 @@
 # Memtize
 
-## **Demo Website:** https://memtize.vercel.app/ (Note that it is still in development)
+## **Demo Website:** (Under Development)
 
 _Some features may be incomplete or subject to change on the website._
 
